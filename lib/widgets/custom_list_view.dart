@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:codecraft/providers/level_provider.dart';
@@ -14,27 +15,27 @@ class CustomListItem extends StatefulWidget {
   final String? imageUrl;
   final IconData iconData;
   final VoidCallback onTap;
+  final double imageWidthPercentage;
+  final int unlockLevel;
   final Color backgroundColor;
   final TextStyle titleStyle;
   final TextStyle descriptionStyle;
   final Color iconColor;
-  final double imageWidthPercentage;
-  final int unlockLevel;
 
   const CustomListItem({
-    Key? key,
+    super.key,
     required this.title,
+    required this.onTap,
+    required this.unlockLevel,
     this.description = '',
     this.imageUrl,
     this.iconData = Icons.remove_circle,
-    required this.onTap,
+    this.imageWidthPercentage = 20.0,
     this.backgroundColor = Colors.white,
-    this.titleStyle = const TextStyle(fontWeight: FontWeight.bold),
-    this.descriptionStyle = const TextStyle(color: Colors.grey),
+    this.titleStyle = const TextStyle(fontSize: 24),
+    this.descriptionStyle = const TextStyle(fontSize: 18),
     this.iconColor = Colors.red,
-    this.imageWidthPercentage = 20.0, // Default to 20%
-    required this.unlockLevel, // Default unlock level
-  }) : super(key: key);
+  });
 
   @override
   CustomListItemState createState() => CustomListItemState();
@@ -42,6 +43,9 @@ class CustomListItem extends StatefulWidget {
 
 class CustomListItemState extends State<CustomListItem> {
   late bool isLocked;
+  late Color backgroundColor;
+  late TextStyle titleStyle;
+  late TextStyle descriptionStyle;
 
   @override
   void initState() {
@@ -49,8 +53,17 @@ class CustomListItemState extends State<CustomListItem> {
     updateLockState();
   }
 
-  void updateLockState() {
-    int currentLevel =
+  void updateTheme() {
+    backgroundColor = AdaptiveTheme.of(context).theme.scaffoldBackgroundColor;
+    titleStyle = AdaptiveTheme.of(context).theme.textTheme.titleLarge!;
+    descriptionStyle = AdaptiveTheme.of(context).theme.textTheme.bodyMedium!;
+  }
+
+  void updateLockState() async {
+    int currentLevel = 1;
+    await Provider.of<LevelProvider>(context, listen: false).loadState();
+    currentLevel =
+        // ignore: use_build_context_synchronously
         Provider.of<LevelProvider>(context, listen: false).currentLevel;
     setState(() {
       isLocked = currentLevel < widget.unlockLevel;
@@ -61,6 +74,8 @@ class CustomListItemState extends State<CustomListItem> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double imageWidth = screenWidth * (widget.imageWidthPercentage / 100);
+
+    updateTheme();
 
     return Consumer<LevelProvider>(builder: (context, levelProvider, child) {
       bool isLocked = levelProvider.currentLevel < widget.unlockLevel;
@@ -76,9 +91,33 @@ class CustomListItemState extends State<CustomListItem> {
           onTap: isLocked
               ? () {
                   Dialogs.materialDialog(
-                      color: Colors.white,
+                      color: AdaptiveTheme.of(context).mode.isLight
+                          ? Colors.white
+                          : const Color.fromARGB(255, 21, 21, 21),
                       msg: 'You have not unlocked this module yet!',
+                      msgStyle: AdaptiveTheme.of(context).mode.isLight
+                          ? const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                              color: Color.fromARGB(255, 21, 21, 21),
+                            )
+                          : const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.white,
+                            ),
                       title: 'Module Locked',
+                      titleStyle: AdaptiveTheme.of(context).mode.isLight
+                          ? const TextStyle(
+                              fontSize: 23,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(255, 21, 21, 21),
+                            )
+                          : const TextStyle(
+                              fontSize: 23,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                       lottieBuilder: Lottie.asset(
                         'assets/anim/locked.json',
                         fit: BoxFit.contain,
@@ -107,7 +146,7 @@ class CustomListItemState extends State<CustomListItem> {
           child: Stack(
             children: [
               Container(
-                color: widget.backgroundColor,
+                color: backgroundColor,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -121,14 +160,14 @@ class CustomListItemState extends State<CustomListItem> {
                           children: [
                             AutoSizeText(
                               widget.title,
-                              style: widget.titleStyle,
+                              style: titleStyle,
                               presetFontSizes: const [28, 24, 12],
                               maxLines: 1,
                             ),
                             if (widget.description.isNotEmpty)
                               AutoSizeText(
                                 widget.description,
-                                style: widget.descriptionStyle,
+                                style: descriptionStyle,
                                 presetFontSizes: const [18, 14, 10],
                                 maxLines: 4,
                                 overflow: TextOverflow.ellipsis,

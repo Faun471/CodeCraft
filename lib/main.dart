@@ -1,104 +1,94 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:codecraft/screens/modules.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/screens/register.dart';
+import 'package:codecraft/themes/dark_mode.dart';
+import 'package:codecraft/themes/light_mode.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:codecraft/providers/level_provider.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
-final globalNavigatorKey = GlobalKey<NavigatorState>();
+extension GlobalKeyExtension on GlobalKey {
+  Rect? get globalPaintBounds {
+    final renderObject = currentContext?.findRenderObject();
+    final translation = renderObject?.getTransformTo(null).getTranslation();
+    if (translation != null && renderObject?.paintBounds != null) {
+      final offset = Offset(translation.x, translation.y);
+      return renderObject!.paintBounds.shift(offset);
+    } else {
+      return null;
+    }
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize the database
+  await Firebase.initializeApp();
   await initDatabase();
-  runApp(const MyApp());
+  final savedThemeMode = await AdaptiveTheme.getThemeMode();
+  runApp(MyApp(savedThemeMode: savedThemeMode));
 }
 
 Future<void> initDatabase() async {
-  // Create an instance of DatabaseHelper
   DatabaseHelper();
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+Future<Widget> getLandingPage() async {
+  return StreamBuilder<User?>(
+    stream: DatabaseHelper().auth.userChanges(),
+    builder: (BuildContext context, snapshot) {
+      if (snapshot.hasData && (!snapshot.data!.isAnonymous)) {
+        return Modules();
+      }
 
-  // This widget is the root of your application.
+      return const MyHomePage();
+    },
+  );
+}
+
+class MyApp extends StatelessWidget {
+  final AdaptiveThemeMode? savedThemeMode;
+  const MyApp({super.key, this.savedThemeMode});
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => LevelProvider(),
-      child: MaterialApp(
-        title: 'CodeCraft',
-        navigatorKey: globalNavigatorKey,
-        themeMode: MediaQuery.platformBrightnessOf(context) == Brightness.dark
-            ? ThemeMode.dark
-            : ThemeMode.light,
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          brightness: Brightness.light,
-          primaryColor: Colors.blue[800],
-          scaffoldBackgroundColor: Colors.white,
-          appBarTheme: AppBarTheme(
-            color: Colors.blue[700],
+      child: AdaptiveTheme(
+        light: lightTheme,
+        dark: darkTheme,
+        initial: savedThemeMode ?? AdaptiveThemeMode.light,
+        builder: (theme, darkTheme) => MaterialApp(
+          title: 'CodeCraft',
+          theme: theme,
+          darkTheme: darkTheme,
+          themeMode: MediaQuery.platformBrightnessOf(context) == Brightness.dark
+              ? ThemeMode.dark
+              : ThemeMode.light,
+          home: FutureBuilder<Widget>(
+            future: getLandingPage(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                return snapshot.data!;
+              } else {
+                return LoadingAnimationWidget.inkDrop(
+                    color: Colors.white,
+                    size: 100); // Show loading spinner while waiting
+              }
+            },
           ),
-          buttonTheme: ButtonThemeData(
-            buttonColor: Colors.blue[700],
-            textTheme: ButtonTextTheme.primary,
-          ),
-          textTheme: TextTheme(
-              displayLarge: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontFamily: GoogleFonts.poppins().fontFamily),
-              displayMedium: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontFamily: GoogleFonts.poppins().fontFamily),
-              displaySmall: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontFamily: GoogleFonts.poppins().fontFamily),
-              headlineMedium: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontFamily: GoogleFonts.poppins().fontFamily),
-              headlineSmall: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontFamily: GoogleFonts.poppins().fontFamily),
-              titleLarge: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontFamily: GoogleFonts.poppins().fontFamily),
-              bodyLarge: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black,
-                  fontFamily: GoogleFonts.poppins().fontFamily),
-              bodyMedium: TextStyle(
-                  fontSize: 12,
-                  color: Colors.black,
-                  fontFamily: GoogleFonts.poppins().fontFamily),
-              bodySmall: TextStyle(
-                  fontSize: 10,
-                  color: Colors.black,
-                  fontFamily: GoogleFonts.poppins().fontFamily)),
         ),
-        home: const MyHomePage(title: 'Getting Started'),
       ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -115,28 +105,28 @@ class _MyHomePageState extends State<MyHomePage> {
             Image.asset('assets/images/flutter.png', width: 200, height: 200),
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 10),
-              child: const Text(
+              child: const AutoSizeText(
                 'Learn to apply and use your programming concepts!',
+                minFontSize: 24,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 20, color: Color.fromARGB(255, 89, 89, 89)),
               ),
             ),
             Container(
-                margin:
-                    const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
-                child: FilledButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const Register()),
-                    );
-                  },
-                  style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(60)),
-                  child:
-                      const Text('Get Started', style: TextStyle(fontSize: 20)),
-                ))
+              margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Register()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(60),
+                ),
+                child:
+                    const Text('Get Started', style: TextStyle(fontSize: 20)),
+              ),
+            )
           ],
         ),
       ),

@@ -7,8 +7,7 @@ class Module extends StatelessWidget {
   final String markdown;
   final String quizName;
 
-  const Module({Key? key, required this.markdown, required this.quizName})
-      : super(key: key);
+  const Module({super.key, required this.markdown, required this.quizName});
 
   @override
   Widget build(BuildContext context) {

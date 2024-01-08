@@ -11,8 +11,8 @@ class QuizViewer extends StatefulWidget {
   final Quiz quiz;
   final Function(bool, Quiz) onQuizFinished;
 
-  const QuizViewer({Key? key, required this.quiz, required this.onQuizFinished})
-      : super(key: key);
+  const QuizViewer(
+      {super.key, required this.quiz, required this.onQuizFinished});
 
   @override
   QuizViewerState createState() => QuizViewerState();
@@ -57,7 +57,7 @@ class QuizViewerState extends State<QuizViewer> {
   void startTimer() {
     double displayTime = _start;
     _timer = Timer.periodic(
-      const Duration(seconds: 1), // Change duration to 1 millisecond
+      const Duration(seconds: 1),
       (Timer timer) {
         if (_start <= 0.0) {
           timer.cancel();
@@ -83,28 +83,27 @@ class QuizViewerState extends State<QuizViewer> {
         opacity: canAnswer ? 1.0 : 0.5,
         duration: const Duration(milliseconds: 300),
         child: OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            minimumSize: const Size.fromHeight(50),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10)),
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              minimumSize: const Size.fromHeight(50),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
             ),
-          ),
-          onPressed: canAnswer
-              ? () {
-                  checkAnswer(answer);
-                  setState(() {
-                    canAnswer = false;
-                    userAnswer = answer;
-                    _timer.cancel();
-                  });
-                }
-              : null,
-          child: AutoSizeText(answer,
+            onPressed: canAnswer
+                ? () {
+                    checkAnswer(answer);
+                    setState(() {
+                      canAnswer = false;
+                      userAnswer = answer;
+                      _timer.cancel();
+                    });
+                  }
+                : null,
+            child: AutoSizeText(
+              answer,
               minFontSize: 16,
-              style: TextStyle(
-                  color: userAnswer == answer ? Colors.white : Colors.black)),
-        ),
+            )),
       ),
     ).animate(effects: [
       if (!canAnswer && userAnswer == answer)
@@ -153,7 +152,6 @@ class QuizViewerState extends State<QuizViewer> {
           minFontSize: 24,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.black,
           ),
           textAlign: TextAlign.justify,
         ),
@@ -167,9 +165,6 @@ class QuizViewerState extends State<QuizViewer> {
       child: AutoSizeText(
         userAnswer,
         minFontSize: 22,
-        style: const TextStyle(
-          color: Colors.black,
-        ),
       ).animate(delay: 1.2.seconds, effects: [
         ScaleEffect(
             begin: const Offset(0, 0),
@@ -209,24 +204,27 @@ class QuizViewerState extends State<QuizViewer> {
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                AnimatedProgressBar(
-                  width: MediaQuery.of(context).size.width,
-                  value: _start / widget.quiz.timer.toDouble(),
-                  duration: const Duration(seconds: 1),
-                  gradient: const LinearGradient(
-                    colors: [
-                      Colors.red,
-                      Colors.red,
-                      Colors.amber,
-                      Colors.orange,
-                      Colors.lightGreen,
-                      Colors.lightGreen,
-                      Colors.lightGreenAccent,
-                    ],
+                if (canAnswer)
+                  AnimatedProgressBar(
+                    width: MediaQuery.of(context).size.width,
+                    value: _start / widget.quiz.timer.toDouble(),
+                    duration: const Duration(seconds: 1),
+                    color: Colors.green,
+                    backgroundColor: Colors.grey.withOpacity(0.8),
+                    curve: Curves.easeOutCubic,
+                  ).animate().color(
+                        begin: Colors.green,
+                        end: Colors.redAccent,
+                        duration: widget.quiz.timer.seconds,
+                        curve: Curves.easeInOutQuint,
+                      ),
+                if (!canAnswer)
+                  ProgressBar(
+                    value: 1.0,
+                    width: MediaQuery.of(context).size.width,
+                    color: Colors.redAccent,
+                    backgroundColor: Colors.grey.withOpacity(0.8),
                   ),
-                  backgroundColor: Colors.grey.withOpacity(0.2),
-                  curve: Curves.easeOutCubic,
-                ),
                 buildQuestionText(),
                 ...widget.quiz.questions[currentQuestionIndex].answerOptions
                     .map((answer) => buildAnswerButton(answer)),
@@ -283,9 +281,6 @@ class QuizViewerState extends State<QuizViewer> {
                 child: const AutoSizeText(
                   'press anywhere to continue...',
                   minFontSize: 8,
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
                 )
                     .animate(
                       delay: 1.5.seconds,

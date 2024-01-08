@@ -1,55 +1,43 @@
-import 'package:codecraft/models/user.dart';
-import 'package:codecraft/services/database_helper.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:codecraft/models/app_user.dart';
 
 class LevelProvider extends ChangeNotifier {
   late int _currentLevel;
-  final DatabaseHelper _databaseHelper = DatabaseHelper();
-  late Database _db;
-  String _username = User().username ?? 'default';
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late String _username;
 
   LevelProvider() {
     _currentLevel = 1;
+    _username = username;
+    loadState();
   }
 
   int get currentLevel => _currentLevel;
 
-  void updateUsername() {
-    _username = User().username ?? 'default';
-  }
-
-  String get username => _username;
+  String get username => AppUser().email ?? 'default';
 
   Future<void> loadState() async {
-    updateUsername();
+    DocumentSnapshot doc =
+        await _firestore.collection('levels').doc(username).get();
 
-    _db = await _databaseHelper.database;
-    final List<Map<String, dynamic>> result = await _db
-        .query('levels', where: 'username = ?', whereArgs: [_username]);
-
-    if (result.isEmpty) {
+    if (!doc.exists) {
       _currentLevel = 1;
       await saveState();
       return;
     }
 
-    _currentLevel = result[0]['level'] != null ? result[0]['level'] as int : 1;
+    _currentLevel = doc['level'] != null ? doc['level'] as int : 1;
   }
 
   Future<void> saveState() async {
-    updateUsername();
-
-    final Database db = await _databaseHelper.database;
-    await db.insert(
-      'levels',
-      {'username': _username, 'level': _currentLevel},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await _firestore.collection('levels').doc(_username).set({
+      'username': _username,
+      'level': _currentLevel,
+    });
   }
 
   void completeLevel() async {
-    updateUsername();
     _currentLevel++;
     await saveState();
     notifyListeners();

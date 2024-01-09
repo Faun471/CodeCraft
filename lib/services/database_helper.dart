@@ -21,7 +21,7 @@ class DatabaseHelper {
     return _firestore;
   }
 
-  CollectionReference get levels {
-    return _firestore.collection('levels');
+  CollectionReference get users {
+    return _firestore.collection('users');
   }
 }

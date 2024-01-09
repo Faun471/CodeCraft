@@ -19,7 +19,7 @@ class LevelProvider extends ChangeNotifier {
 
   Future<void> loadState() async {
     DocumentSnapshot doc =
-        await _firestore.collection('levels').doc(username).get();
+        await _firestore.collection('users').doc(username).get();
 
     if (!doc.exists) {
       _currentLevel = 1;
@@ -31,10 +31,9 @@ class LevelProvider extends ChangeNotifier {
   }
 
   Future<void> saveState() async {
-    await _firestore.collection('levels').doc(_username).set({
-      'username': _username,
+    await _firestore.collection('users').doc(_username).set({
       'level': _currentLevel,
-    });
+    }, SetOptions(merge: true));
   }
 
   void completeLevel() async {

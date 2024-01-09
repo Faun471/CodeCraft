@@ -1,35 +1,29 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:another_flutter_splash_screen/another_flutter_splash_screen.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:codecraft/models/app_user.dart';
+import 'package:codecraft/providers/level_provider.dart';
+import 'package:codecraft/providers/theme_provider.dart';
 import 'package:codecraft/screens/modules.dart';
-import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/screens/register.dart';
+import 'package:codecraft/services/auth_helper.dart';
+import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/themes/dark_mode.dart';
 import 'package:codecraft/themes/light_mode.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:codecraft/themes/theme_utils.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:codecraft/providers/level_provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
-
-extension GlobalKeyExtension on GlobalKey {
-  Rect? get globalPaintBounds {
-    final renderObject = currentContext?.findRenderObject();
-    final translation = renderObject?.getTransformTo(null).getTranslation();
-    if (translation != null && renderObject?.paintBounds != null) {
-      final offset = Offset(translation.x, translation.y);
-      return renderObject!.paintBounds.shift(offset);
-    } else {
-      return null;
-    }
-  }
-}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await initDatabase();
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
+  AppUser();
+
   runApp(MyApp(savedThemeMode: savedThemeMode));
 }
 
@@ -38,65 +32,99 @@ Future<void> initDatabase() async {
 }
 
 Future<Widget> getLandingPage() async {
-  return StreamBuilder<User?>(
-    stream: DatabaseHelper().auth.userChanges(),
-    builder: (BuildContext context, snapshot) {
-      if (snapshot.hasData && (!snapshot.data!.isAnonymous)) {
-        return Modules();
-      }
-
-      return const MyHomePage();
-    },
-  );
+  Auth auth = Auth(DatabaseHelper().auth);
+  bool userLoggedIn = await auth.isLoggedIn();
+  return userLoggedIn ? const Modules() : const GettingStartedPage();
 }
 
 class MyApp extends StatelessWidget {
   final AdaptiveThemeMode? savedThemeMode;
+
   const MyApp({super.key, this.savedThemeMode});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => LevelProvider(),
-      child: AdaptiveTheme(
-        light: lightTheme,
-        dark: darkTheme,
-        initial: savedThemeMode ?? AdaptiveThemeMode.light,
-        builder: (theme, darkTheme) => MaterialApp(
-          title: 'CodeCraft',
-          theme: theme,
-          darkTheme: darkTheme,
-          themeMode: MediaQuery.platformBrightnessOf(context) == Brightness.dark
-              ? ThemeMode.dark
-              : ThemeMode.light,
-          home: FutureBuilder<Widget>(
-            future: getLandingPage(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                return snapshot.data!;
-              } else {
-                return LoadingAnimationWidget.inkDrop(
-                    color: Colors.white,
-                    size: 100); // Show loading spinner while waiting
-              }
-            },
-          ),
-        ),
-      ),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<LevelProvider>(
+            create: (context) => LevelProvider()),
+        ChangeNotifierProvider<ThemeProvider>(
+            create: (context) => ThemeProvider()),
+      ],
+      builder: (appContext, child) {
+        return AdaptiveTheme(
+          light: lightTheme,
+          dark: darkTheme,
+          initial: savedThemeMode ?? AdaptiveThemeMode.light,
+          debugShowFloatingThemeButton: true,
+          builder: (theme, darkTheme) {
+            return MaterialApp(
+              title: 'CodeCraft',
+              theme: theme,
+              darkTheme: darkTheme,
+              themeMode:
+                  MediaQuery.platformBrightnessOf(appContext) == Brightness.dark
+                      ? ThemeMode.dark
+                      : ThemeMode.light,
+              //TO-DO: Properly implement splash screen
+              //Load all the assets during the splash screen
+              home: FlutterSplashScreen.scale(
+                useImmersiveMode: true,
+                gradient: const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.pink,
+                    Colors.blue,
+                  ],
+                ),
+                childWidget: SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: Image.asset('assets/images/flutter.png'),
+                ),
+                animationDuration: 3.seconds,
+                duration: 5.seconds,
+                nextScreen: FutureBuilder<Widget>(
+                  future: getLandingPage(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return snapshot.data ?? Container();
+                    }
+
+                    return LoadingAnimationWidget.inkDrop(
+                        color: Colors.white, size: 100);
+                  },
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class GettingStartedPage extends StatelessWidget {
+  const GettingStartedPage({super.key});
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ThemeProvider>(context, listen: false)
+          .loadColorFromFirestore();
+
+      AdaptiveTheme.of(context).setTheme(
+          light: ThemeUtils.changeThemeColor(
+              AdaptiveTheme.of(context).lightTheme,
+              Provider.of<ThemeProvider>(context, listen: false)
+                  .preferredColor),
+          dark: ThemeUtils.changeThemeColor(
+              AdaptiveTheme.of(context).darkTheme,
+              Provider.of<ThemeProvider>(context, listen: false)
+                  .preferredColor));
+    });
+
     return Scaffold(
       body: Center(
         child: Column(

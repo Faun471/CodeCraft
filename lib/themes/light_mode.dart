@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 TextStyle _customTextStyle({
   double fontSize = 14.0,
   FontWeight fontWeight = FontWeight.normal,
-  Color color = const Color.fromARGB(255, 21, 21, 21),
+  Color color = Colors.black,
 }) {
   return TextStyle(
     fontSize: fontSize,
@@ -14,150 +14,101 @@ TextStyle _customTextStyle({
   );
 }
 
-ButtonStyle _customOutlinedButtonStyle(Color sideColor, Color textColor) {
-  return OutlinedButton.styleFrom(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
-    side: BorderSide(color: sideColor),
-  ).merge(ButtonStyle(
-    foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-      return states.contains(MaterialState.disabled) ? Colors.grey : textColor;
-    }),
-  ));
-}
 
-ButtonStyle _customElevatedButtonStyle(Color backgroundColor, Color textColor) {
-  return ElevatedButton.styleFrom(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
-    backgroundColor: backgroundColor,
-  ).merge(ButtonStyle(
-    foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-      return states.contains(MaterialState.disabled) ? Colors.grey : textColor;
-    }),
-    textStyle: MaterialStateProperty.all<TextStyle>(
-        _customTextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-  ));
-}
 
-ButtonStyle _customTextButtonStyle(Color textColor) {
-  return TextButton.styleFrom(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
-  ).merge(ButtonStyle(
-    foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-      return states.contains(MaterialState.disabled) ? Colors.grey : textColor;
-    }),
-  ));
-}
-
-ButtonStyle _customFilledButtonStyle(Color backgroundColor, Color textColor) {
-  return ElevatedButton.styleFrom(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
-    backgroundColor: backgroundColor,
-  ).merge(ButtonStyle(
-    foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-      return states.contains(MaterialState.disabled) ? Colors.grey : textColor;
-    }),
-  ));
-}
-
-final ThemeData lightTheme = ThemeData(
-  primaryColorLight: Colors.blue[700],
-  primarySwatch: Colors.blue,
-  colorScheme: ColorScheme.fromSwatch(
-    primarySwatch: Colors.blue,
-  ),
-  brightness: Brightness.light,
-  primaryColor: const Color.fromARGB(255, 21, 101, 192),
-  scaffoldBackgroundColor: Colors.white,
-  appBarTheme: AppBarTheme(
-    color: Colors.blue[700],
-    iconTheme: const IconThemeData(color: Colors.white),
-    titleTextStyle: _customTextStyle(
+final ThemeData lightTheme = ThemeData.light().copyWith(
+  primaryColor: Colors.blue,
+  appBarTheme: const AppBarTheme(
+    iconTheme: IconThemeData(color: Colors.white),
+    color: Color.fromARGB(255, 21, 101, 192),
+    titleTextStyle: TextStyle(
+      color: Colors.white,
       fontSize: 20,
       fontWeight: FontWeight.bold,
-      color: Colors.white,
     ),
   ),
-  outlinedButtonTheme: OutlinedButtonThemeData(
-    style: _customOutlinedButtonStyle(
-        Colors.blueGrey, const Color.fromARGB(255, 21, 21, 21)),
+  colorScheme:
+      ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 21, 101, 192))
+          .copyWith(
+    primary: const Color.fromARGB(255, 21, 101, 192),
+    secondary: const Color.fromARGB(255, 21, 101, 192),
   ),
   inputDecorationTheme: InputDecorationTheme(
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: Colors.blueGrey),
+      borderSide: const BorderSide(color: Colors.black),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: Colors.blueGrey),
+      borderSide: const BorderSide(color: Colors.black),
     ),
     disabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: Colors.grey),
+      borderSide: const BorderSide(color: Color.fromARGB(255, 150, 147, 147)),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
       borderSide: const BorderSide(color: Colors.blue),
     ),
-    labelStyle: _customTextStyle(color: const Color.fromARGB(255, 21, 21, 21)),
+    labelStyle: _customTextStyle(color: Colors.black),
     hintStyle: _customTextStyle(color: Colors.blueGrey),
   ),
-  elevatedButtonTheme: ElevatedButtonThemeData(
-    style: _customElevatedButtonStyle(Colors.blue, Colors.white),
-  ),
   buttonTheme: ButtonThemeData(
-    buttonColor: Colors.blue[700],
-    textTheme: ButtonTextTheme.primary,
+    buttonColor: Colors.blue,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+    ),
   ),
-  textButtonTheme: TextButtonThemeData(
-    style: _customTextButtonStyle(const Color.fromARGB(255, 21, 101, 192)),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      backgroundColor: Colors.blue,
+    ).merge(
+      ButtonStyle(
+        foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+          return states.contains(MaterialState.disabled)
+              ? Colors.grey
+              : Colors.white;
+        }),
+        textStyle: MaterialStateProperty.all<TextStyle>(
+            const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+      ),
+    ),
   ),
-  filledButtonTheme: FilledButtonThemeData(
-    style: _customFilledButtonStyle(Colors.blue, Colors.white),
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      side: const BorderSide(color: Colors.white),
+    ).merge(
+      ButtonStyle(
+        foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+          return states.contains(MaterialState.disabled)
+              ? Colors.grey
+              : Colors.white;
+        }),
+        textStyle: MaterialStateProperty.all<TextStyle>(
+            const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+      ),
+    ),
   ),
   textTheme: TextTheme(
-    displayLarge: _customTextStyle(
-      fontSize: 24,
-      fontWeight: FontWeight.bold,
-      color: const Color.fromARGB(255, 21, 21, 21),
-    ),
-    displayMedium: _customTextStyle(
-      fontSize: 20,
-      fontWeight: FontWeight.bold,
-      color: const Color.fromARGB(255, 21, 21, 21),
-    ),
-    displaySmall: _customTextStyle(
-      fontSize: 18,
-      fontWeight: FontWeight.bold,
-      color: const Color.fromARGB(255, 21, 21, 21),
-    ),
-    headlineMedium: _customTextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.bold,
-      color: const Color.fromARGB(255, 21, 21, 21),
-    ),
-    headlineSmall: _customTextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.bold,
-      color: const Color.fromARGB(255, 21, 21, 21),
-    ),
-    titleLarge: _customTextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.bold,
-      color: const Color.fromARGB(255, 21, 21, 21),
-    ),
-    bodyLarge: _customTextStyle(
-        fontSize: 14, color: const Color.fromARGB(255, 21, 21, 21)),
-    bodyMedium: _customTextStyle(
-        fontSize: 12, color: const Color.fromARGB(255, 21, 21, 21)),
-    bodySmall: _customTextStyle(
-        fontSize: 10, color: const Color.fromARGB(255, 21, 21, 21)),
+    displayLarge: _customTextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+    displayMedium: _customTextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    displaySmall: _customTextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    headlineMedium: _customTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    headlineSmall: _customTextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+    titleLarge: _customTextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+    titleMedium: _customTextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+    titleSmall: _customTextStyle(fontSize: 8, fontWeight: FontWeight.bold),
+    bodyLarge: _customTextStyle(fontSize: 14),
+    bodyMedium: _customTextStyle(fontSize: 12),
+    bodySmall: _customTextStyle(fontSize: 10),
+    labelLarge: _customTextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+    labelMedium: _customTextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+    labelSmall: _customTextStyle(fontSize: 10, fontWeight: FontWeight.bold),
   ),
 );

@@ -108,7 +108,7 @@ class Login extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) {
-                            return Modules();
+                            return const Modules();
                           },
                         ),
                       );
@@ -129,7 +129,8 @@ class Login extends StatelessWidget {
                 Expanded(
                   child: Container(
                     height: 1.0,
-                    color: AdaptiveTheme.of(context).mode.isLight
+                    color:
+                        AdaptiveTheme.of(context).brightness == Brightness.light
                         ? const Color.fromARGB(255, 21, 21, 21)
                         : const Color.fromARGB(255, 255, 255, 255),
                     margin: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -139,14 +140,16 @@ class Login extends StatelessWidget {
                   ' or continue with ',
                   style: TextStyle(
                       fontSize: 15.0,
-                      color: AdaptiveTheme.of(context).mode.isLight
+                      color: AdaptiveTheme.of(context).brightness ==
+                              Brightness.light
                           ? const Color.fromARGB(212, 21, 21, 21)
                           : const Color.fromARGB(212, 255, 255, 255)),
                 ),
                 Expanded(
                   child: Container(
                     height: 1.0,
-                    color: AdaptiveTheme.of(context).mode.isLight
+                    color:
+                        AdaptiveTheme.of(context).brightness == Brightness.light
                         ? const Color.fromARGB(255, 21, 21, 21)
                         : const Color.fromARGB(255, 255, 255, 255),
                     margin: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -169,7 +172,7 @@ class Login extends StatelessWidget {
                           if (error == null) {
                             Navigator.pushReplacement(context,
                                 MaterialPageRoute(builder: (context) {
-                              return Modules();
+                              return const Modules();
                             }));
                           } else {
                             _showErrorDialog(context, error);
@@ -218,7 +221,7 @@ class Login extends StatelessWidget {
                           if (error == null) {
                             Navigator.pushReplacement(context,
                                 MaterialPageRoute(builder: (context) {
-                              return Modules();
+                              return const Modules();
                             }));
                           } else {
                             _showErrorDialog(context, error);
@@ -277,29 +280,9 @@ class Login extends StatelessWidget {
         fit: BoxFit.contain,
         repeat: false,
       ),
-      titleStyle: AdaptiveTheme.of(context).mode.isLight
-          ? const TextStyle(
-              fontSize: 23,
-              fontWeight: FontWeight.bold,
-              color: Color.fromARGB(255, 21, 21, 21),
-            )
-          : const TextStyle(
-              fontSize: 23,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-      msgStyle: AdaptiveTheme.of(context).mode.isLight
-          ? const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.normal,
-              color: Color.fromARGB(255, 21, 21, 21),
-            )
-          : const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.normal,
-              color: Colors.white,
-            ),
-      color: AdaptiveTheme.of(context).mode.isLight
+      titleStyle: AdaptiveTheme.of(context).theme.textTheme.displayLarge!,
+      msgStyle: AdaptiveTheme.of(context).theme.textTheme.displaySmall!,
+      color: AdaptiveTheme.of(context).brightness == Brightness.light
           ? Colors.white
           : const Color.fromARGB(255, 40, 35, 35),
     );

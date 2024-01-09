@@ -85,11 +85,11 @@ class MarkdownParser {
         pPadding: const EdgeInsets.only(bottom: 2.0),
         codeblockDecoration: BoxDecoration(
           color: const Color.fromARGB(255, 21, 21, 21),
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(12.0),
         ),
         code: GoogleFonts.robotoMono(
-          color: Colors.white,
-          backgroundColor: const Color.fromARGB(255, 21, 21, 21),
+          color: Colors.black,
+          backgroundColor: const Color.fromARGB(255, 238, 238, 234),
           fontSize: 16.0,
           height: 1.5,
           letterSpacing: 0.5,
@@ -130,6 +130,7 @@ class MarkdownParser {
                     launchUrl(href! as Uri);
                   },
                   text: 'Yes',
+                  textStyle: const TextStyle(color: Colors.white),
                   iconData: Icons.check_circle,
                   color: Colors.green,
                   iconColor: Colors.white,
@@ -143,6 +144,7 @@ class MarkdownParser {
                     Navigator.pop(dialogContext);
                   },
                   text: 'No',
+                  textStyle: const TextStyle(color: Colors.white),
                   iconData: Icons.cancel_rounded,
                   color: Colors.red,
                   iconColor: Colors.white,
@@ -152,29 +154,9 @@ class MarkdownParser {
           ],
           title: 'Are you sure?',
           msg: 'You are about to open an external link and leave the app.',
-          titleStyle: AdaptiveTheme.of(context).mode.isLight
-              ? const TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 21, 21, 21),
-                )
-              : const TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-          msgStyle: AdaptiveTheme.of(context).mode.isLight
-              ? const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.normal,
-                  color: Color.fromARGB(255, 21, 21, 21),
-                )
-              : const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.white,
-                ),
-          color: AdaptiveTheme.of(context).mode.isLight
+          titleStyle: AdaptiveTheme.of(context).theme.textTheme.displayLarge!,
+          msgStyle: AdaptiveTheme.of(context).theme.textTheme.bodyLarge!,
+          color: AdaptiveTheme.of(context).brightness == Brightness.light
               ? Colors.white
               : const Color.fromARGB(255, 21, 21, 21),
         );

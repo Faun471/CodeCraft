@@ -55,11 +55,12 @@ class QuizScreen extends StatelessWidget {
                     return Text('Error: ${snapshot.error}');
                   } else {
                     return QuizViewer(
-                        quiz: snapshot.data!,
-                        onQuizFinished: (passed, quiz) {
-                          Navigator.pop(
-                              context, {'passed': passed, 'quiz': quiz});
-                        });
+                      quiz: snapshot.data!,
+                      onQuizFinished: (passed, quiz) {
+                        Navigator.pop(
+                            context, {'passed': passed, 'quiz': quiz});
+                      },
+                    );
                   }
                 },
               );
@@ -77,33 +78,13 @@ class QuizScreen extends StatelessWidget {
   Future<void> _onWillPop(BuildContext context) async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Dialogs.materialDialog(
-        color: AdaptiveTheme.of(context).mode.isLight
+        color: AdaptiveTheme.of(context).brightness == Brightness.light
             ? Colors.white
             : const Color.fromARGB(255, 21, 21, 21),
         msg: 'Are you sure you want to exit? Your progress will be lost.',
-        msgStyle: AdaptiveTheme.of(context).mode.isLight
-            ? const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.normal,
-                color: Color.fromARGB(255, 21, 21, 21),
-              )
-            : const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.normal,
-                color: Colors.white,
-              ),
+        msgStyle: AdaptiveTheme.of(context).theme.textTheme.displaySmall!,
         title: 'Exit',
-        titleStyle: AdaptiveTheme.of(context).mode.isLight
-            ? const TextStyle(
-                fontSize: 23,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 21, 21, 21),
-              )
-            : const TextStyle(
-                fontSize: 23,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+        titleStyle: AdaptiveTheme.of(context).theme.textTheme.displayLarge!,
         lottieBuilder: Lottie.asset(
           'assets/anim/question.json',
           fit: BoxFit.contain,

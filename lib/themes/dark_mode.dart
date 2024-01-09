@@ -14,44 +14,20 @@ TextStyle _customTextStyle({
   );
 }
 
-ButtonStyle _customOutlinedButtonStyle(Color sideColor, Color textColor) {
-  return OutlinedButton.styleFrom(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
-    side: BorderSide(color: sideColor),
-  ).merge(ButtonStyle(
-    foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-      return states.contains(MaterialState.disabled) ? Colors.grey : textColor;
-    }),
-  ));
-}
-
-ButtonStyle _customElevatedButtonStyle(Color backgroundColor, Color textColor) {
-  return ElevatedButton.styleFrom(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
-    backgroundColor: backgroundColor,
-  ).merge(ButtonStyle(
-    foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-      return states.contains(MaterialState.disabled) ? Colors.grey : textColor;
-    }),
-    textStyle: MaterialStateProperty.all<TextStyle>(
-        _customTextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-  ));
-}
-
 final ThemeData darkTheme = ThemeData.dark().copyWith(
-  primaryColor: const Color.fromARGB(255, 21, 101, 192),
-  appBarTheme: AppBarTheme(
-    color: Colors.blue[700],
-    iconTheme: const IconThemeData(color: Colors.white),
-    titleTextStyle: _customTextStyle(
-        fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+  primaryColor: Colors.blue,
+  colorScheme: const ColorScheme.dark(
+    primary: Color.fromARGB(255, 21, 101, 192),
+    secondary: Color.fromARGB(255, 21, 101, 192),
   ),
-  outlinedButtonTheme: OutlinedButtonThemeData(
-    style: _customOutlinedButtonStyle(Colors.blueGrey, Colors.white),
+  appBarTheme: const AppBarTheme(
+    iconTheme: IconThemeData(color: Colors.white),
+    color: Color.fromARGB(255, 21, 101, 192),
+    titleTextStyle: TextStyle(
+      color: Colors.white,
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+    ),
   ),
   inputDecorationTheme: InputDecorationTheme(
     border: OutlineInputBorder(
@@ -73,12 +49,47 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
     labelStyle: _customTextStyle(color: Colors.white),
     hintStyle: _customTextStyle(color: Colors.blueGrey),
   ),
-  elevatedButtonTheme: ElevatedButtonThemeData(
-    style: _customElevatedButtonStyle(Colors.blue, Colors.white),
-  ),
   buttonTheme: ButtonThemeData(
-    buttonColor: Colors.blue[700],
-    textTheme: ButtonTextTheme.primary,
+    buttonColor: Colors.blue,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+    ),
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      backgroundColor: Colors.blue,
+    ).merge(
+      ButtonStyle(
+        foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+          return states.contains(MaterialState.disabled)
+              ? Colors.grey
+              : Colors.white;
+        }),
+        textStyle: MaterialStateProperty.all<TextStyle>(
+            const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+      ),
+    ),
+  ),
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      side: const BorderSide(color: Colors.white),
+    ).merge(
+      ButtonStyle(
+        foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+          return states.contains(MaterialState.disabled)
+              ? Colors.grey
+              : Colors.white;
+        }),
+        textStyle: MaterialStateProperty.all<TextStyle>(
+            const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+      ),
+    ),
   ),
   textTheme: TextTheme(
     displayLarge: _customTextStyle(fontSize: 24, fontWeight: FontWeight.bold),

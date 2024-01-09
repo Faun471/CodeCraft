@@ -71,14 +71,32 @@ class MarkdownViewerState extends State<MarkdownViewer> {
                       ? _pageController.page! / (sections.length - 1)
                       : 0.0,
                   duration: const Duration(seconds: 1),
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
+                    tileMode: TileMode.clamp,
                     colors: [
-                      Colors.lightBlue,
-                      Colors.lightBlue,
-                      Colors.lightBlueAccent,
-                      Colors.lightGreen,
-                      Colors.lightGreen,
-                      Colors.lightGreenAccent,
+                      HSLColor.fromColor(AdaptiveTheme.of(context)
+                              .theme
+                              .colorScheme
+                              .primary)
+                          .withSaturation(0.9)
+                          .withHue(20)
+                          .withLightness(
+                              AdaptiveTheme.of(context).theme.brightness ==
+                                      Brightness.dark
+                                  ? 0.5
+                                  : 0.8)
+                          .toColor(),
+                      HSLColor.fromColor(AdaptiveTheme.of(context)
+                              .theme
+                              .colorScheme
+                              .secondaryContainer)
+                          .withHue(80)
+                          .withLightness(
+                              AdaptiveTheme.of(context).theme.brightness ==
+                                      Brightness.dark
+                                  ? 0.5
+                                  : 0.8)
+                          .toColor(),
                     ],
                   ),
                   backgroundColor: Colors.grey.withOpacity(0.2),
@@ -264,14 +282,18 @@ class MarkdownViewerState extends State<MarkdownViewer> {
                                   } else {
                                     Dialogs.materialDialog(
                                       color:
-                                          AdaptiveTheme.of(context).mode.isLight
+                                          AdaptiveTheme.of(context)
+                                                  .brightness ==
+                                              Brightness.light
                                               ? Colors.white
                                               : const Color.fromARGB(
                                                   255, 21, 21, 21),
                                       msg:
                                           'You did not pass the quiz... There is still room for improvement!',
                                       msgStyle:
-                                          AdaptiveTheme.of(context).mode.isLight
+                                          AdaptiveTheme.of(context)
+                                                  .brightness ==
+                                              Brightness.light
                                               ? const TextStyle(
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.normal,
@@ -285,7 +307,9 @@ class MarkdownViewerState extends State<MarkdownViewer> {
                                                 ),
                                       title: 'Try Again!',
                                       titleStyle:
-                                          AdaptiveTheme.of(context).mode.isLight
+                                          AdaptiveTheme.of(context)
+                                                  .brightness ==
+                                              Brightness.light
                                               ? const TextStyle(
                                                   fontSize: 23,
                                                   fontWeight: FontWeight.bold,

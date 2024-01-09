@@ -91,11 +91,13 @@ class CustomListItemState extends State<CustomListItem> {
           onTap: isLocked
               ? () {
                   Dialogs.materialDialog(
-                      color: AdaptiveTheme.of(context).mode.isLight
+                      color: AdaptiveTheme.of(context).brightness ==
+                              Brightness.light
                           ? Colors.white
                           : const Color.fromARGB(255, 21, 21, 21),
                       msg: 'You have not unlocked this module yet!',
-                      msgStyle: AdaptiveTheme.of(context).mode.isLight
+                      msgStyle: AdaptiveTheme.of(context).brightness ==
+                              Brightness.light
                           ? const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.normal,
@@ -107,7 +109,8 @@ class CustomListItemState extends State<CustomListItem> {
                               color: Colors.white,
                             ),
                       title: 'Module Locked',
-                      titleStyle: AdaptiveTheme.of(context).mode.isLight
+                      titleStyle: AdaptiveTheme.of(context).brightness ==
+                              Brightness.light
                           ? const TextStyle(
                               fontSize: 23,
                               fontWeight: FontWeight.bold,

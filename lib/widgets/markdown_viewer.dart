@@ -2,6 +2,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:codecraft/models/quiz.dart';
 import 'package:codecraft/parsers/markdown_parser.dart';
 import 'package:codecraft/providers/level_provider.dart';
+import 'package:codecraft/providers/theme_provider.dart';
 import 'package:codecraft/screens/quiz_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -29,10 +30,7 @@ class MarkdownViewerState extends State<MarkdownViewer> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController()
-      ..addListener(() {
-        setState(() {});
-      });
+    _pageController = PageController()..addListener(_onPageChanged);
   }
 
   @override
@@ -41,25 +39,131 @@ class MarkdownViewerState extends State<MarkdownViewer> {
     super.dispose();
   }
 
+  void _onPageChanged() {
+    setState(() {});
+  }
+
+  double getPageValue() {
+    return _pageController.hasClients
+        ? _pageController.page! / (sections.length - 1)
+        : 0.0;
+  }
+
+  Widget buildLoadingWidget() {
+    return Center(
+      child: LoadingAnimationWidget.staggeredDotsWave(
+        color: Colors.white,
+        size: 200,
+      ),
+    );
+  }
+
+  Widget buildPageView() {
+    return PageView.builder(
+      controller: _pageController,
+      itemCount: sections.length,
+      itemBuilder: (context, index) {
+        return Scrollbar(
+          thickness: 6,
+          controller: FixedExtentScrollController(),
+          child: Column(
+            children: [
+              Expanded(
+                child: SelectionArea(
+                  child: MarkdownParser.parse(
+                      data: sections[index], context: context),
+                ),
+              ),
+              if (index < sections.length - 1)
+                ElevatedButton(
+                  onPressed: () {
+                    _pageController.nextPage(
+                      duration: const Duration(seconds: 1),
+                      curve: Curves.easeOutCubic,
+                    );
+                  },
+                  child: const Text('Continue Reading'),
+                ),
+              if (index == sections.length - 1)
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => QuizScreen(
+                            quizName: widget.quizName,
+                          ),
+                        )).then(
+                      (value) {
+                        if (value == null) {
+                          return;
+                        }
+
+                        final Map<String, dynamic> result =
+                            value as Map<String, dynamic>;
+
+                        if (result['passed'] == true) {
+                          showMaterialDialog(
+                            context: context,
+                            message: 'You passed the quiz! Congratulations!',
+                            title: 'Congratulations!🎉',
+                            lottieBuilder: Lottie.asset(
+                              'assets/anim/congrats.json',
+                              fit: BoxFit.contain,
+                            ),
+                          );
+
+                          Quiz quiz = result['quiz'] as Quiz;
+                          if (quiz.level >=
+                              Provider.of<LevelProvider>(context, listen: false)
+                                  .currentLevel) {
+                            Provider.of<LevelProvider>(context, listen: false)
+                                .completeLevel();
+
+                            showMaterialDialog(
+                              context: context,
+                              message: 'You have unlocked a new level!',
+                              title: 'New Level Unlocked!',
+                              lottieBuilder: Lottie.asset(
+                                'assets/anim/level_up.json',
+                                fit: BoxFit.contain,
+                              ),
+                            );
+                          }
+                          return;
+                        }
+                        showMaterialDialog(
+                          context: context,
+                          message:
+                              'You did not pass the quiz... There is still room for improvement!',
+                          title: 'You can always try again!',
+                          lottieBuilder: Lottie.asset(
+                            'assets/anim/failed.json',
+                            fit: BoxFit.contain,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: const Text('Test Your Knowledge!'),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: widget.markdownData,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: LoadingAnimationWidget.staggeredDotsWave(
-              color: Colors.white,
-              size: 200,
-            ),
-          );
-        }
-        if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
+        if (snapshot.connectionState != ConnectionState.done) {
+          return buildLoadingWidget();
         }
 
-        // Split the Markdown content into sections using <br>
-        sections = (snapshot.data as String).split('<br>');
+        sections = (snapshot.data as String).split('<next page>');
 
         return Column(
           children: [
@@ -105,270 +209,54 @@ class MarkdownViewerState extends State<MarkdownViewer> {
               ],
             ),
             Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: sections.length,
-                itemBuilder: (context, index) {
-                  return Scrollbar(
-                    thickness: 6,
-                    controller: FixedExtentScrollController(),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: SelectionArea(
-                            child: MarkdownParser.parse(
-                                data: sections[index], context: context),
-                          ),
-                        ),
-                        if (index < sections.length - 1)
-                          ElevatedButton(
-                            onPressed: () {
-                              _pageController.nextPage(
-                                duration: const Duration(seconds: 1),
-                                curve: Curves.easeOutCubic,
-                              );
-                            },
-                            child: const Text('Continue Reading'),
-                          ),
-                        if (index == sections.length - 1)
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => QuizScreen(
-                                      quizName: widget.quizName,
-                                    ),
-                                  )).then(
-                                (value) {
-                                  if (value == null) {
-                                    return;
-                                  }
-
-                                  final Map<String, dynamic> result =
-                                      value as Map<String, dynamic>;
-
-                                  if (result['passed'] == true) {
-                                    Dialogs.materialDialog(
-                                        color: AdaptiveTheme.of(context)
-                                                .mode
-                                                .isLight
-                                            ? Colors.white
-                                            : const Color.fromARGB(
-                                                255, 21, 21, 21),
-                                        msg:
-                                            'Congratulations, you passed the quiz!',
-                                        msgStyle: AdaptiveTheme.of(context)
-                                                .mode
-                                                .isLight
-                                            ? const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.normal,
-                                                // ignore: unnecessary_const
-                                                color: const Color.fromARGB(
-                                                    255, 21, 21, 21),
-                                              )
-                                            : const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.normal,
-                                                color: Colors.white,
-                                              ),
-                                        title: 'Congratulations 🎉',
-                                        titleStyle: AdaptiveTheme.of(context)
-                                                .mode
-                                                .isLight
-                                            ? const TextStyle(
-                                                fontSize: 23,
-                                                fontWeight: FontWeight.bold,
-                                                color: Color.fromARGB(
-                                                    255, 21, 21, 21),
-                                              )
-                                            : const TextStyle(
-                                                fontSize: 23,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                              ),
-                                        lottieBuilder: Lottie.asset(
-                                          'assets/anim/congrats.json',
-                                          fit: BoxFit.contain,
-                                        ),
-                                        context: context,
-                                        actions: [
-                                          Builder(
-                                            builder: (dialogContext) =>
-                                                IconsButton(
-                                              onPressed: () {
-                                                Navigator.pop(dialogContext);
-                                              },
-                                              text: 'Okay!',
-                                              iconData: Icons.done,
-                                              color: Colors.blue,
-                                              textStyle: const TextStyle(
-                                                  color: Colors.white),
-                                              iconColor: Colors.white,
-                                            ),
-                                          ),
-                                        ]);
-
-                                    Quiz quiz = result['quiz'] as Quiz;
-                                    if (quiz.level >=
-                                        Provider.of<LevelProvider>(context,
-                                                listen: false)
-                                            .currentLevel) {
-                                      Provider.of<LevelProvider>(context,
-                                              listen: false)
-                                          .completeLevel();
-
-                                      Dialogs.materialDialog(
-                                          color: AdaptiveTheme.of(context)
-                                                  .mode
-                                                  .isLight
-                                              ? Colors.white
-                                              : const Color.fromARGB(
-                                                  255, 21, 21, 21),
-                                          msg:
-                                              'Congratulations, you have completed the level!',
-                                          msgStyle: AdaptiveTheme.of(context)
-                                                  .mode
-                                                  .isLight
-                                              ? const TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.normal,
-                                                  color: Color.fromARGB(
-                                                      255, 21, 21, 21),
-                                                )
-                                              : const TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.normal,
-                                                  color: Colors.white,
-                                                ),
-                                          title: 'Congratulations 🎉',
-                                          titleStyle: AdaptiveTheme.of(context)
-                                                  .mode
-                                                  .isLight
-                                              ? const TextStyle(
-                                                  fontSize: 23,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Color.fromARGB(
-                                                      255, 21, 21, 21),
-                                                )
-                                              : const TextStyle(
-                                                  fontSize: 23,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white,
-                                                ),
-                                          lottieBuilder: Lottie.asset(
-                                            'assets/anim/level_up.json',
-                                            fit: BoxFit.contain,
-                                          ),
-                                          context: context,
-                                          actions: [
-                                            Builder(
-                                              builder: (dialogContext) =>
-                                                  IconsButton(
-                                                onPressed: () {
-                                                  Navigator.pop(dialogContext);
-                                                },
-                                                text: 'Okay!',
-                                                iconData: Icons.done,
-                                                color: Colors.blue,
-                                                textStyle: const TextStyle(
-                                                    color: Colors.white),
-                                                iconColor: Colors.white,
-                                              ),
-                                            ),
-                                          ]);
-                                    }
-                                  } else {
-                                    Dialogs.materialDialog(
-                                      color:
-                                          AdaptiveTheme.of(context)
-                                                  .brightness ==
-                                              Brightness.light
-                                              ? Colors.white
-                                              : const Color.fromARGB(
-                                                  255, 21, 21, 21),
-                                      msg:
-                                          'You did not pass the quiz... There is still room for improvement!',
-                                      msgStyle:
-                                          AdaptiveTheme.of(context)
-                                                  .brightness ==
-                                              Brightness.light
-                                              ? const TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.normal,
-                                                  color: Color.fromARGB(
-                                                      255, 21, 21, 21),
-                                                )
-                                              : const TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.normal,
-                                                  color: Colors.white,
-                                                ),
-                                      title: 'Try Again!',
-                                      titleStyle:
-                                          AdaptiveTheme.of(context)
-                                                  .brightness ==
-                                              Brightness.light
-                                              ? const TextStyle(
-                                                  fontSize: 23,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Color.fromARGB(
-                                                      255, 21, 21, 21),
-                                                )
-                                              : const TextStyle(
-                                                  fontSize: 23,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white,
-                                                ),
-                                      lottieBuilder: Lottie.asset(
-                                        'assets/anim/failed.json',
-                                        fit: BoxFit.contain,
-                                      ),
-                                      context: context,
-                                      actions: [
-                                        Builder(
-                                          builder: (dialogContext) =>
-                                              IconsButton(
-                                            onPressed: () {
-                                              Navigator.pop(dialogContext);
-                                            },
-                                            text: 'Okay!',
-                                            iconData: Icons.done,
-                                            color: Colors.blue,
-                                            textStyle: AdaptiveTheme.of(context)
-                                                    .mode
-                                                    .isDark
-                                                ? const TextStyle(
-                                                    color: Colors.white)
-                                                : const TextStyle(
-                                                    color: Color.fromARGB(
-                                                        255, 21, 21, 21)),
-                                            iconColor: AdaptiveTheme.of(context)
-                                                    .mode
-                                                    .isDark
-                                                ? Colors.white
-                                                : const Color.fromARGB(
-                                                    255, 21, 21, 21),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  }
-                                },
-                              );
-                            },
-                            child: const Text('Test Your Knowledge!'),
-                          ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+              child: buildPageView(),
             ),
           ],
         );
       },
+    );
+  }
+
+  void showMaterialDialog({
+    required BuildContext context,
+    required String message,
+    required String title,
+    required LottieBuilder? lottieBuilder,
+  }) {
+    Dialogs.materialDialog(
+      msg: message,
+      msgStyle:
+          AdaptiveTheme.of(context).theme.textTheme.displaySmall!.copyWith(
+                color: Colors.black,
+              ),
+      msgAlign: TextAlign.center,
+      titleStyle: TextStyle(
+        color:
+            Provider.of<ThemeProvider>(context, listen: false).preferredColor,
+        fontSize: MediaQuery.of(context).size.width * 0.05,
+        fontWeight: FontWeight.bold,
+      ),
+      titleAlign: TextAlign.center,
+      title: title,
+      lottieBuilder: lottieBuilder,
+      context: context,
+      useRootNavigator: true,
+      useSafeArea: true,
+      actions: [
+        Builder(
+          builder: (dialogContext) => IconsButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+            },
+            text: 'Okay!',
+            iconData: Icons.done,
+            color: Provider.of<ThemeProvider>(context, listen: false)
+                .preferredColor,
+            textStyle: const TextStyle(color: Colors.white),
+            iconColor: Colors.white,
+          ),
+        ),
+      ],
     );
   }
 }

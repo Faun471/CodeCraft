@@ -60,14 +60,23 @@ class CustomListItemState extends State<CustomListItem> {
   }
 
   void updateLockState() async {
+    if (!mounted) return;
+    
     int currentLevel = 1;
     await Provider.of<LevelProvider>(context, listen: false).loadState();
     currentLevel =
         // ignore: use_build_context_synchronously
         Provider.of<LevelProvider>(context, listen: false).currentLevel;
-    setState(() {
-      isLocked = currentLevel < widget.unlockLevel;
-    });
+    if (mounted) {
+      setState(() {
+        isLocked = currentLevel < widget.unlockLevel;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override

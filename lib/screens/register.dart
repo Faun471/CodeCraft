@@ -1,7 +1,7 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:codecraft/screens/login.dart';
-import 'package:codecraft/screens/modules.dart';
+import 'package:codecraft/screens/body.dart';
 import 'package:codecraft/services/auth_helper.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:flutter/material.dart';
@@ -9,16 +9,45 @@ import 'package:lottie/lottie.dart';
 import 'package:material_dialogs/material_dialogs.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 
-class Register extends StatelessWidget {
+class Register extends StatefulWidget {
   const Register({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    TextEditingController email = TextEditingController();
-    TextEditingController password = TextEditingController();
-    TextEditingController confirmPassword =
-        TextEditingController(); // New controller
+  RegisterState createState() => RegisterState();
+}
 
+class RegisterState extends State<Register> {
+  late TextEditingController email, password, confirmPassword;
+  late FocusNode passwordFocusNode, confirmPasswordFocusNode;
+  bool _passwordVisible = false;
+  bool _confirmPasswordVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    email = TextEditingController();
+    password = TextEditingController();
+    confirmPassword = TextEditingController();
+    passwordFocusNode = FocusNode()
+      ..addListener(() {
+        setState(() {});
+      });
+    confirmPasswordFocusNode = FocusNode()
+      ..addListener(() {
+        setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    email.dispose();
+    password.dispose();
+    confirmPassword.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: Column(
@@ -49,31 +78,66 @@ class Register extends StatelessWidget {
                 const SizedBox(height: 10),
                 //Password field
                 TextField(
+                  focusNode: passwordFocusNode,
                   controller: password,
-                  obscureText: true,
+                  obscureText: !_passwordVisible,
                   enableSuggestions: false,
                   autocorrect: false,
                   scribbleEnabled: false,
                   obscuringCharacter: '●',
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
                     labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock),
+                    prefixIcon: const Icon(Icons.lock),
+                    suffixIcon: passwordFocusNode.hasFocus
+                        ? IconButton(
+                            icon: Icon(
+                              _passwordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(
+                                () {
+                                  _passwordVisible = !_passwordVisible;
+                                },
+                              );
+                            },
+                          )
+                        : null,
                   ),
                 ),
                 const SizedBox(height: 10),
                 //Confirm password field
                 TextField(
+                  focusNode: confirmPasswordFocusNode,
                   controller: confirmPassword,
                   obscureText: true,
                   enableSuggestions: false,
                   autocorrect: false,
                   scribbleEnabled: false,
                   obscuringCharacter: '●',
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
                     labelText: 'Confirm Password',
-                    prefixIcon: Icon(Icons.lock),
+                    prefixIcon: const Icon(Icons.lock),
+                    suffixIcon: confirmPasswordFocusNode.hasFocus
+                        ? IconButton(
+                            icon: Icon(
+                              _confirmPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(
+                                () {
+                                  _confirmPasswordVisible =
+                                      !_confirmPasswordVisible;
+                                },
+                              );
+                            },
+                          )
+                        : null,
                   ),
                 ),
               ],
@@ -116,6 +180,12 @@ class Register extends StatelessWidget {
                   return;
                 }
 
+                if (!Auth.isEmailValid(inputEmail)) {
+                  // Check if the email is valid.
+                  _showErrorDialog(context, 'Please enter a valid email.');
+                  return;
+                }
+
                 if (inputPassword != confirmPassword.text) {
                   // Check if the password and confirm password is the same.
                   _showErrorDialog(context, 'Passwords do not match.');
@@ -134,7 +204,7 @@ class Register extends StatelessWidget {
                     .then(
                   (message) {
                     // If the error message is null, then the registration is successful.
-                    if (message == null) {
+                    if (message == 'success') {
                       Dialogs.bottomMaterialDialog(
                         context: context,
                         title: 'Account Created!',
@@ -174,39 +244,24 @@ class Register extends StatelessWidget {
                           fit: BoxFit.contain,
                           repeat: false,
                         ),
+                        onClose: (value) => Navigator.of(context).pop(),
                         actions: [
-                          PopScope(
-                            onPopInvoked: (didPop) {
-                              WidgetsBinding.instance.addPostFrameCallback(
-                                (_) {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        return Modules();
-                                      },
-                                    ),
-                                  );
-                                },
+                          IconsButton(
+                            onPressed: () {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return const Body();
+                                  },
+                                ),
                               );
                             },
-                            child: IconsButton(
-                              onPressed: () {
-                                Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute(
-                                    builder: (context) {
-                                      return Modules();
-                                    },
-                                  ),
-                                );
-                              },
-                              text: 'Okay!',
-                              color: const Color.fromARGB(255, 17, 172, 77),
-                              iconData: Icons.check_circle,
-                              textStyle: const TextStyle(color: Colors.white),
-                              iconColor: Colors.white,
-                            ),
-                          )
+                            text: 'Okay!',
+                            color: const Color.fromARGB(255, 17, 172, 77),
+                            iconData: Icons.check_circle,
+                            textStyle: const TextStyle(color: Colors.white),
+                            iconColor: Colors.white,
+                          ),
                         ],
                       );
 
@@ -230,8 +285,8 @@ class Register extends StatelessWidget {
                     height: 1.0,
                     color:
                         AdaptiveTheme.of(context).brightness == Brightness.light
-                        ? const Color.fromARGB(255, 21, 21, 21)
-                        : const Color.fromARGB(255, 255, 255, 255),
+                            ? const Color.fromARGB(255, 21, 21, 21)
+                            : const Color.fromARGB(255, 255, 255, 255),
                     margin: const EdgeInsets.symmetric(horizontal: 10.0),
                   ),
                 ),
@@ -249,8 +304,8 @@ class Register extends StatelessWidget {
                     height: 1.0,
                     color:
                         AdaptiveTheme.of(context).brightness == Brightness.light
-                        ? const Color.fromARGB(255, 21, 21, 21)
-                        : const Color.fromARGB(255, 255, 255, 255),
+                            ? const Color.fromARGB(255, 21, 21, 21)
+                            : const Color.fromARGB(255, 255, 255, 255),
                     margin: const EdgeInsets.symmetric(horizontal: 10.0),
                   ),
                 ),
@@ -268,10 +323,14 @@ class Register extends StatelessWidget {
                       Auth(DatabaseHelper().auth).signInWithGoogle().then(
                         (message) {
                           if (message == null) {
-                            Navigator.pushReplacement(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Modules();
-                            }));
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return const Body();
+                                },
+                              ),
+                            );
                             return;
                           }
                           _showErrorDialog(context, message.toString());
@@ -279,19 +338,20 @@ class Register extends StatelessWidget {
                       );
                     },
                     style: ButtonStyle(
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          const RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(4.0)),
-                              side: BorderSide(
-                                  color: Color.fromARGB(255, 21, 21, 21))),
-                        ),
-                        backgroundColor: MaterialStateProperty.resolveWith(
-                          (states) => Colors.white,
-                        ),
-                        minimumSize: MaterialStateProperty.all(
-                            const Size.fromHeight(60))),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(4.0)),
+                            side: BorderSide(
+                                color: Color.fromARGB(255, 21, 21, 21))),
+                      ),
+                      backgroundColor: MaterialStateProperty.resolveWith(
+                        (states) => Colors.white,
+                      ),
+                      minimumSize: MaterialStateProperty.all(
+                        const Size.fromHeight(60),
+                      ),
+                    ),
                     child: const Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
@@ -301,10 +361,13 @@ class Register extends StatelessWidget {
                           height: 30,
                         ),
                         SizedBox(width: 15),
-                        Text('Continue with Google',
-                            style: TextStyle(
-                                fontSize: 15,
-                                color: Color.fromARGB(255, 17, 17, 17))),
+                        Text(
+                          'Continue with Google',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: Color.fromARGB(255, 17, 17, 17),
+                          ),
+                        ),
                       ],
                     )),
               ),
@@ -312,49 +375,55 @@ class Register extends StatelessWidget {
                 margin:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: FilledButton(
-                    onPressed: () {
-                      Auth(DatabaseHelper().auth).signInWithFacebook().then(
-                        (message) {
-                          if (message == null) {
-                            Navigator.pushReplacement(context,
-                                MaterialPageRoute(builder: (context) {
-                              return Modules();
-                            }));
-                            return;
-                          }
-                          _showErrorDialog(context, message.toString());
-                        },
-                      );
-                    },
-                    style: ButtonStyle(
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          const RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(4.0)),
-                              side: BorderSide(
-                                  color: Color.fromARGB(31, 141, 98, 98))),
+                  onPressed: () {
+                    Auth(DatabaseHelper().auth).signInWithFacebook().then(
+                      (message) {
+                        if (message == null) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return const Body();
+                              },
+                            ),
+                          );
+                          return;
+                        }
+                        _showErrorDialog(context, message.toString());
+                      },
+                    );
+                  },
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(4.0)),
+                            side: BorderSide(
+                                color: Color.fromARGB(31, 141, 98, 98))),
+                      ),
+                      backgroundColor: MaterialStateProperty.resolveWith(
+                          (states) => const Color.fromARGB(255, 255, 255, 255)),
+                      minimumSize:
+                          MaterialStateProperty.all(const Size.fromHeight(60))),
+                  child: const Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Image(
+                        image: AssetImage('assets/images/facebook.png'),
+                        width: 30,
+                        height: 30,
+                      ),
+                      SizedBox(width: 15),
+                      Text(
+                        'Continue with Facebook',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Color.fromARGB(255, 17, 17, 17),
                         ),
-                        backgroundColor: MaterialStateProperty.resolveWith(
-                            (states) =>
-                                const Color.fromARGB(255, 255, 255, 255)),
-                        minimumSize: MaterialStateProperty.all(
-                            const Size.fromHeight(60))),
-                    child: const Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Image(
-                          image: AssetImage('assets/images/facebook.png'),
-                          width: 30,
-                          height: 30,
-                        ),
-                        SizedBox(width: 15),
-                        Text('Continue with Facebook',
-                            style: TextStyle(
-                                fontSize: 15,
-                                color: Color.fromARGB(255, 17, 17, 17))),
-                      ],
-                    )),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),

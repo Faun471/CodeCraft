@@ -1,25 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:codecraft/services/database_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:codecraft/models/app_user.dart';
 
 class LevelProvider extends ChangeNotifier {
   late int _currentLevel;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  late String _username;
 
   LevelProvider() {
     _currentLevel = 1;
-    _username = username;
     loadState();
   }
 
   int get currentLevel => _currentLevel;
 
-  String get username => AppUser().email ?? 'default';
-
   Future<void> loadState() async {
-    DocumentSnapshot doc =
-        await _firestore.collection('users').doc(username).get();
+    DocumentSnapshot doc = await _firestore
+        .collection('users')
+        .doc(DatabaseHelper().auth.currentUser!.email)
+        .get();
 
     if (!doc.exists) {
       _currentLevel = 1;
@@ -31,7 +29,7 @@ class LevelProvider extends ChangeNotifier {
   }
 
   Future<void> saveState() async {
-    await _firestore.collection('users').doc(_username).set({
+    await DatabaseHelper().currentUser.set({
       'level': _currentLevel,
     }, SetOptions(merge: true));
   }

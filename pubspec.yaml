@@ -60,10 +60,21 @@ dependencies:
   flutter_syntax_view: ^4.0.0
   babstrap_settings_screen: ^0.1.6
   another_flutter_splash_screen: ^1.2.0
+  image_picker: ^1.0.7
+  firebase_storage: ^11.6.0
+  image_picker_widget: ^2.4.1
+  image_cropper: ^5.0.1
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.png"
+  min_sdk_android: 21
 
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -84,10 +95,11 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/images/flutter.png
+    - assets/images/logo.png
     - assets/images/google.png
     - assets/images/apple.png
     - assets/images/facebook.png
+    - assets/images/default_profile.png
     - assets/pages/
     - assets/quizzes/
     - assets/anim/congrats.json

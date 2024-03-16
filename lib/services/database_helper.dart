@@ -24,4 +24,8 @@ class DatabaseHelper {
   CollectionReference get users {
     return _firestore.collection('users');
   }
+
+  DocumentReference<Object?> get currentUser {
+    return users.doc(_auth.currentUser!.email);
+  }
 }

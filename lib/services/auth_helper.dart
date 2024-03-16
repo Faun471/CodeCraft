@@ -25,7 +25,7 @@ class Auth {
         password: password,
       );
 
-      return null; // return null on success
+      return 'success';
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
         case 'invalid-email':
@@ -77,8 +77,16 @@ class Auth {
   }
 
   Future<String?> signInWithGoogle() async {
+    await GoogleSignIn(
+            clientId:
+                "831166027593-53rh04dgchjmgj0348m05pl6g6tru9c2.apps.googleusercontent.com")
+        .signOut();
+
     // Trigger the authentication flow
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    final GoogleSignInAccount? googleUser = await GoogleSignIn(
+            clientId:
+                "831166027593-53rh04dgchjmgj0348m05pl6g6tru9c2.apps.googleusercontent.com")
+        .signIn();
 
     // Obtain the auth details from the request
     final GoogleSignInAuthentication? googleAuth =
@@ -152,5 +160,10 @@ class Auth {
           return e.toString();
       }
     }
+  }
+
+  static bool isEmailValid(String inputEmail) {
+    return RegExp(r'^.+@[a-zA-Z]+\.{1}[a-zA-Z]+(\.{0,1}[a-zA-Z]+)$')
+        .hasMatch(inputEmail);
   }
 }

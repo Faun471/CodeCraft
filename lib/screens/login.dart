@@ -1,6 +1,6 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:codecraft/screens/modules.dart';
+import 'package:codecraft/screens/body.dart';
 import 'package:codecraft/screens/register.dart';
 import 'package:codecraft/services/auth_helper.dart';
 import 'package:codecraft/services/database_helper.dart';
@@ -8,14 +8,40 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:material_dialogs/material_dialogs.dart';
 
-class Login extends StatelessWidget {
+class Login extends StatefulWidget {
   const Login({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    TextEditingController email = TextEditingController();
-    TextEditingController password = TextEditingController();
+  LoginState createState() => LoginState();
+}
 
+class LoginState extends State<Login> {
+  late TextEditingController email;
+  late TextEditingController password;
+  bool _passwordVisible = false;
+  late FocusNode passwordFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    email = TextEditingController();
+    password = TextEditingController();
+
+    passwordFocusNode = FocusNode()
+      ..addListener(() {
+        setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    email.dispose();
+    password.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: Column(
@@ -46,16 +72,31 @@ class Login extends StatelessWidget {
                 const SizedBox(height: 10),
                 //Password field
                 TextField(
+                  focusNode: passwordFocusNode,
                   controller: password,
-                  obscureText: true,
+                  obscureText: !_passwordVisible,
                   enableSuggestions: false,
                   autocorrect: false,
                   scribbleEnabled: false,
                   obscuringCharacter: '●',
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
                     labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock),
+                    prefixIcon: const Icon(Icons.lock),
+                    suffixIcon: passwordFocusNode.hasFocus
+                        ? IconButton(
+                            icon: Icon(
+                              _passwordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _passwordVisible = !_passwordVisible;
+                              });
+                            },
+                          )
+                        : null,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -108,7 +149,7 @@ class Login extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) {
-                            return const Modules();
+                            return const Body();
                           },
                         ),
                       );
@@ -131,8 +172,8 @@ class Login extends StatelessWidget {
                     height: 1.0,
                     color:
                         AdaptiveTheme.of(context).brightness == Brightness.light
-                        ? const Color.fromARGB(255, 21, 21, 21)
-                        : const Color.fromARGB(255, 255, 255, 255),
+                            ? const Color.fromARGB(255, 21, 21, 21)
+                            : const Color.fromARGB(255, 255, 255, 255),
                     margin: const EdgeInsets.symmetric(horizontal: 10.0),
                   ),
                 ),
@@ -150,8 +191,8 @@ class Login extends StatelessWidget {
                     height: 1.0,
                     color:
                         AdaptiveTheme.of(context).brightness == Brightness.light
-                        ? const Color.fromARGB(255, 21, 21, 21)
-                        : const Color.fromARGB(255, 255, 255, 255),
+                            ? const Color.fromARGB(255, 21, 21, 21)
+                            : const Color.fromARGB(255, 255, 255, 255),
                     margin: const EdgeInsets.symmetric(horizontal: 10.0),
                   ),
                 ),
@@ -172,7 +213,7 @@ class Login extends StatelessWidget {
                           if (error == null) {
                             Navigator.pushReplacement(context,
                                 MaterialPageRoute(builder: (context) {
-                              return const Modules();
+                              return const Body();
                             }));
                           } else {
                             _showErrorDialog(context, error);
@@ -221,7 +262,7 @@ class Login extends StatelessWidget {
                           if (error == null) {
                             Navigator.pushReplacement(context,
                                 MaterialPageRoute(builder: (context) {
-                              return const Modules();
+                              return const Body();
                             }));
                           } else {
                             _showErrorDialog(context, error);
@@ -280,7 +321,12 @@ class Login extends StatelessWidget {
         fit: BoxFit.contain,
         repeat: false,
       ),
-      titleStyle: AdaptiveTheme.of(context).theme.textTheme.displayLarge!,
+      titleStyle:
+          AdaptiveTheme.of(context).theme.textTheme.displayLarge!.copyWith(
+                color: AdaptiveTheme.of(context).brightness == Brightness.light
+                    ? Colors.black
+                    : Colors.white,
+              ),
       msgStyle: AdaptiveTheme.of(context).theme.textTheme.displaySmall!,
       color: AdaptiveTheme.of(context).brightness == Brightness.light
           ? Colors.white

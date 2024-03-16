@@ -154,7 +154,15 @@ class MarkdownParser {
           ],
           title: 'Are you sure?',
           msg: 'You are about to open an external link and leave the app.',
-          titleStyle: AdaptiveTheme.of(context).theme.textTheme.displayLarge!,
+          titleStyle: AdaptiveTheme.of(context)
+              .theme
+              .textTheme
+              .displayLarge!
+              .copyWith(
+                color: AdaptiveTheme.of(context).brightness == Brightness.light
+                    ? Colors.black
+                    : Colors.white,
+              ),
           msgStyle: AdaptiveTheme.of(context).theme.textTheme.bodyLarge!,
           color: AdaptiveTheme.of(context).brightness == Brightness.light
               ? Colors.white
@@ -162,6 +170,7 @@ class MarkdownParser {
         );
       },
       syntaxHighlighter: _SyntaxHighlighter(),
+      blockSyntaxes: [TableSyntax()],
     );
   }
 }

@@ -1,0 +1,27 @@
+timer: 15
+level: 2
+questions:
+  - Question:
+      text: "Fill in the blanks: \nSystem._.println(\"Hello World!\");"
+      options:
+        - "out"
+        - "in"
+        - "on"
+        - "at"
+      answer: "out"
+  - Question:
+      text: "Which one is the correct way to define a class in Java"
+      options:
+        - "class Main { }"
+        - "class main(String[] args) { }"
+        - "class main ()"
+        - "class main string { }"
+      answer: class Main { }
+  - Question:
+      text: "How do you add a single line comment in java?"
+      options:
+        - "<!-- Commented code -->"
+        - "# Commented code"
+        - "// Commented code"
+        - "/* Commented code*/"
+      answer: "// Commented code"

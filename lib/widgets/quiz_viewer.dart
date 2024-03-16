@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:codecraft/models/quiz.dart';
 import 'package:codecraft/providers/theme_provider.dart';
@@ -13,8 +14,12 @@ class QuizViewer extends StatefulWidget {
   final Quiz quiz;
   final Function(bool, Quiz) onQuizFinished;
 
-  const QuizViewer(
-      {super.key, required this.quiz, required this.onQuizFinished});
+  QuizViewer({super.key, required this.quiz, required this.onQuizFinished}) {
+    quiz.questions.shuffle();
+    for (var question in quiz.questions) {
+      question.answerOptions.shuffle();
+    }
+  }
 
   @override
   QuizViewerState createState() => QuizViewerState();
@@ -35,6 +40,7 @@ class QuizViewerState extends State<QuizViewer> {
     _start = widget.quiz.timer.toDouble();
     startTimer();
     Animate.restartOnHotReload = true;
+
     super.initState();
   }
 
@@ -91,6 +97,10 @@ class QuizViewerState extends State<QuizViewer> {
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(10)),
               ),
+              side: BorderSide(
+                color: Provider.of<ThemeProvider>(context).preferredColor,
+                width: 2,
+              ),
             ),
             onPressed: canAnswer
                 ? () {
@@ -105,6 +115,7 @@ class QuizViewerState extends State<QuizViewer> {
             child: AutoSizeText(
               answer,
               minFontSize: 16,
+              style: AdaptiveTheme.of(context).theme.textTheme.titleLarge!,
             )),
       ),
     ).animate(effects: [
@@ -213,7 +224,7 @@ class QuizViewerState extends State<QuizViewer> {
                   duration: const Duration(seconds: 1),
                   color: Colors.green,
                   backgroundColor: Colors.grey.withOpacity(0.8),
-                  curve: Curves.easeOutCubic,
+                  curve: Curves.linear,
                 ).animate().color(
                       begin: Colors.green,
                       end: Colors.redAccent,

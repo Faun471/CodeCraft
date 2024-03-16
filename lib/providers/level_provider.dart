@@ -1,55 +1,40 @@
-import 'package:codecraft/models/user.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
 
 class LevelProvider extends ChangeNotifier {
   late int _currentLevel;
-  final DatabaseHelper _databaseHelper = DatabaseHelper();
-  late Database _db;
-  String _username = User().username ?? 'default';
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   LevelProvider() {
     _currentLevel = 1;
+    loadState();
   }
 
   int get currentLevel => _currentLevel;
 
-  void updateUsername() {
-    _username = User().username ?? 'default';
-  }
-
-  String get username => _username;
-
   Future<void> loadState() async {
-    updateUsername();
+    DocumentSnapshot doc = await _firestore
+        .collection('users')
+        .doc(DatabaseHelper().auth.currentUser!.email)
+        .get();
 
-    _db = await _databaseHelper.database;
-    final List<Map<String, dynamic>> result = await _db
-        .query('levels', where: 'username = ?', whereArgs: [_username]);
-
-    if (result.isEmpty) {
+    if (!doc.exists) {
       _currentLevel = 1;
       await saveState();
       return;
     }
 
-    _currentLevel = result[0]['level'] != null ? result[0]['level'] as int : 1;
+    _currentLevel = doc['level'] != null ? doc['level'] as int : 1;
   }
 
   Future<void> saveState() async {
-    updateUsername();
-
-    final Database db = await _databaseHelper.database;
-    await db.insert(
-      'levels',
-      {'username': _username, 'level': _currentLevel},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await DatabaseHelper().currentUser.set({
+      'level': _currentLevel,
+    }, SetOptions(merge: true));
   }
 
   void completeLevel() async {
-    updateUsername();
     _currentLevel++;
     await saveState();
     notifyListeners();

@@ -1,19 +1,53 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:codecraft/models/user.dart';
-import 'package:codecraft/providers/level_provider.dart';
-import 'package:codecraft/screens/modules.dart';
+import 'package:codecraft/screens/login.dart';
+import 'package:codecraft/screens/body.dart';
+import 'package:codecraft/services/auth_helper.dart';
+import 'package:codecraft/services/database_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:provider/provider.dart';
+import 'package:lottie/lottie.dart';
+import 'package:material_dialogs/material_dialogs.dart';
+import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 
-class Register extends StatelessWidget {
+class Register extends StatefulWidget {
   const Register({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    TextEditingController username = TextEditingController();
-    TextEditingController password = TextEditingController();
+  RegisterState createState() => RegisterState();
+}
 
+class RegisterState extends State<Register> {
+  late TextEditingController email, password, confirmPassword;
+  late FocusNode passwordFocusNode, confirmPasswordFocusNode;
+  bool _passwordVisible = false;
+  bool _confirmPasswordVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    email = TextEditingController();
+    password = TextEditingController();
+    confirmPassword = TextEditingController();
+    passwordFocusNode = FocusNode()
+      ..addListener(() {
+        setState(() {});
+      });
+    confirmPasswordFocusNode = FocusNode()
+      ..addListener(() {
+        setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    email.dispose();
+    password.dispose();
+    confirmPassword.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: Column(
@@ -22,7 +56,7 @@ class Register extends StatelessWidget {
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
             child: const Text(
-              'Welcome Back!',
+              'Create an account!',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               textAlign: TextAlign.start,
             ),
@@ -32,26 +66,78 @@ class Register extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                //Username field
                 TextField(
-                  controller: username,
+                  controller: email,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Username',
-                    prefixIcon: Icon(Icons.person),
+                    labelText: 'Email',
+                    prefixIcon: Icon(Icons.email_rounded),
                   ),
                 ),
                 const SizedBox(height: 10),
+                //Password field
                 TextField(
+                  focusNode: passwordFocusNode,
                   controller: password,
+                  obscureText: !_passwordVisible,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  scribbleEnabled: false,
+                  obscuringCharacter: '●',
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: 'Password',
+                    prefixIcon: const Icon(Icons.lock),
+                    suffixIcon: passwordFocusNode.hasFocus
+                        ? IconButton(
+                            icon: Icon(
+                              _passwordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(
+                                () {
+                                  _passwordVisible = !_passwordVisible;
+                                },
+                              );
+                            },
+                          )
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                //Confirm password field
+                TextField(
+                  focusNode: confirmPasswordFocusNode,
+                  controller: confirmPassword,
                   obscureText: true,
                   enableSuggestions: false,
                   autocorrect: false,
                   scribbleEnabled: false,
                   obscuringCharacter: '●',
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: 'Confirm Password',
+                    prefixIcon: const Icon(Icons.lock),
+                    suffixIcon: confirmPasswordFocusNode.hasFocus
+                        ? IconButton(
+                            icon: Icon(
+                              _confirmPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(
+                                () {
+                                  _confirmPasswordVisible =
+                                      !_confirmPasswordVisible;
+                                },
+                              );
+                            },
+                          )
+                        : null,
                   ),
                 ),
               ],
@@ -62,12 +148,18 @@ class Register extends StatelessWidget {
             children: [
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 10),
-                child: TextButton(
-                  onPressed: () {},
+                child: InkWell(
+                  onTap: () {
+                    Navigator.pushReplacement(context, MaterialPageRoute(
+                      builder: (context) {
+                        return const Login();
+                      },
+                    ));
+                  },
                   child: const Align(
                     alignment:
                         Alignment.centerRight, // Align the text to the end.
-                    child: Text('Forgot Password?'),
+                    child: Text('Already have an account? Sign in!'),
                   ),
                 ),
               ),
@@ -76,57 +168,107 @@ class Register extends StatelessWidget {
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: ElevatedButton(
-              onPressed: () {
-                String inputUsername = username.text;
+              onPressed: () async {
+                String inputEmail = email.text;
                 String inputPassword = password.text;
 
-                if (inputUsername.isEmpty || inputPassword.isEmpty) {
-                  // Show some error message
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Error'),
-                        content: const Text('Please fill in all fields'),
+                if (inputEmail.isEmpty ||
+                    inputPassword.isEmpty ||
+                    confirmPassword.text.isEmpty) {
+                  // Check if the username or password is empty.
+                  _showErrorDialog(context, 'Please fill in all the fields.');
+                  return;
+                }
+
+                if (!Auth.isEmailValid(inputEmail)) {
+                  // Check if the email is valid.
+                  _showErrorDialog(context, 'Please enter a valid email.');
+                  return;
+                }
+
+                if (inputPassword != confirmPassword.text) {
+                  // Check if the password and confirm password is the same.
+                  _showErrorDialog(context, 'Passwords do not match.');
+                  return;
+                }
+
+                if (!Auth.isPasswordValid(password.text)) {
+                  // Check if the password is valid.
+                  _showErrorDialog(context,
+                      'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.');
+                  return;
+                }
+
+                await Auth(DatabaseHelper().auth)
+                    .registerUser(inputEmail, inputPassword)
+                    .then(
+                  (message) {
+                    // If the error message is null, then the registration is successful.
+                    if (message == 'success') {
+                      Dialogs.bottomMaterialDialog(
+                        context: context,
+                        title: 'Account Created!',
+                        titleStyle: AdaptiveTheme.of(context).brightness ==
+                                Brightness.light
+                            ? const TextStyle(
+                                fontSize: 23,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(255, 21, 21, 21),
+                              )
+                            : const TextStyle(
+                                fontSize: 23,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                        msg: 'Your account has been created successfully!',
+                        msgStyle: AdaptiveTheme.of(context).brightness ==
+                                Brightness.light
+                            ? const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.normal,
+                                color: Color.fromARGB(255, 21, 21, 21),
+                              )
+                            : const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.white,
+                              ),
+                        color: AdaptiveTheme.of(context).brightness ==
+                                Brightness.light
+                            ? Colors.white
+                            : const Color.fromARGB(255, 21, 21, 21),
+                        lottieBuilder: Lottie.asset(
+                          'assets/anim/congrats.json',
+                          width: 75,
+                          height: 75,
+                          fit: BoxFit.contain,
+                          repeat: false,
+                        ),
+                        onClose: (value) => Navigator.of(context).pop(),
                         actions: [
-                          TextButton(
+                          IconsButton(
                             onPressed: () {
-                              Navigator.of(context).pop();
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return const Body();
+                                  },
+                                ),
+                              );
                             },
-                            child: const Text('Close'),
+                            text: 'Okay!',
+                            color: const Color.fromARGB(255, 17, 172, 77),
+                            iconData: Icons.check_circle,
+                            textStyle: const TextStyle(color: Colors.white),
+                            iconColor: Colors.white,
                           ),
                         ],
                       );
-                    },
-                  );
-                } else {
-                  // Continue with your logic
-                  User().setUsername(inputUsername);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FutureBuilder(
-                        future: context.read<LevelProvider>().loadState(),
-                        builder:
-                            (BuildContext context, AsyncSnapshot snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Center(
-                              child: LoadingAnimationWidget.staggeredDotsWave(
-                                color: Colors.white,
-                                size: 200,
-                              ),
-                            );
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else {
-                            return const Modules();
-                          }
-                        },
-                      ),
-                    ),
-                  );
-                }
+
+                      return;
+                    }
+                  },
+                );
               },
               style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(60)),
@@ -141,19 +283,29 @@ class Register extends StatelessWidget {
                 Expanded(
                   child: Container(
                     height: 1.0,
-                    color: Colors.black,
+                    color:
+                        AdaptiveTheme.of(context).brightness == Brightness.light
+                            ? const Color.fromARGB(255, 21, 21, 21)
+                            : const Color.fromARGB(255, 255, 255, 255),
                     margin: const EdgeInsets.symmetric(horizontal: 10.0),
                   ),
                 ),
-                const Text(
+                Text(
                   ' or continue with ',
                   style: TextStyle(
-                      fontSize: 15.0, color: Color.fromARGB(255, 87, 87, 87)),
+                      fontSize: 15.0,
+                      color: AdaptiveTheme.of(context).brightness ==
+                              Brightness.light
+                          ? const Color.fromARGB(212, 21, 21, 21)
+                          : const Color.fromARGB(212, 255, 255, 255)),
                 ),
                 Expanded(
                   child: Container(
                     height: 1.0,
-                    color: Colors.black,
+                    color:
+                        AdaptiveTheme.of(context).brightness == Brightness.light
+                            ? const Color.fromARGB(255, 21, 21, 21)
+                            : const Color.fromARGB(255, 255, 255, 255),
                     margin: const EdgeInsets.symmetric(horizontal: 10.0),
                   ),
                 ),
@@ -167,20 +319,39 @@ class Register extends StatelessWidget {
                 margin:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: FilledButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Auth(DatabaseHelper().auth).signInWithGoogle().then(
+                        (message) {
+                          if (message == null) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return const Body();
+                                },
+                              ),
+                            );
+                            return;
+                          }
+                          _showErrorDialog(context, message.toString());
+                        },
+                      );
+                    },
                     style: ButtonStyle(
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          const RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(4.0)),
-                              side: BorderSide(color: Colors.black12)),
-                        ),
-                        backgroundColor: MaterialStateProperty.resolveWith(
-                          (states) => Colors.white,
-                        ),
-                        minimumSize: MaterialStateProperty.all(
-                            const Size.fromHeight(60))),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(4.0)),
+                            side: BorderSide(
+                                color: Color.fromARGB(255, 21, 21, 21))),
+                      ),
+                      backgroundColor: MaterialStateProperty.resolveWith(
+                        (states) => Colors.white,
+                      ),
+                      minimumSize: MaterialStateProperty.all(
+                        const Size.fromHeight(60),
+                      ),
+                    ),
                     child: const Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
@@ -190,10 +361,13 @@ class Register extends StatelessWidget {
                           height: 30,
                         ),
                         SizedBox(width: 15),
-                        Text('Continue with Google',
-                            style: TextStyle(
-                                fontSize: 15,
-                                color: Color.fromARGB(255, 17, 17, 17))),
+                        Text(
+                          'Continue with Google',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: Color.fromARGB(255, 17, 17, 17),
+                          ),
+                        ),
                       ],
                     )),
               ),
@@ -201,41 +375,82 @@ class Register extends StatelessWidget {
                 margin:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: FilledButton(
-                    onPressed: () {},
-                    style: ButtonStyle(
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          const RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(4.0)),
-                              side: BorderSide(
-                                  color: Color.fromARGB(31, 141, 98, 98))),
+                  onPressed: () {
+                    Auth(DatabaseHelper().auth).signInWithFacebook().then(
+                      (message) {
+                        if (message == null) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return const Body();
+                              },
+                            ),
+                          );
+                          return;
+                        }
+                        _showErrorDialog(context, message.toString());
+                      },
+                    );
+                  },
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(4.0)),
+                            side: BorderSide(
+                                color: Color.fromARGB(31, 141, 98, 98))),
+                      ),
+                      backgroundColor: MaterialStateProperty.resolveWith(
+                          (states) => const Color.fromARGB(255, 255, 255, 255)),
+                      minimumSize:
+                          MaterialStateProperty.all(const Size.fromHeight(60))),
+                  child: const Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Image(
+                        image: AssetImage('assets/images/facebook.png'),
+                        width: 30,
+                        height: 30,
+                      ),
+                      SizedBox(width: 15),
+                      Text(
+                        'Continue with Facebook',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Color.fromARGB(255, 17, 17, 17),
                         ),
-                        backgroundColor: MaterialStateProperty.resolveWith(
-                            (states) =>
-                                const Color.fromARGB(255, 255, 255, 255)),
-                        minimumSize: MaterialStateProperty.all(
-                            const Size.fromHeight(60))),
-                    child: const Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Image(
-                          image: AssetImage('assets/images/facebook.png'),
-                          width: 30,
-                          height: 30,
-                        ),
-                        SizedBox(width: 15),
-                        Text('Continue with Facebook',
-                            style: TextStyle(
-                                fontSize: 15,
-                                color: Color.fromARGB(255, 17, 17, 17))),
-                      ],
-                    )),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
         ],
       ),
+    );
+  }
+
+  void _showErrorDialog(BuildContext context, String? message) {
+    if (message == null || message.isEmpty) return;
+
+    Dialogs.materialDialog(
+      context: context,
+      msg: message,
+      title: 'Error',
+      lottieBuilder: Lottie.asset(
+        'assets/anim/error.json',
+        width: 75,
+        height: 75,
+        fit: BoxFit.contain,
+        repeat: false,
+      ),
+      titleStyle: AdaptiveTheme.of(context).theme.textTheme.displayLarge!,
+      msgStyle: AdaptiveTheme.of(context).theme.textTheme.displaySmall!,
+      color: AdaptiveTheme.of(context).brightness == Brightness.light
+          ? Colors.white
+          : const Color.fromARGB(255, 21, 21, 21),
     );
   }
 }

@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "831166027593",
+    "project_id": "code-craft-bb5b1",
+    "storage_bucket": "code-craft-bb5b1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:831166027593:android:f93618dd120d72acab6c98",
+        "android_client_info": {
+          "package_name": "dev.faun.codecraft"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "831166027593-323n0uoodhbjps1d8ju6oev83h3iothk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dev.faun.codecraft",
+            "certificate_hash": "6c64da02c2b0bd934ea324c5867973a0777f24f8"
+          }
+        },
+        {
+          "client_id": "831166027593-53rh04dgchjmgj0348m05pl6g6tru9c2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDMcme-KGcidrSdnAjr7dtGGLWvymReU0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "831166027593-53rh04dgchjmgj0348m05pl6g6tru9c2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "831166027593-sa83n4loesbqjgde3npb58tsvb98quk2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "dev.faun.codecraft"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

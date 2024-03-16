@@ -1,5 +1,5 @@
 name: codecraft
-description: A new Flutter project.
+description: CodeCraft is a mobile app that helps you learn programming languages and frameworks by solving quizzes and challenges.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.2.0
 
 environment:
   sdk: '>=3.1.3 <4.0.0'
@@ -32,14 +32,9 @@ dependencies:
     sdk: flutter
   simple_progress_indicators:
     path: ../simple_progress_indicators
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   auto_size_text: ^3.0.0
   provider: ^6.1.1
-  sqflite: ^2.3.0
-  sqflite_common_ffi: ^2.3.0+4
   path: ^1.8.3
   flutter_markdown: ^0.6.18+2
   url_launcher: ^6.2.2
@@ -53,10 +48,33 @@ dependencies:
   lottie: ^2.7.0
   loading_animation_widget: ^1.2.0+4
   cached_network_image: ^3.3.1
+  firebase_auth: ^4.16.0
+  cloud_firestore: ^4.14.0
+  firebase_core: ^2.24.2
+  sidebarx: ^0.16.3
+  adaptive_theme: ^3.5.0
+  animated_toggle_switch: ^0.8.0
+  json_theme: ^6.4.0
+  google_sign_in: ^6.2.1
+  flutter_facebook_auth: ^6.0.3
+  flutter_syntax_view: ^4.0.0
+  babstrap_settings_screen: ^0.1.6
+  another_flutter_splash_screen: ^1.2.0
+  image_picker: ^1.0.7
+  firebase_storage: ^11.6.0
+  image_picker_widget: ^2.4.1
+  image_cropper: ^5.0.1
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.png"
+  min_sdk_android: 21
 
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -64,7 +82,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -77,10 +95,11 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/images/flutter.png
+    - assets/images/logo.png
     - assets/images/google.png
     - assets/images/apple.png
     - assets/images/facebook.png
+    - assets/images/default_profile.png
     - assets/pages/
     - assets/quizzes/
     - assets/anim/congrats.json
@@ -91,6 +110,8 @@ flutter:
     - assets/anim/correct.json
     - assets/anim/incorrect.json
     - assets/anim/timeout.json
+    - assets/anim/error.json
+    - assets/anim/soon.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

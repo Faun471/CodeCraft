@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:yaml/yaml.dart';
 
-class CustomPage {
+class ModulePage {
   final String title;
   final String description;
   final int level;
@@ -11,7 +11,7 @@ class CustomPage {
   final String markdownName;
   final String quizName;
 
-  CustomPage({
+  ModulePage({
     required this.title,
     required this.description,
     required this.level,
@@ -20,7 +20,7 @@ class CustomPage {
     required this.quizName,
   });
 
-  static Future<List<CustomPage>> loadPagesFromYamlDirectory() async {
+  static Future<List<ModulePage>> loadPagesFromYamlDirectory() async {
     final manifestJson = await rootBundle.loadString('AssetManifest.json');
     final pageKeys = json
         .decode(manifestJson)
@@ -29,14 +29,14 @@ class CustomPage {
         .where((String key) => key.endsWith('.yaml'))
         .toList();
 
-    List<CustomPage> pages = [];
+    List<ModulePage> pages = [];
 
     for (var key in pageKeys) {
       String yamlString = await rootBundle.loadString(key);
       Map<String, dynamic> yamlMap =
           Map<String, dynamic>.from(loadYaml(yamlString));
 
-      pages.add(CustomPage(
+      pages.add(ModulePage(
         title: yamlMap['title'],
         description: yamlMap['description'],
         level: yamlMap['level'],

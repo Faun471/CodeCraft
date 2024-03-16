@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:codecraft/models/quiz.dart';
 import 'package:codecraft/widgets/quiz_viewer.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,7 @@ import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 class QuizScreen extends StatelessWidget {
   final String quizName;
 
-  const QuizScreen({Key? key, required this.quizName}) : super(key: key);
+  const QuizScreen({super.key, required this.quizName});
 
   @override
   Widget build(BuildContext context) {
@@ -18,83 +19,14 @@ class QuizScreen extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => {
-            Dialogs.materialDialog(
-              color: Colors.white,
-              msg: 'Are you sure you want to exit? Your progress will be lost.',
-              title: 'Exit',
-              lottieBuilder: Lottie.asset(
-                'assets/anim/question.json',
-                fit: BoxFit.contain,
-              ),
-              context: context,
-              actions: [
-                Builder(
-                    builder: (dialogContext) => IconsButton(
-                          onPressed: () {
-                            Navigator.pop(dialogContext);
-                          },
-                          text: 'No, back to quiz',
-                          color: const Color.fromARGB(255, 17, 172, 77),
-                          iconData: Icons.cancel_outlined,
-                          textStyle: const TextStyle(color: Colors.white),
-                          iconColor: Colors.white,
-                        )),
-                Builder(
-                    builder: (dialogContext) => IconsButton(
-                          onPressed: () {
-                            Navigator.pop(dialogContext);
-                            Navigator.pop(context);
-                          },
-                          text: 'Yes, I\'m sure',
-                          iconData: Icons.check_circle,
-                          iconColor: Colors.white,
-                          color: Colors.red,
-                          textStyle: const TextStyle(color: Colors.white),
-                        )),
-              ],
-            )
-          },
+          onPressed: () => _onWillPop(context),
         ),
       ),
-      body: WillPopScope(
-        onWillPop: () async {
-          Dialogs.materialDialog(
-            color: Colors.white,
-            msg: 'Are you sure you want to exit? Your progress will be lost.',
-            title: 'Exit',
-            lottieBuilder: Lottie.asset(
-              'assets/anim/question.json',
-              fit: BoxFit.contain,
-            ),
-            context: context,
-            actions: [
-              Builder(
-                  builder: (dialogContext) => IconsButton(
-                        onPressed: () {
-                          Navigator.pop(dialogContext);
-                        },
-                        text: 'No, back to quiz',
-                        color: const Color.fromARGB(255, 17, 172, 77),
-                        iconData: Icons.cancel_outlined,
-                        textStyle: const TextStyle(color: Colors.white),
-                        iconColor: Colors.white,
-                      )),
-              Builder(
-                  builder: (dialogContext) => IconsButton(
-                        onPressed: () {
-                          Navigator.pop(dialogContext);
-                          Navigator.pop(context);
-                        },
-                        text: 'Yes, I\'m sure',
-                        iconData: Icons.check_circle,
-                        iconColor: Colors.white,
-                        color: Colors.red,
-                        textStyle: const TextStyle(color: Colors.white),
-                      )),
-            ],
-          );
-          return false;
+      body: PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) async {
+          if (didPop) return;
+          await _onWillPop(context);
         },
         child: FutureBuilder(
           future: loadQuiz(),
@@ -123,11 +55,12 @@ class QuizScreen extends StatelessWidget {
                     return Text('Error: ${snapshot.error}');
                   } else {
                     return QuizViewer(
-                        quiz: snapshot.data!,
-                        onQuizFinished: (passed, quiz) {
-                          Navigator.pop(
-                              context, {'passed': passed, 'quiz': quiz});
-                        });
+                      quiz: snapshot.data!,
+                      onQuizFinished: (passed, quiz) {
+                        Navigator.pop(
+                            context, {'passed': passed, 'quiz': quiz});
+                      },
+                    );
                   }
                 },
               );
@@ -140,5 +73,50 @@ class QuizScreen extends StatelessWidget {
 
   Future<String> loadQuiz() async {
     return await rootBundle.loadString(quizName);
+  }
+
+  Future<void> _onWillPop(BuildContext context) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Dialogs.materialDialog(
+        color: AdaptiveTheme.of(context).brightness == Brightness.light
+            ? Colors.white
+            : const Color.fromARGB(255, 21, 21, 21),
+        msg: 'Are you sure you want to exit? Your progress will be lost.',
+        msgStyle: AdaptiveTheme.of(context).theme.textTheme.displaySmall!,
+        title: 'Exit',
+        titleStyle: AdaptiveTheme.of(context).theme.textTheme.displayLarge!,
+        lottieBuilder: Lottie.asset(
+          'assets/anim/question.json',
+          fit: BoxFit.contain,
+        ),
+        context: context,
+        actions: [
+          Builder(
+              builder: (dialogContext) => IconsButton(
+                    onPressed: () {
+                      Navigator.pop(dialogContext);
+                    },
+                    text: 'Back to quiz.',
+                    color: const Color.fromARGB(255, 17, 172, 77),
+                    iconData: Icons.cancel_outlined,
+                    textStyle:
+                        const TextStyle(color: Colors.white, fontSize: 16),
+                    iconColor: Colors.white,
+                  )),
+          Builder(
+            builder: (dialogContext) => IconsButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                  Navigator.pop(context);
+                },
+                text: 'Quit.',
+                iconData: Icons.check_circle,
+                iconColor: Colors.white,
+                color: Colors.red,
+                textStyle: const TextStyle(color: Colors.white, fontSize: 16)),
+          ),
+        ],
+      );
+    });
   }
 }

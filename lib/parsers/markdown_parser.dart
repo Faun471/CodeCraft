@@ -11,37 +11,6 @@ import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_syntax_view/flutter_syntax_view.dart';
 
-final draculaTheme = <String, TextStyle>{
-  'comment': const TextStyle(color: Color(0xff6272a4)),
-  'quote': const TextStyle(color: Color(0xff6272a4)),
-  'variable': const TextStyle(color: Color(0xfff8f8f2)),
-  'template-variable': const TextStyle(color: Color(0xfff8f8f2)),
-  'tag': const TextStyle(color: Color(0xff8be9fd)),
-  'name': const TextStyle(color: Color(0xff8be9fd)),
-  'selector-id': const TextStyle(color: Color(0xff8be9fd)),
-  'selector-class': const TextStyle(color: Color(0xff8be9fd)),
-  'regexp': const TextStyle(color: Color(0xff50fa7b)),
-  'meta': const TextStyle(color: Color(0xff50fa7b)),
-  'number': const TextStyle(color: Color(0xffbd93f9)),
-  'built_in': const TextStyle(color: Color(0xff50fa7b)),
-  'builtin-name': const TextStyle(color: Color(0xff50fa7b)),
-  'literal': const TextStyle(color: Color(0xff50fa7b)),
-  'type': const TextStyle(color: Color(0xff50fa7b)),
-  'params': const TextStyle(color: Color(0xfff8f8f2)),
-  'string': const TextStyle(color: Color.fromARGB(255, 108, 255, 150)),
-  'symbol': const TextStyle(color: Color(0xffff79c6)),
-  'bullet': const TextStyle(color: Color(0xffff79c6)),
-  'title': const TextStyle(color: Color(0xff8be9fd)),
-  'section': const TextStyle(color: Color(0xff8be9fd)),
-  'keyword': const TextStyle(color: Color(0xffc792ea)),
-  'selector-tag': const TextStyle(color: Color(0xffc792ea)),
-  'deletion': const TextStyle(color: Color(0xffff5555)),
-  'addition': const TextStyle(color: Color(0xff50fa7b)),
-  'attribute': const TextStyle(color: Color(0xff50fa7b)),
-  'emphasis': const TextStyle(fontStyle: FontStyle.italic),
-  'strong': const TextStyle(fontWeight: FontWeight.bold),
-};
-
 class MarkdownParser {
   static Widget parse({
     required BuildContext context,
@@ -96,7 +65,6 @@ class MarkdownParser {
           wordSpacing: 1.0,
           fontWeight: FontWeight.normal,
           fontStyle: FontStyle.normal,
-          fontFeatures: null,
           textBaseline: TextBaseline.alphabetic,
         ),
         codeblockAlign: WrapAlignment.start,
@@ -127,7 +95,7 @@ class MarkdownParser {
                 return IconsButton(
                   onPressed: () {
                     Navigator.pop(dialogContext);
-                    launchUrl(href! as Uri);
+                    launchUrl(Uri.parse(href!));
                   },
                   text: 'Yes',
                   textStyle: const TextStyle(color: Colors.white),
@@ -179,7 +147,7 @@ class _SyntaxHighlighter extends SyntaxHighlighter {
   @override
   TextSpan format(String source) {
     return TextSpan(
-      style: const TextStyle(
+      style: TextStyle(
         fontFamily: 'monospace',
         fontSize: 16.0,
         height: 1.5,

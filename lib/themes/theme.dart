@@ -84,7 +84,9 @@ class AppTheme {
           foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
             return states.contains(MaterialState.disabled)
                 ? Colors.grey
-                : Colors.white;
+                : states.contains(MaterialState.pressed)
+                    ? Colors.orange
+                    : Colors.white;
           }),
           textStyle: MaterialStateProperty.all<TextStyle>(
             const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),

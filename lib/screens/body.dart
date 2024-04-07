@@ -35,17 +35,17 @@ class BodyState extends State<Body> {
       });
 
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) {
-        Provider.of<ThemeProvider>(context, listen: false)
-            .loadColorFromFirestore()
-            .then(
-          (preferredColor) {
-            setState(
-              () {
-                Provider.of<ThemeProvider>(context, listen: false)
-                    .updateColor(preferredColor, context);
-              },
-            );
+      (_) async {
+        final ThemeProvider themeProvider =
+            Provider.of<ThemeProvider>(context, listen: false);
+
+        await themeProvider.loadColorFromFirestore().then(
+          (value) {
+            if (value == themeProvider.preferredColor) {
+              return;
+            }
+
+            themeProvider.updateColor(value, context);
           },
         );
       },
@@ -66,7 +66,7 @@ class BodyState extends State<Body> {
         controller: sidebarXController,
         showToggleButton: false,
         extendedTheme: SidebarXTheme(
-          width: 200,
+          width: MediaQuery.sizeOf(context).width * 0.6,
           decoration: BoxDecoration(
               color: AdaptiveTheme.of(context).theme.scaffoldBackgroundColor,
               borderRadius: const BorderRadius.only(

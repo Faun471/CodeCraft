@@ -4,14 +4,13 @@ import 'package:babstrap_settings_screen/babstrap_settings_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codecraft/providers/level_provider.dart';
 import 'package:codecraft/providers/theme_provider.dart';
-import 'package:codecraft/screens/login.dart';
 import 'package:codecraft/screens/settings/account_edit.dart';
+import 'package:codecraft/screens/login.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/widgets/colour_scheme_button.dart';
 import 'package:codecraft/widgets/custom_big_user_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:material_dialogs/material_dialogs.dart';
 import 'package:material_dialogs/shared/types.dart';
@@ -76,26 +75,12 @@ class SettingsState extends State<Settings> {
       userName:
           "$displayName Lvl ${Provider.of<LevelProvider>(context).currentLevel}",
       userProfilePic: CachedNetworkImage(
-        width: MediaQuery.of(context).size.width / 4,
-        height: MediaQuery.of(context).size.width / 4,
-        fit: BoxFit.contain,
+        height: 150,
+        width: 150,
+        alignment: Alignment.centerLeft,
+        fit: BoxFit.cover,
         imageUrl: imageUrl,
-        progressIndicatorBuilder: (context, url, progress) => SizedBox(
-          height: 20,
-          width: 20,
-          child: LoadingAnimationWidget.discreteCircle(
-              color: AdaptiveTheme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.black,
-              size: 20),
-        ),
-        errorWidget: (context, url, error) => Image.asset(
-          'assets/images/default_profile.png',
-          height: 20,
-          width: 20,
-        ),
         imageBuilder: (context, imageProvider) => CircleAvatar(
-          radius: 100,
           backgroundImage: imageProvider,
         ),
       ),
@@ -301,7 +286,7 @@ class SettingsState extends State<Settings> {
                 DatabaseHelper().auth.signOut();
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => const Login()),
+                  MaterialPageRoute(builder: (context) => Login()),
                   (Route<dynamic> route) => false,
                 );
               },

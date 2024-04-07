@@ -1,19 +1,18 @@
-// ignore_for_file: use_build_context_synchronously
+import 'dart:typed_data';
 
-import 'dart:io';
+import 'package:codecraft/io/file_io.dart';
+import 'package:codecraft/io/io.dart';
+import 'package:codecraft/io/web_io.dart';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:auto_size_text/auto_size_text.dart';
-import 'package:codecraft/providers/theme_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:image_picker_widget/image_picker_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:material_dialogs/dialogs.dart';
-import 'package:provider/provider.dart';
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class AccountEdit extends StatefulWidget {
   const AccountEdit({super.key});
@@ -26,7 +25,8 @@ class AccountEditState extends State<AccountEdit> {
   late String imageUrl;
   late User? user;
   late TextEditingController displayNameController;
-  late File imageFile;
+  late Uint8List imageFile = Uint8List(0);
+  Io io = kIsWeb ? WebIo() : FileIo();
   bool imageChanged = false;
   bool isLoading = false;
 
@@ -34,13 +34,13 @@ class AccountEditState extends State<AccountEdit> {
   void initState() {
     super.initState();
     imageUrl = DatabaseHelper().auth.currentUser!.photoURL ?? '';
-    imageFile = File(imageUrl);
     user = DatabaseHelper().auth.currentUser;
     displayNameController = TextEditingController();
   }
 
   @override
   Widget build(BuildContext context) {
+    print(imageUrl);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Account'),
@@ -49,62 +49,51 @@ class AccountEditState extends State<AccountEdit> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            ImagePickerWidget(
-              diameter: 100,
-              initialImage: imageUrl,
-              shouldCrop: true,
-              isEditable: true,
-              iconAlignment: AlignmentDirectional.bottomEnd
-                ..add(const Alignment(0.0, 5)),
-              fit: BoxFit.cover,
-              modalOptions: ModalOptions(
-                title: Padding(
-                  padding: EdgeInsets.only(top: 8, bottom: 12),
-                  child: AutoSizeText(
-                    'Select Image Source',
-                    maxFontSize: 24,
-                    minFontSize: 18,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
+            Center(
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color.fromARGB(255, 28, 28, 28),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: ClipOval(
+                      child: imageUrl.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: imageUrl,
+                              fit: BoxFit.cover,
+                              width: 150,
+                              height: 150,
+                            )
+                          : Image.memory(Uint8List.fromList(imageFile),
+                              fit: BoxFit.cover, width: 150, height: 150),
                     ),
                   ),
-                ),
-                cameraText: AutoSizeText(
-                  'Camera',
-                  maxFontSize: 18,
-                  minFontSize: 14,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                galleryText: AutoSizeText(
-                  'Gallery',
-                  maxFontSize: 18,
-                  minFontSize: 14,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                cameraColor: Provider.of<ThemeProvider>(context, listen: false)
-                    .preferredColor,
-                galleryColor: Provider.of<ThemeProvider>(context, listen: false)
-                    .preferredColor,
-              ),
-              imagePickerOptions:
-                  ImagePickerOptions(preferredCameraDevice: CameraDevice.front),
-              onChange: (file) async {
-                imageUrl = file.path;
-                imageFile = file;
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: IconButton(
+                      style: ButtonStyle(
+                          backgroundColor: MaterialStateColor.resolveWith(
+                              (states) =>
+                                  const Color.fromARGB(255, 212, 212, 212)
+                                      .withOpacity(0.5))),
+                      icon: const Icon(Icons.camera_alt),
+                      onPressed: () async {
+                        imageFile = await io.pickImage();
 
-                setState(() {
-                  imageUrl = file.path;
-                  imageFile = file;
-                  imageChanged = true;
-                });
-              },
+                        setState(() {
+                          imageUrl = '';
+                          imageChanged = true;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -117,6 +106,19 @@ class AccountEditState extends State<AccountEdit> {
               controller: displayNameController,
             ),
             const SizedBox(height: 60),
+
+            //TODO: do this fr
+            // FutureBuilder(
+            //   future: Auth(DatabaseHelper().auth).updateUser(),
+            //   builder: (context, snapshot) {
+            //     if (snapshot.connectionState != ConnectionState.done) {
+            //       return LoadingAnimationWidget.dotsTriangle(
+            //           color: Colors.white, size: 100);
+            //     }
+
+            //     return Container();
+            //   },
+            // ),
             ElevatedButton(
               style: AdaptiveTheme.of(context)
                   .theme
@@ -185,25 +187,27 @@ class AccountEditState extends State<AccountEdit> {
     );
   }
 
-  Future<void> updateProfilePicture(User? currentUser, File file) async {
-    FirebaseStorage firebaseStorage = FirebaseStorage.instance;
-    var storageRef = firebaseStorage.ref(
-        '${currentUser!.email!}/profilePicture/${file.path.split('/').last}');
+  Future<void> updateProfilePicture(
+      User? currentUser, Uint8List imageFile) async {
+    if (currentUser == null) {
+      return;
+    }
 
-    // Upload the file to Firebase Storage
-    UploadTask task = storageRef.putFile(file);
-
-    // Listen for changes in the upload task
-    task.snapshotEvents.listen(
-      (TaskSnapshot snapshot) async {
-        if (snapshot.state == TaskState.success) {
-          // If the upload is complete, update the user's photoURL
-          String downloadURL = await snapshot.ref.getDownloadURL();
-          await DatabaseHelper().auth.currentUser!.updatePhotoURL(downloadURL);
-        }
-      },
-    );
-
-    await currentUser.reload();
+    try {
+      io.uploadImageToStorage(imageFile).then(
+        (value) async {
+          io.getDownloadUrl(value).then(
+            (url) async {
+              await currentUser.updatePhotoURL(url);
+              setState(() {
+                imageUrl = url;
+              });
+            },
+          );
+        },
+      );
+    } catch (error) {
+      print("Error updating profile picture: $error");
+    }
   }
 }

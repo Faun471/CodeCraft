@@ -65,26 +65,29 @@ class CustomBigUserCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     // User profile
+                    ClipOval(
+                        child: userProfilePic, clipBehavior: Clip.antiAlias),
                     Expanded(
-                      child: userProfilePic,
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          AutoSizeText(
-                            userName!,
-                            presetFontSizes: const [24, 20, 16, 12, 8],
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                      child: Container(
+                        padding: EdgeInsets.only(right: 30),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            AutoSizeText(
+                              userName!,
+                              presetFontSizes: const [24, 20, 16, 12, 8],
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.end,
                             ),
-                          ),
-                          if (userMoreInfo != null) ...[
-                            userMoreInfo!,
+                            if (userMoreInfo != null) ...[
+                              userMoreInfo!,
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ),
                   ],

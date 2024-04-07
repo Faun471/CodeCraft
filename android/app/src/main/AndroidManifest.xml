@@ -6,7 +6,7 @@
     <application
         android:label="codecraft"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/ic_launcher">
         <activity
             android:name="io.flutter.embedding.android.FlutterActivity"
             android:exported="true"

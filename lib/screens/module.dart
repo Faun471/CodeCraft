@@ -30,11 +30,12 @@ class Module extends StatelessWidget {
             );
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
-          } else {
-            return MarkdownViewer(
-                markdownData: Future.value(snapshot.data as String),
-                quizName: quizName);
           }
+
+          return MarkdownViewer(
+            markdownData: Future.value(snapshot.data as String),
+            quizName: quizName,
+          );
         },
       ),
     );

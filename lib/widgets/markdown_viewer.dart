@@ -16,8 +16,11 @@ class MarkdownViewer extends StatefulWidget {
   final Future<String> markdownData;
   final String quizName;
 
-  const MarkdownViewer(
-      {super.key, required this.markdownData, required this.quizName});
+  const MarkdownViewer({
+    super.key,
+    required this.markdownData,
+    required this.quizName,
+  });
 
   @override
   MarkdownViewerState createState() => MarkdownViewerState();
@@ -63,92 +66,89 @@ class MarkdownViewerState extends State<MarkdownViewer> {
       controller: _pageController,
       itemCount: sections.length,
       itemBuilder: (context, index) {
-        return Scrollbar(
-          thickness: 6,
-          controller: FixedExtentScrollController(),
-          child: Column(
-            children: [
-              Expanded(
-                child: SelectionArea(
-                  child: MarkdownParser.parse(
-                      data: sections[index], context: context),
-                ),
+        return Column(
+          children: [
+            Expanded(
+              child: SelectionArea(
+                child: MarkdownParser.parse(
+                    data: sections[index], context: context),
+                selectionControls: DesktopTextSelectionControls(),
               ),
-              if (index < sections.length - 1)
-                ElevatedButton(
-                  onPressed: () {
-                    _pageController.nextPage(
-                      duration: const Duration(seconds: 1),
-                      curve: Curves.easeOutCubic,
-                    );
-                  },
-                  child: const Text('Continue Reading'),
-                ),
-              if (index == sections.length - 1)
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => QuizScreen(
-                            quizName: widget.quizName,
-                          ),
-                        )).then(
-                      (value) {
-                        if (value == null) {
-                          return;
-                        }
+            ),
+            if (index < sections.length - 1)
+              ElevatedButton(
+                onPressed: () {
+                  _pageController.nextPage(
+                    duration: const Duration(seconds: 1),
+                    curve: Curves.easeOutCubic,
+                  );
+                },
+                child: const Text('Continue Reading'),
+              ),
+            if (index == sections.length - 1)
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => QuizScreen(
+                          quizName: widget.quizName,
+                        ),
+                      )).then(
+                    (value) {
+                      if (value == null) {
+                        return;
+                      }
 
-                        final Map<String, dynamic> result =
-                            value as Map<String, dynamic>;
+                      final Map<String, dynamic> result =
+                          value as Map<String, dynamic>;
 
-                        if (result['passed'] == true) {
-                          showMaterialDialog(
-                            context: context,
-                            message: 'You passed the quiz! Congratulations!',
-                            title: 'Congratulations!🎉',
-                            lottieBuilder: Lottie.asset(
-                              'assets/anim/congrats.json',
-                              fit: BoxFit.contain,
-                            ),
-                          );
-
-                          Quiz quiz = result['quiz'] as Quiz;
-                          if (quiz.level >=
-                              Provider.of<LevelProvider>(context, listen: false)
-                                  .currentLevel) {
-                            Provider.of<LevelProvider>(context, listen: false)
-                                .completeLevel();
-
-                            showMaterialDialog(
-                              context: context,
-                              message: 'You have unlocked a new level!',
-                              title: 'New Level Unlocked!',
-                              lottieBuilder: Lottie.asset(
-                                'assets/anim/level_up.json',
-                                fit: BoxFit.contain,
-                              ),
-                            );
-                          }
-                          return;
-                        }
+                      if (result['passed'] == true) {
                         showMaterialDialog(
                           context: context,
-                          message:
-                              'You did not pass the quiz... There is still room for improvement!',
-                          title: 'You can always try again!',
+                          message: 'You passed the quiz! Congratulations!',
+                          title: 'Congratulations!🎉',
                           lottieBuilder: Lottie.asset(
-                            'assets/anim/failed.json',
+                            'assets/anim/congrats.json',
                             fit: BoxFit.contain,
                           ),
                         );
-                      },
-                    );
-                  },
-                  child: const Text('Test Your Knowledge!'),
-                ),
-            ],
-          ),
+
+                        Quiz quiz = result['quiz'] as Quiz;
+                        if (quiz.level >=
+                            Provider.of<LevelProvider>(context, listen: false)
+                                .currentLevel) {
+                          Provider.of<LevelProvider>(context, listen: false)
+                              .completeLevel();
+
+                          showMaterialDialog(
+                            context: context,
+                            message: 'You have unlocked a new level!',
+                            title: 'New Level Unlocked!',
+                            lottieBuilder: Lottie.asset(
+                              'assets/anim/level_up.json',
+                              fit: BoxFit.contain,
+                            ),
+                          );
+                        }
+                        return;
+                      }
+                      showMaterialDialog(
+                        context: context,
+                        message:
+                            'You did not pass the quiz... There is still room for improvement!',
+                        title: 'You can always try again!',
+                        lottieBuilder: Lottie.asset(
+                          'assets/anim/failed.json',
+                          fit: BoxFit.contain,
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: const Text('Test Your Knowledge!'),
+              ),
+          ],
         );
       },
     );

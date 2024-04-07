@@ -27,11 +27,12 @@ class QuizViewer extends StatefulWidget {
 
 class QuizViewerState extends State<QuizViewer> {
   late Timer _timer;
+  late Color _color;
   double _start = 0;
-  bool _animating = false;
-  bool _shouldAnimateLottie = false;
   int currentQuestionIndex = 0;
   int score = 0;
+  bool _animating = false;
+  bool _shouldAnimateLottie = false;
   bool canAnswer = true;
   String userAnswer = '';
 
@@ -88,56 +89,57 @@ class QuizViewerState extends State<QuizViewer> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: AnimatedOpacity(
-        opacity: canAnswer ? 1.0 : 0.5,
-        duration: const Duration(milliseconds: 300),
-        child: OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              minimumSize: const Size.fromHeight(50),
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10)),
+          opacity: canAnswer ? 1.0 : 0.5,
+          duration: const Duration(milliseconds: 300),
+          child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                minimumSize: const Size.fromHeight(50),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+                side: BorderSide(
+                  color: Provider.of<ThemeProvider>(context).preferredColor,
+                  width: 2,
+                ),
               ),
-              side: BorderSide(
-                color: Provider.of<ThemeProvider>(context).preferredColor,
-                width: 2,
+              onPressed: canAnswer
+                  ? () {
+                      checkAnswer(answer);
+                      setState(() {
+                        canAnswer = false;
+                        userAnswer = answer;
+                        _timer.cancel();
+                      });
+                    }
+                  : null,
+              child: AutoSizeText(
+                answer,
+                minFontSize: 16,
+                style: AdaptiveTheme.of(context).theme.textTheme.titleLarge!,
+              )).animate(effects: [
+            if (!canAnswer)
+              ColorEffect(
+                begin: Colors.transparent,
+                end: Provider.of<ThemeProvider>(context).preferredColor,
+                duration: 300.ms,
               ),
-            ),
-            onPressed: canAnswer
-                ? () {
-                    checkAnswer(answer);
-                    setState(() {
-                      canAnswer = false;
-                      userAnswer = answer;
-                      _timer.cancel();
-                    });
-                  }
-                : null,
-            child: AutoSizeText(
-              answer,
-              minFontSize: 16,
-              style: AdaptiveTheme.of(context).theme.textTheme.titleLarge!,
-            )),
-      ),
+          ])),
     ).animate(effects: [
       if (!canAnswer && userAnswer == answer)
-        ColorEffect(
-            begin: Colors.transparent,
-            end: Provider.of<ThemeProvider>(context).preferredColor,
-            duration: 300.ms,
-            curve: Curves.bounceInOut),
-      canAnswer
-          ? MoveEffect(
-              begin: const Offset(-200, 0),
-              end: Offset.zero,
-              delay: const Duration(milliseconds: 50),
-              duration: 600.ms,
-              curve: Curves.easeOutQuint)
-          : MoveEffect(
-              end: const Offset(400, 0),
-              begin: Offset.zero,
-              delay: const Duration(milliseconds: 300),
-              duration: 1000.ms,
-              curve: Curves.easeOutQuint),
+        canAnswer
+            ? MoveEffect(
+                begin: const Offset(-200, 0),
+                end: Offset.zero,
+                delay: const Duration(milliseconds: 50),
+                duration: 600.ms,
+                curve: Curves.easeOutQuint)
+            : MoveEffect(
+                end: const Offset(400, 0),
+                begin: Offset.zero,
+                delay: const Duration(milliseconds: 300),
+                duration: 1000.ms,
+                curve: Curves.easeOutQuint),
       FadeEffect(
           duration: 1.seconds,
           begin: canAnswer ? 0.0 : 1.0,
@@ -195,7 +197,7 @@ class QuizViewerState extends State<QuizViewer> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return GestureDetector( 
       behavior: HitTestBehavior.opaque,
       onTap: () => setState(() {
         if (!canAnswer && !_animating) {
@@ -218,24 +220,28 @@ class QuizViewerState extends State<QuizViewer> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               if (canAnswer)
-                AnimatedProgressBar(
-                  width: MediaQuery.of(context).size.width,
-                  value: _start / widget.quiz.timer.toDouble(),
-                  duration: const Duration(seconds: 1),
-                  color: Colors.green,
-                  backgroundColor: Colors.grey.withOpacity(0.8),
-                  curve: Curves.linear,
-                ).animate().color(
-                      begin: Colors.green,
-                      end: Colors.redAccent,
-                      duration: widget.quiz.timer.seconds,
-                      curve: Curves.easeInOutQuint,
-                    ),
+                TweenAnimationBuilder(
+                  tween: ColorTween(begin: Colors.green, end: Colors.red),
+                  duration: widget.quiz.timer.seconds,
+                  builder: (BuildContext context, Color? color, Widget? child) {
+                    _color = color!;
+                    return AnimatedProgressBar(
+                      width: MediaQuery.of(context).size.width,
+                      value: _start / widget.quiz.timer.toDouble(),
+                      duration: 1.seconds,
+                      color: color,
+                      backgroundColor: Colors.grey.withOpacity(0.8),
+                      curve: Curves.linear,
+                    );
+                  },
+                ),
+              // TODO: save the value of the remaining seconds, and replace the progress bar's
+              // value with the remaining seconds, instead of having a filled red progress bar.
               if (!canAnswer)
                 ProgressBar(
-                  value: 1.0,
+                  value: (_start / widget.quiz.timer),
                   width: MediaQuery.of(context).size.width,
-                  color: Colors.redAccent,
+                  color: _color,
                   backgroundColor: Colors.grey.withOpacity(0.8),
                 ),
               buildQuestionText(),

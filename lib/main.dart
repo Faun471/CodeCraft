@@ -1,5 +1,4 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:codecraft/firebase_options.dart';
 import 'package:codecraft/providers/level_provider.dart';
 import 'package:codecraft/providers/theme_provider.dart';
@@ -8,10 +7,12 @@ import 'package:codecraft/screens/register.dart';
 import 'package:codecraft/services/auth_helper.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/themes/theme.dart';
+import 'package:codecraft/widgets/onboarding_card.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +30,8 @@ Future<void> initDatabase() async {
 Future<Widget> getLandingPage() async {
   Auth auth = Auth(DatabaseHelper().auth);
   bool userLoggedIn = await auth.isLoggedIn();
-  return userLoggedIn ? const Body() : const GettingStartedPage();
+  
+  return userLoggedIn ? const Body() : const OnboardingPage();
 }
 
 class MyApp extends StatelessWidget {
@@ -80,41 +82,96 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class GettingStartedPage extends StatelessWidget {
-  const GettingStartedPage({super.key});
+class OnboardingPage extends StatefulWidget {
+  const OnboardingPage({super.key});
+
+  @override
+  State<OnboardingPage> createState() => _OnboardingPageState();
+}
+
+class _OnboardingPageState extends State<OnboardingPage> {
+  static final PageController _pageController = PageController(initialPage: 0);
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> _onBoardingPages = [
+      OnboardingCard(
+        image: "assets/images/ccOrangeLogo.png",
+        title: "Welcome to CodeCraft",
+        description:
+            "A multiplatform web application for Java and Python using unit tests with dynamic animations.",
+        buttonText: "Next",
+        onPressed: () {
+          _pageController.animateToPage(
+            1,
+            duration: Durations.long1,
+            curve: Curves.linear,
+          );
+        },
+      ),
+      OnboardingCard(
+        image: "assets/images/onboarding1.png",
+        title: "Create an Account",
+        description:
+            "Sign up to start learning with CodeCraft. We have a lot of challenges and courses for you to learn from.",
+        buttonText: "Next",
+        onPressed: () {
+          _pageController.animateToPage(
+            2,
+            duration: Durations.long1,
+            curve: Curves.linear,
+          );
+        },
+      ),
+      OnboardingCard(
+        image: "assets/images/onboarding3.png",
+        title: "Start Coding Now! 🚀",
+        description: "",
+        buttonText: "Done",
+        onPressed: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Register(),
+            ),
+          );
+        },
+      ),
+    ];
+
     return Scaffold(
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: 50.0,
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Image.asset('assets/images/logo.png', width: 200, height: 200),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 10),
-              child: const AutoSizeText(
-                'Learn to apply and use your programming concepts!',
-                minFontSize: 24,
-                textAlign: TextAlign.center,
-              ),
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: PageView(
+                  controller: _pageController,
+                  children: _onBoardingPages
+                    ..lastWhere((element) => element is OnboardingCard)),
             ),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Register()),
+            Padding(
+              padding: const EdgeInsets.only(top: 24.0),
+              child: SmoothPageIndicator(
+                controller: _pageController,
+                count: _onBoardingPages.length,
+                effect: ExpandingDotsEffect(
+                  activeDotColor: Colors.orange,
+                  dotColor: Colors.orange.shade300,
+                ),
+                onDotClicked: (index) {
+                  _pageController.animateToPage(
+                    index,
+                    duration: Durations.long1,
+                    curve: Curves.linear,
                   );
                 },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(60),
-                ),
-                child:
-                    const Text('Get Started', style: TextStyle(fontSize: 20)),
               ),
-            )
+            ),
           ],
         ),
       ),

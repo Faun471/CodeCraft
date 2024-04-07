@@ -62,19 +62,27 @@ dependencies:
   another_flutter_splash_screen: ^1.2.0
   image_picker: ^1.0.7
   firebase_storage: ^11.6.0
-  image_picker_widget: ^2.4.1
   image_cropper: ^5.0.1
   flutter_launcher_icons: ^0.13.1
+  file_picker: ^8.0.0+1
+  intl_phone_number_input: ^0.7.4
+  flutter_svg: ^2.0.10+1
+  universal_html: ^2.2.4
+  smooth_page_indicator: ^1.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
+
+# run `dart run flutter_launcher_icons:main` to generate icons
 flutter_launcher_icons:
-  android: "launcher_icon"
-  ios: true
-  image_path: "assets/images/logo.png"
+  android: true
+  image_path_android: "assets/images/logo.png"
   min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/images/logo.png"
 
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -97,9 +105,16 @@ flutter:
   assets:
     - assets/images/logo.png
     - assets/images/google.png
-    - assets/images/apple.png
-    - assets/images/facebook.png
     - assets/images/default_profile.png
+    - assets/images/bg-psych.png
+    - assets/images/logo-hor.svg
+    - assets/images/logo-ver.svg
+    - assets/images/logo-ver.png
+    - assets/images/logo-hor.png
+    - assets/images/ccOrangeLogo.png
+    - assets/images/onboarding1.png
+    - assets/images/onboarding2.png
+    - assets/images/onboarding3.png
     - assets/pages/
     - assets/quizzes/
     - assets/anim/congrats.json

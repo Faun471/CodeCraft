@@ -162,8 +162,17 @@ class Auth {
     }
   }
 
-  static bool isEmailValid(String inputEmail) {
-    return RegExp(r'^.+@[a-zA-Z]+\.{1}[a-zA-Z]+(\.{0,1}[a-zA-Z]+)$')
-        .hasMatch(inputEmail);
+  Future<void> updateUser(
+      {String username = '', String profilePictureUrl = ''}) {
+    if (username.isNotEmpty) {
+      // update the username
+    }
+
+    if (profilePictureUrl.isNotEmpty) {
+      // update the profile picture
+    }
+
+    //TODO implement this
+    throw UnimplementedError();
   }
 }

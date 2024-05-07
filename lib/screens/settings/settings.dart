@@ -4,13 +4,16 @@ import 'package:babstrap_settings_screen/babstrap_settings_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codecraft/providers/level_provider.dart';
 import 'package:codecraft/providers/theme_provider.dart';
+import 'package:codecraft/screens/account_setup/account_setup.dart';
+import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/screens/settings/account_edit.dart';
-import 'package:codecraft/screens/login.dart';
+import 'package:codecraft/screens/account_setup/login.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/widgets/colour_scheme_button.dart';
 import 'package:codecraft/widgets/custom_big_user_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lottie/lottie.dart';
 import 'package:material_dialogs/material_dialogs.dart';
 import 'package:material_dialogs/shared/types.dart';
@@ -54,9 +57,6 @@ class SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: ListView(
@@ -282,12 +282,25 @@ class SettingsState extends State<Settings> {
               ),
             ),
             IconsButton(
-              onPressed: () {
-                DatabaseHelper().auth.signOut();
-                Navigator.pushAndRemoveUntil(
+              onPressed: () async {
+                Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => Login()),
-                  (Route<dynamic> route) => false,
+                  MaterialPageRoute(
+                    builder: (context) => LoadingScreen(
+                      futures: [
+                        DatabaseHelper().auth.signOut(),
+                        Future.delayed(5.seconds)
+                      ],
+                      onDone: (context, _) => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AccountSetup(
+                            Login(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 );
               },
               text: 'Yes',

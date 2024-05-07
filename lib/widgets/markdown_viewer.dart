@@ -1,11 +1,9 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:codecraft/models/quiz.dart';
 import 'package:codecraft/parsers/markdown_parser.dart';
-import 'package:codecraft/providers/level_provider.dart';
 import 'package:codecraft/providers/theme_provider.dart';
-import 'package:codecraft/screens/quiz_screen.dart';
+import 'package:flutter_highlight/theme_map.dart';
+import 'package:markdown_widget/markdown_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:material_dialogs/material_dialogs.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
@@ -13,7 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:simple_progress_indicators/simple_progress_indicators.dart';
 
 class MarkdownViewer extends StatefulWidget {
-  final Future<String> markdownData;
+  final String markdownData;
   final String quizName;
 
   const MarkdownViewer({
@@ -29,11 +27,18 @@ class MarkdownViewer extends StatefulWidget {
 class MarkdownViewerState extends State<MarkdownViewer> {
   late PageController _pageController;
   late List<String> sections;
+  late bool isEditMode = false;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController()..addListener(_onPageChanged);
+
+    sections = [];
+
+    widget.markdownData.split('<next page>').forEach((element) {
+      sections.add(element);
+    });
   }
 
   @override
@@ -52,102 +57,70 @@ class MarkdownViewerState extends State<MarkdownViewer> {
         : 0.0;
   }
 
-  Widget buildLoadingWidget() {
-    return Center(
-      child: LoadingAnimationWidget.staggeredDotsWave(
+  Widget buildFloatingActionButton() {
+    return FloatingActionButton(
+      isExtended: true,
+      onPressed: () {
+        setState(() {
+          isEditMode = !isEditMode;
+        });
+      },
+      child: Icon(
+        isEditMode ? Icons.edit_off : Icons.edit,
         color: Colors.white,
-        size: 200,
       ),
     );
   }
 
-  Widget buildPageView() {
+  final tocController = TocController();
+
+  final List<WidgetConfig> configs = [
+    CodeConfig(
+      style: const TextStyle(fontSize: 14, color: Colors.white),
+    ),
+    PreConfig(
+      decoration: BoxDecoration(
+        color: themeMap['atom-one-dark-reasonable']!['root']!.backgroundColor ??
+            Colors.grey[800]!,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      theme: themeMap['atom-one-dark-reasonable']!,
+      textStyle: const TextStyle(fontSize: 14),
+      wrapper: (child, code, language) => CodeWrapperWidget(
+        child,
+        code,
+        language,
+      ),
+    )
+  ];
+
+  late MarkdownConfig config;
+  late bool isVertical;
+
+  Widget buildTocWidget() => TocWidget(controller: tocController);
+
+  Widget buildMarkdown(String data, MarkdownConfig config) => MarkdownWidget(
+        data: data,
+        tocController: tocController,
+        config: config.copy(
+          configs: configs,
+        ),
+      );
+
+  Widget buildPageView(MarkdownConfig config) {
     return PageView.builder(
       controller: _pageController,
       itemCount: sections.length,
       itemBuilder: (context, index) {
-        return Column(
+        return Row(
           children: [
+            if (!isVertical) Expanded(child: buildTocWidget()),
             Expanded(
-              child: SelectionArea(
-                child: MarkdownParser.parse(
-                    data: sections[index], context: context),
-                selectionControls: DesktopTextSelectionControls(),
-              ),
+              flex: 3,
+              child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: buildMarkdown(sections[index], config)),
             ),
-            if (index < sections.length - 1)
-              ElevatedButton(
-                onPressed: () {
-                  _pageController.nextPage(
-                    duration: const Duration(seconds: 1),
-                    curve: Curves.easeOutCubic,
-                  );
-                },
-                child: const Text('Continue Reading'),
-              ),
-            if (index == sections.length - 1)
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => QuizScreen(
-                          quizName: widget.quizName,
-                        ),
-                      )).then(
-                    (value) {
-                      if (value == null) {
-                        return;
-                      }
-
-                      final Map<String, dynamic> result =
-                          value as Map<String, dynamic>;
-
-                      if (result['passed'] == true) {
-                        showMaterialDialog(
-                          context: context,
-                          message: 'You passed the quiz! Congratulations!',
-                          title: 'Congratulations!🎉',
-                          lottieBuilder: Lottie.asset(
-                            'assets/anim/congrats.json',
-                            fit: BoxFit.contain,
-                          ),
-                        );
-
-                        Quiz quiz = result['quiz'] as Quiz;
-                        if (quiz.level >=
-                            Provider.of<LevelProvider>(context, listen: false)
-                                .currentLevel) {
-                          Provider.of<LevelProvider>(context, listen: false)
-                              .completeLevel();
-
-                          showMaterialDialog(
-                            context: context,
-                            message: 'You have unlocked a new level!',
-                            title: 'New Level Unlocked!',
-                            lottieBuilder: Lottie.asset(
-                              'assets/anim/level_up.json',
-                              fit: BoxFit.contain,
-                            ),
-                          );
-                        }
-                        return;
-                      }
-                      showMaterialDialog(
-                        context: context,
-                        message:
-                            'You did not pass the quiz... There is still room for improvement!',
-                        title: 'You can always try again!',
-                        lottieBuilder: Lottie.asset(
-                          'assets/anim/failed.json',
-                          fit: BoxFit.contain,
-                        ),
-                      );
-                    },
-                  );
-                },
-                child: const Text('Test Your Knowledge!'),
-              ),
           ],
         );
       },
@@ -156,64 +129,81 @@ class MarkdownViewerState extends State<MarkdownViewer> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: widget.markdownData,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return buildLoadingWidget();
-        }
-
-        sections = (snapshot.data as String).split('<next page>');
-
-        return Column(
-          children: [
-            Stack(
+    isVertical = MediaQuery.of(context).size.aspectRatio < 1;
+    config = Theme.of(context).brightness == Brightness.dark
+        ? MarkdownConfig.darkConfig
+        : MarkdownConfig.defaultConfig;
+    return Scaffold(
+      appBar: AppBar(
+          // leading: IconButton(
+          //   icon: const Icon(Icons.arrow_back),
+          //   onPressed: () => Navigator.pop(context),
+          // ),
+          ),
+      drawer: isVertical
+          ? Drawer(
+              child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                AnimatedProgressBar(
-                  width: MediaQuery.of(context).size.width,
-                  value: _pageController.hasClients
-                      ? _pageController.page! / (sections.length - 1)
-                      : 0.0,
-                  duration: const Duration(seconds: 1),
-                  gradient: LinearGradient(
-                    tileMode: TileMode.clamp,
-                    colors: [
-                      HSLColor.fromColor(AdaptiveTheme.of(context)
-                              .theme
-                              .colorScheme
-                              .primary)
-                          .withSaturation(0.9)
-                          .withHue(20)
-                          .withLightness(
-                              AdaptiveTheme.of(context).theme.brightness ==
-                                      Brightness.dark
-                                  ? 0.5
-                                  : 0.8)
-                          .toColor(),
-                      HSLColor.fromColor(AdaptiveTheme.of(context)
-                              .theme
-                              .colorScheme
-                              .secondaryContainer)
-                          .withHue(80)
-                          .withLightness(
-                              AdaptiveTheme.of(context).theme.brightness ==
-                                      Brightness.dark
-                                  ? 0.5
-                                  : 0.8)
-                          .toColor(),
-                    ],
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24.0),
+                  child: Text(
+                    'Table of Contents',
+                    style: TextStyle(fontSize: 24),
                   ),
-                  backgroundColor: Colors.grey.withOpacity(0.2),
-                  curve: Curves.easeOutCubic,
                 ),
+                const Divider(),
+                Expanded(child: buildTocWidget())
               ],
-            ),
-            Expanded(
-              child: buildPageView(),
-            ),
-          ],
-        );
-      },
+            ))
+          : null,
+      body: Column(
+        children: [
+          Stack(
+            children: [
+              AnimatedProgressBar(
+                width: MediaQuery.of(context).size.width,
+                value: _pageController.hasClients
+                    ? _pageController.page! / (sections.length - 1)
+                    : 0.0,
+                duration: const Duration(seconds: 1),
+                gradient: LinearGradient(
+                  tileMode: TileMode.clamp,
+                  colors: [
+                    HSLColor.fromColor(
+                            AdaptiveTheme.of(context).theme.colorScheme.primary)
+                        .withSaturation(0.9)
+                        .withHue(20)
+                        .withLightness(
+                            AdaptiveTheme.of(context).theme.brightness ==
+                                    Brightness.dark
+                                ? 0.5
+                                : 0.8)
+                        .toColor(),
+                    HSLColor.fromColor(AdaptiveTheme.of(context)
+                            .theme
+                            .colorScheme
+                            .secondaryContainer)
+                        .withHue(80)
+                        .withLightness(
+                            AdaptiveTheme.of(context).theme.brightness ==
+                                    Brightness.dark
+                                ? 0.5
+                                : 0.8)
+                        .toColor(),
+                  ],
+                ),
+                backgroundColor: Colors.grey.withOpacity(0.2),
+                curve: Curves.easeOutCubic,
+              ),
+            ],
+          ),
+          Expanded(
+            child: buildPageView(config),
+          ),
+        ],
+      ),
     );
   }
 

@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:codecraft/services/database_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -162,17 +164,35 @@ class Auth {
     }
   }
 
-  Future<void> updateUser(
-      {String username = '', String profilePictureUrl = ''}) {
-    if (username.isNotEmpty) {
-      // update the username
+  Future<void> updateUser({
+    String? displayName,
+    String? photoUrl,
+    String? firstName,
+    String? mi,
+    String? lastName,
+    String? suffix,
+    String? phoneNumber,
+  }) async {
+    if (displayName != null) {
+      _user!.updateDisplayName(displayName);
     }
 
-    if (profilePictureUrl.isNotEmpty) {
-      // update the profile picture
+    if (photoUrl != null) {
+      _user!.updatePhotoURL(photoUrl);
     }
 
-    //TODO implement this
-    throw UnimplementedError();
+    Map<String, String?> updates = {
+      if (firstName != null) 'firstName': firstName,
+      if (mi != null) 'mi': mi,
+      if (lastName != null) 'lastName': lastName,
+      if (suffix != null) 'suffix': suffix,
+      if (phoneNumber != null) 'phoneNumber': phoneNumber,
+    };
+
+    if (updates.isNotEmpty) {
+      await DatabaseHelper().currentUser.set(updates, SetOptions(merge: true));
+    }
+
+    return Future.value();
   }
 }

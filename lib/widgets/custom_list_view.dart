@@ -46,6 +46,7 @@ class CustomListItemState extends State<CustomListItem> {
   late Color backgroundColor;
   late TextStyle titleStyle;
   late TextStyle descriptionStyle;
+  late int currentLevel = -1;
 
   @override
   void initState() {
@@ -61,12 +62,11 @@ class CustomListItemState extends State<CustomListItem> {
 
   void updateLockState() async {
     if (!mounted) return;
-    
-    int currentLevel = 1;
-    await Provider.of<LevelProvider>(context, listen: false).loadState();
-    currentLevel =
-        // ignore: use_build_context_synchronously
-        Provider.of<LevelProvider>(context, listen: false).currentLevel;
+
+    final LevelProvider levelProvider =
+        Provider.of<LevelProvider>(context, listen: false);
+
+    currentLevel = await levelProvider.currentLevel;
     if (mounted) {
       setState(() {
         isLocked = currentLevel < widget.unlockLevel;
@@ -87,12 +87,13 @@ class CustomListItemState extends State<CustomListItem> {
     updateTheme();
 
     return Consumer<LevelProvider>(builder: (context, levelProvider, child) {
-      bool isLocked = levelProvider.currentLevel < widget.unlockLevel;
+      bool isLocked = currentLevel < widget.unlockLevel;
 
-      Color iconColor = levelProvider.currentLevel >= widget.unlockLevel
+      Color iconColor =
+          currentLevel >= widget.unlockLevel
           ? Colors.green
           : widget.iconColor;
-      IconData iconData = levelProvider.currentLevel >= widget.unlockLevel
+      IconData iconData = currentLevel >= widget.unlockLevel
           ? Icons.check_circle
           : widget.iconData;
 

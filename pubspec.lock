@@ -1115,9 +1115,11 @@ packages:
   simple_progress_indicators:
     dependency: "direct main"
     description:
-      path: "../simple_progress_indicators"
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: d6669505b11026ff02ac947003389465b8c98bed
+      url: "https://github.com/Faun471/simple_progress_indicators.git"
+    source: git
     version: "0.2.0"
   sky_engine:
     dependency: transitive

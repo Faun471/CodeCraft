@@ -3,15 +3,23 @@ import 'package:codecraft/services/database_helper.dart';
 import 'package:flutter/material.dart';
 
 class LevelProvider extends ChangeNotifier {
-  late int _currentLevel;
+  late int _currentLevel = -1;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  LevelProvider() {
-    _currentLevel = 1;
+  static final LevelProvider _singleton = LevelProvider._internal();
+
+  factory LevelProvider() {
+    return _singleton;
+  }
+
+  LevelProvider._internal() {
     loadState();
   }
 
-  int get currentLevel => _currentLevel;
+  Future<int> get currentLevel async {
+    await loadState();
+    return _currentLevel;
+  }
 
   Future<void> loadState() async {
     DocumentSnapshot doc = await _firestore

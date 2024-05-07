@@ -9,7 +9,7 @@ Java program is an object-oriented programming language, that means java is the 
  3. **Method:** The behavior of an object is the method.
  4. **Instance variables:** Every object has its own unique set of instance variables. The state of an object is generally created by the values that are assigned to these instance variables.
  
-<br>
+<next page>
 
 Steps to compile and run a java program in a console:
 
@@ -55,7 +55,7 @@ There are three types of comments in Java.
 /** documentation */
 ```
 
-<br>
+<next page>
 
 **Source File Name**
 The name of a source file should exactly match the public class name with the extension of .**java**. The name of the file can be a different name if it does not have any public class. Assume you have a public class **GFG**.
@@ -63,7 +63,7 @@ The name of a source file should exactly match the public class name with the ex
 CC.java // valid syntax
 _cc_.java // invalid syntax
 ```
-<br>
+<next page>
 
 **Case Sensitivity**
 Java is a case-sensitive language, which means that the identifiers _**AB, Ab, aB**_,  and _**ab**_ are different in Java.
@@ -71,7 +71,7 @@ Java is a case-sensitive language, which means that the identifiers _**AB, Ab, a
 System.out.println("CodeCraft"); // valid syntax
 _s_ystem.out.println("CodeCraft"); // invalid syntax because of the first letter of System keyword is always uppercase.
 ```
-<br>
+<next page>
 
 **Class Names**
 
@@ -85,12 +85,12 @@ class $Program         // valid syntax, but discouraged
 class My$Program       // valid syntax, but discouraged (inner class Program inside the class My)
 class myJavaProgram    // valid syntax, but discouraged
 ```
-<br>
+<next page>
 
 ****public static void main(String [] args)****
 The method main() is the main entry point into a Java program; this is where the processing starts. Also allowed is the signature **public static void main(String… args)**.
 
-<br>
+<next page>
 
 **Method Names**
 
@@ -101,7 +101,7 @@ public void employeeRecords() // valid syntax
 public void EmployeeRecords() // valid syntax, but discouraged
 ``` 
 
-<br>
+<next page>
 
 **Identifiers in java**
 Identifiers are the names of local variables, instance and class variables, and labels, but also the names for classes, packages, modules and methods. All Unicode characters are valid, not just the ASCII subset.
@@ -114,16 +114,16 @@ Identifiers are the names of local variables, instance and class variables, and 
 Legal identifiers: MinNumber, total, ak74, hello_world, $amount, _under_value
 Illegal identifiers: 74ak, -amount
 ``` 
-<br>
+<next page>
 
 **White Spaces in Java**
 A line containing only white spaces, possibly with the comment, is known as a blank line, and the Java compiler totally ignores it.
-<br>
+<next page>
 **Access Modifiers**
 *These modifiers control the scope of class and methods.*
 -   **Access Modifiers:**  default, public, protected, private.
 -    **Non-access Modifiers:**  final, abstract, static, transient, synchronized, volatile, native.
-<br>
+<next page>
 
 **Understanding Access Modifiers**
 | Access Modifier | Within Class | Within Package | Outside Package by subclass only | Outside Package |
@@ -133,7 +133,7 @@ A line containing only white spaces, possibly with the comment, is known as a bl
 | Protected        | Yes          | Yes             | Yes                              | No               |
 | Public           | Yes          | Yes             | Yes                              | Yes              |
 
-<br>
+<next page>
 
 **Java Keywords**
 Keywords or Reserved words are the words in a language that are used for some internal process or represent some predefined actions. These words are therefore not allowed to use as variable names or objects.

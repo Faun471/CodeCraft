@@ -28,7 +28,7 @@ Java supports multithreading, allowing developers to create concurrent and paral
 
 Java comes with a comprehensive standard library that provides a wide range of pre-built classes and functions, simplifying common programming tasks.
 
-<br>
+<next page>
 
 ## Getting Started
 
@@ -41,7 +41,7 @@ Download the latest version of the JDK from [Oracle's Java SE Downloads page](ht
 2. **Follow installation instructions:**
 Install the JDK by following the instructions provided for your specific operating system (Windows, macOS, or Linux).
 
-<br>
+<next page>
 
 ### Writing Your First Java Program
 

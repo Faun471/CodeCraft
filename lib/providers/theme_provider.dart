@@ -22,7 +22,7 @@ class ThemeProvider extends ChangeNotifier {
     }, SetOptions(merge: true));
   }
 
-  Future<Color> loadColorFromFirestore() async {
+  Future<Color> loadState() async {
     DocumentSnapshot doc = await FirebaseFirestore.instance
         .collection('users')
         .doc(DatabaseHelper().auth.currentUser!.email)

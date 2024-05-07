@@ -1,18 +1,24 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:codecraft/firebase_options.dart';
+import 'package:codecraft/models/app_user.dart';
+import 'package:codecraft/models/page.dart';
 import 'package:codecraft/providers/level_provider.dart';
 import 'package:codecraft/providers/theme_provider.dart';
+import 'package:codecraft/screens/account_setup/account_setup.dart';
+import 'package:codecraft/screens/account_setup/login.dart';
 import 'package:codecraft/screens/body.dart';
-import 'package:codecraft/screens/register.dart';
+import 'package:codecraft/screens/account_setup/register.dart';
+import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/services/auth_helper.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/themes/theme.dart';
 import 'package:codecraft/widgets/onboarding_card.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,11 +33,28 @@ Future<void> initDatabase() async {
   DatabaseHelper();
 }
 
-Future<Widget> getLandingPage() async {
+Future<Widget> getLandingPage(BuildContext context) async {
   Auth auth = Auth(DatabaseHelper().auth);
   bool userLoggedIn = await auth.isLoggedIn();
-  
-  return userLoggedIn ? const Body() : const OnboardingPage();
+
+  if (!userLoggedIn) {
+    return kIsWeb ? AccountSetup(Login()) : const OnboardingPage();
+  }
+
+  return LoadingScreen(
+    futures: [
+      AppUser.instance.fetchData(),
+      ModulePage.loadPagesFromYamlDirectory(),
+    ],
+    onDone: (context, snapshot) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Body(),
+        ),
+      );
+    },
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -47,6 +70,7 @@ class MyApp extends StatelessWidget {
             create: (context) => LevelProvider()),
         ChangeNotifierProvider<ThemeProvider>(
             create: (context) => ThemeProvider()),
+        ChangeNotifierProvider<AppUser>(create: (context) => AppUser.instance),
       ],
       builder: (appContext, child) {
         return AdaptiveTheme(
@@ -56,25 +80,23 @@ class MyApp extends StatelessWidget {
           debugShowFloatingThemeButton: true,
           builder: (theme, darkTheme) {
             return MaterialApp(
-              title: 'CodeCraft',
-              theme: theme,
-              darkTheme: darkTheme,
-              themeMode:
-                  MediaQuery.platformBrightnessOf(appContext) == Brightness.dark
-                      ? ThemeMode.dark
-                      : ThemeMode.light,
-              home: FutureBuilder<Widget>(
-                future: getLandingPage(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return snapshot.data ?? Container();
-                  }
-
-                  return LoadingAnimationWidget.inkDrop(
-                      color: Colors.white, size: 100);
-                },
-              ),
-            );
+                title: 'CodeCraft',
+                theme: theme,
+                darkTheme: darkTheme,
+                themeMode: MediaQuery.platformBrightnessOf(appContext) ==
+                        Brightness.dark
+                    ? ThemeMode.dark
+                    : ThemeMode.light,
+                home: LoadingScreen(
+                  futures: [getLandingPage(context)],
+                  onDone: (context, snapshot) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => snapshot.data![0]),
+                    );
+                  },
+                ));
           },
         );
       },
@@ -132,7 +154,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => Register(),
+              builder: (context) => AccountSetup(
+                Register(),
+              ),
             ),
           );
         },

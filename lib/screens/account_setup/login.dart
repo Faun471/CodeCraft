@@ -2,6 +2,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
+import 'package:codecraft/screens/account_setup/forgot_password.dart';
 import 'package:codecraft/screens/body.dart';
 import 'package:codecraft/screens/account_setup/register.dart';
 import 'package:codecraft/screens/loading_screen.dart';
@@ -144,7 +145,11 @@ class _LoginState extends State<Login> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context){
+                    return AccountSetup(ForgotPasswordPage());
+                  }));
+                },
                 child: Text(
                   'Forgot Password?',
                   style: AdaptiveTheme.of(context)

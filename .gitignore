@@ -45,3 +45,4 @@ app.*.map.json
 pubspec.lock
 .firebase/
 .firebaserc
+pubspec.lock

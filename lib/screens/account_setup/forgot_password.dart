@@ -6,21 +6,6 @@ import 'package:lottie/lottie.dart';
 import 'package:material_dialogs/material_dialogs.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: ForgotPasswordPage(),
-    );
-  }
-}
-
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
 
@@ -36,8 +21,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     _emailController.dispose();
     super.dispose();
   }
-
-//basta sa firebase e2
 
   Future<void> passwordReset() async {
     try {

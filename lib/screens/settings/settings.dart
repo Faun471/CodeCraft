@@ -2,7 +2,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:babstrap_settings_screen/babstrap_settings_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:codecraft/providers/level_provider.dart';
+import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/providers/theme_provider.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/loading_screen.dart';
@@ -73,7 +73,7 @@ class SettingsState extends State<Settings> {
   Widget buildUserCard(BuildContext context) {
     return CustomBigUserCard(
       userName:
-          "$displayName Lvl ${Provider.of<LevelProvider>(context).currentLevel}",
+          "$displayName Lvl ${AppUser.instance.data['level'] ?? 1}",
       userProfilePic: CachedNetworkImage(
         height: 150,
         width: 150,

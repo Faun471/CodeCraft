@@ -1,14 +1,17 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/parsers/markdown_parser.dart';
 import 'package:codecraft/providers/theme_provider.dart';
-import 'package:flutter_highlight/theme_map.dart';
+import 'package:codecraft/widgets/split_screen.dart';
+import 'package:flutter_markdown/flutter_markdown.dart' as md;
+import 'package:flutter_syntax_view/flutter_syntax_view.dart';
+import 'package:markdown_editable_textinput/markdown_text_input.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:material_dialogs/material_dialogs.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 import 'package:provider/provider.dart';
-import 'package:simple_progress_indicators/simple_progress_indicators.dart';
 
 class MarkdownViewer extends StatefulWidget {
   final String markdownData;
@@ -25,51 +28,22 @@ class MarkdownViewer extends StatefulWidget {
 }
 
 class MarkdownViewerState extends State<MarkdownViewer> {
-  late PageController _pageController;
-  late List<String> sections;
   late bool isEditMode = false;
+
+  TextEditingController controller = TextEditingController();
+  FocusNode focusNode = FocusNode();
+  String get markdownData => controller.text;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController()..addListener(_onPageChanged);
-
-    sections = [];
-
-    widget.markdownData.split('<next page>').forEach((element) {
-      sections.add(element);
-    });
+    controller.text = widget.markdownData;
+    controller.addListener(refresh);
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
     super.dispose();
-  }
-
-  void _onPageChanged() {
-    setState(() {});
-  }
-
-  double getPageValue() {
-    return _pageController.hasClients
-        ? _pageController.page! / (sections.length - 1)
-        : 0.0;
-  }
-
-  Widget buildFloatingActionButton() {
-    return FloatingActionButton(
-      isExtended: true,
-      onPressed: () {
-        setState(() {
-          isEditMode = !isEditMode;
-        });
-      },
-      child: Icon(
-        isEditMode ? Icons.edit_off : Icons.edit,
-        color: Colors.white,
-      ),
-    );
   }
 
   final tocController = TocController();
@@ -80,67 +54,53 @@ class MarkdownViewerState extends State<MarkdownViewer> {
     ),
     PreConfig(
       decoration: BoxDecoration(
-        color: themeMap['atom-one-dark-reasonable']!['root']!.backgroundColor ??
-            Colors.grey[800]!,
+        color: SyntaxTheme.dracula().backgroundColor!,
         borderRadius: BorderRadius.circular(8),
       ),
-      theme: themeMap['atom-one-dark-reasonable']!,
       textStyle: const TextStyle(fontSize: 14),
-      wrapper: (child, code, language) => CodeWrapperWidget(
-        child,
-        code,
-        language,
-      ),
+      builder: (code, language) {
+        return CodeWrapperWidget(
+          RichText(
+            text: _SyntaxHighlighter(
+              theme: SyntaxTheme.dracula(),
+              language: Syntax.JAVA,
+            ).format(code),
+          ),
+          code,
+          language,
+          theme: SyntaxTheme.dracula(),
+        );
+      },
     )
   ];
 
   late MarkdownConfig config;
   late bool isVertical;
 
-  Widget buildTocWidget() => TocWidget(controller: tocController);
-
-  Widget buildMarkdown(String data, MarkdownConfig config) => MarkdownWidget(
-        data: data,
-        tocController: tocController,
-        config: config.copy(
-          configs: configs,
-        ),
-      );
-
-  Widget buildPageView(MarkdownConfig config) {
-    return PageView.builder(
-      controller: _pageController,
-      itemCount: sections.length,
-      itemBuilder: (context, index) {
-        return Row(
-          children: [
-            if (!isVertical) Expanded(child: buildTocWidget()),
-            Expanded(
-              flex: 3,
-              child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: buildMarkdown(sections[index], config)),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     isVertical = MediaQuery.of(context).size.aspectRatio < 1;
     config = Theme.of(context).brightness == Brightness.dark
         ? MarkdownConfig.darkConfig
-        : MarkdownConfig.defaultConfig;
+        : MarkdownConfig.defaultConfig.copy(
+            configs: [
+              PConfig(textStyle: TextStyle(fontSize: 16, color: Colors.black)),
+            ],
+          );
     return Scaffold(
       appBar: AppBar(
-          // leading: IconButton(
-          //   icon: const Icon(Icons.arrow_back),
-          //   onPressed: () => Navigator.pop(context),
-          // ),
-          ),
-      drawer: isVertical
+        actions: [
+          if (AppUser.instance.data['accountType'] == 'teacher' && isEditMode)
+            IconButton(
+              icon: Icon(Icons.save_rounded),
+              onPressed: () {},
+            ),
+        ],
+      ),
+      floatingActionButton: AppUser.instance.data['accountType'] == 'teacher'
+          ? buildFloatingActionButton()
+          : null,
+      drawer: isVertical && !isEditMode
           ? Drawer(
               child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -158,52 +118,65 @@ class MarkdownViewerState extends State<MarkdownViewer> {
               ],
             ))
           : null,
-      body: Column(
+      body: Row(
         children: [
-          Stack(
-            children: [
-              AnimatedProgressBar(
-                width: MediaQuery.of(context).size.width,
-                value: _pageController.hasClients
-                    ? _pageController.page! / (sections.length - 1)
-                    : 0.0,
-                duration: const Duration(seconds: 1),
-                gradient: LinearGradient(
-                  tileMode: TileMode.clamp,
-                  colors: [
-                    HSLColor.fromColor(
-                            AdaptiveTheme.of(context).theme.colorScheme.primary)
-                        .withSaturation(0.9)
-                        .withHue(20)
-                        .withLightness(
-                            AdaptiveTheme.of(context).theme.brightness ==
-                                    Brightness.dark
-                                ? 0.5
-                                : 0.8)
-                        .toColor(),
-                    HSLColor.fromColor(AdaptiveTheme.of(context)
-                            .theme
-                            .colorScheme
-                            .secondaryContainer)
-                        .withHue(80)
-                        .withLightness(
-                            AdaptiveTheme.of(context).theme.brightness ==
-                                    Brightness.dark
-                                ? 0.5
-                                : 0.8)
-                        .toColor(),
-                  ],
-                ),
-                backgroundColor: Colors.grey.withOpacity(0.2),
-                curve: Curves.easeOutCubic,
+          if (!isVertical && !isEditMode) Expanded(child: buildTocWidget()),
+          if (!isVertical && isEditMode)
+            Expanded(
+              child: DraggableSplitScreen(
+                leftWidget: buildEditText(),
+                rightWidget: buildMarkdown(markdownData, config),
               ),
-            ],
-          ),
-          Expanded(
-            child: buildPageView(config),
-          ),
+            ),
+          if (!isEditMode)
+            Expanded(flex: 3, child: buildMarkdown(markdownData, config))
         ],
       ),
+    );
+  }
+
+  Widget buildTocWidget() {
+    return TocWidget(controller: tocController);
+  }
+
+  Widget buildMarkdown(String data, MarkdownConfig config) {
+    return MarkdownWidget(
+      data: data,
+      tocController: tocController,
+      config: config.copy(
+        configs: configs,
+      ),
+      padding: EdgeInsets.all(24),
+    );
+  }
+
+  Widget buildFloatingActionButton() {
+    return FloatingActionButton(
+      isExtended: true,
+      onPressed: () {
+        setState(() {
+          isEditMode = !isEditMode;
+        });
+      },
+      child: Icon(
+        isEditMode ? Icons.edit_off : Icons.edit,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  Widget buildEditText() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        MarkdownTextInput(
+          () {},
+          controller.text,
+          controller: controller,
+          maxLines: 25,
+        ),
+      ],
     );
   }
 
@@ -248,5 +221,44 @@ class MarkdownViewerState extends State<MarkdownViewer> {
         ),
       ],
     );
+  }
+
+  void refresh() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+}
+
+class _SyntaxHighlighter extends md.SyntaxHighlighter {
+  final SyntaxTheme theme;
+  final Syntax language;
+
+  _SyntaxHighlighter({required this.theme, required this.language});
+
+  @override
+  TextSpan format(String source) {
+    return TextSpan(
+      style: TextStyle(
+        fontFamily: 'monospace',
+        fontSize: 16.0,
+        height: 1.5,
+        color: Colors.white,
+      ),
+      children: [
+        JavaSyntaxHighlighter(SyntaxTheme.dracula()).format(source.trimRight()),
+      ],
+    );
+  }
+
+  SyntaxBase getSytaxBase(Syntax syntax) {
+    switch (syntax) {
+      case Syntax.JAVA:
+        return JavaSyntaxHighlighter(SyntaxTheme.dracula());
+      case Syntax.DART:
+        return DartSyntaxHighlighter(SyntaxTheme.dracula());
+      default:
+        return YamlSyntaxHighlighter(SyntaxTheme.dracula());
+    }
   }
 }

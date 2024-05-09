@@ -93,9 +93,8 @@ class CustomBigUserCard extends StatelessWidget {
                   ],
                 ),
                 Container(
-                  child: (cardActionWidget != null)
-                      ? cardActionWidget
-                      : Container(),
+                  child:
+                      cardActionWidget != null ? cardActionWidget : Container(),
                 )
               ],
             ),

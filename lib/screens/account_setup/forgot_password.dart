@@ -1,6 +1,10 @@
 import 'package:codecraft/services/database_helper.dart';
+import 'package:codecraft/widgets/custom_text_fields.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
+import 'package:material_dialogs/material_dialogs.dart';
+import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,102 +37,118 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     super.dispose();
   }
 
-
 //basta sa firebase e2
 
   Future<void> passwordReset() async {
-    try{
-        await DatabaseHelper().auth.sendPasswordResetEmail(email: _emailController.text.trim());
-        showDialog(
-        context: context, 
+    try {
+      await DatabaseHelper()
+          .auth
+          .sendPasswordResetEmail(email: _emailController.text.trim());
+      showDialog(
+        context: context,
         builder: (context) {
           return const AlertDialog(
-            content: Text("Success! Check Your Email for the Password Reset Link."),
+            content:
+                Text("Success! Check Your Email for the Password Reset Link."),
           );
         },
-      );   
+      );
     } on FirebaseAuthException catch (e) {
-      print(e);
-      showDialog(
-        context: context, 
-        builder: (context) {
-          return AlertDialog(
-            content: Text(e.message.toString()),
-          );
-        },
+      Dialogs.materialDialog(
+        context: context,
+        msg: e.message!,
+        titleStyle: Theme.of(context).textTheme.displayLarge!.copyWith(
+            color: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white),
+        title: 'Error',
+        msgStyle: TextStyle(
+            color: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white),
+        lottieBuilder: Lottie.asset(
+          'assets/anim/error.json',
+          fit: BoxFit.contain,
+          alignment: Alignment.center,
+        ),
+        dialogWidth: 0.25,
+        color: Theme.of(context).brightness == Brightness.light
+            ? Colors.white
+            : const Color.fromARGB(255, 21, 21, 21),
+        actions: [
+          IconsButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            text: 'Close',
+            iconData: Icons.close,
+            color: Colors.red,
+            textStyle: TextStyle(
+              color: Colors.white,
+            ),
+            iconColor: Colors.white,
+          ),
+        ],
       );
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return
-     Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 25.0, top: 20.0),
-            child: Text(
-              'Forgot Password',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 25.0, top: 20.0),
+          child: Text(
+            'Forgot Password',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 40),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 25.0),
-            child: Text(
-              'Please Provide Your Email Address to Receive a Password Reset Link.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15),
+        ),
+        SizedBox(height: 40),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 25.0),
+          child: Text(
+            'Please Provide Your Email Address to Receive a Password Reset Link.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 15),
+          ),
+        ),
+        SizedBox(height: 20),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 25.0),
+          child: CustomTextField(
+            labelText: 'Email',
+            icon: Icons.email,
+            controller: _emailController,
+          ),
+        ),
+        SizedBox(height: 20),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 25.0),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.orange,
+            ),
+            child: MaterialButton(
+              onPressed: () async {
+                await passwordReset();
+              }, //call out niyo na lang dito si passwordReset
+              child: Text(
+                'Reset Password',
+                style: TextStyle(color: Colors.white),
+              ),
+              minWidth: double.infinity,
+              height: 50.0,
             ),
           ),
-          SizedBox(height: 20),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 25.0),
-            child: TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.white),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.orange),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                hintText: 'Email',
-                fillColor: Colors.grey[200],
-                filled: true,
-              ),
-            ),
-          ),
-          SizedBox(height: 20),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 25.0),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: Colors.orange,
-              ),
-              child: MaterialButton(
-                onPressed: () async {
-                  await passwordReset();
-                }, //call out niyo na lang dito si passwordReset
-                child: Text(
-                  'Reset Password',
-                  style: TextStyle(color: Colors.white),
-                ),
-                minWidth: double.infinity,
-                height: 50.0,
-              ),
-            ),
-          ),
-        ],
-      );
+        ),
+      ],
+    );
   }
 }

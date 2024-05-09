@@ -165,6 +165,7 @@ class SettingsState extends State<Settings> {
           titleAlign: TextAlign.left,
           titleStyle: AdaptiveTheme.of(context).theme.textTheme.displayMedium!,
           customViewPosition: CustomViewPosition.BEFORE_ACTION,
+          dialogWidth: 0.25,
           customView: Padding(
             padding: const EdgeInsets.all(16.0),
             child: GridView.builder(
@@ -256,6 +257,7 @@ class SettingsState extends State<Settings> {
             height: 200,
             width: 200,
           ),
+          dialogWidth: 0.25,
           actions: [
             IconsButton(
               onPressed: () {

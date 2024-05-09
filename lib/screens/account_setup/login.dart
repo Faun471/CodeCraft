@@ -194,6 +194,7 @@ class _LoginState extends State<Login> {
                         msg: error,
                         title: 'Error',
                         color: Colors.white,
+                        dialogWidth: 0.25,
                         lottieBuilder: Lottie.asset(
                           'assets/anim/error.json',
                           fit: BoxFit.contain,

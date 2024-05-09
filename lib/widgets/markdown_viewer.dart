@@ -188,6 +188,7 @@ class MarkdownViewerState extends State<MarkdownViewer> {
   }) {
     Dialogs.materialDialog(
       msg: message,
+      dialogWidth: 0.25,
       msgStyle:
           AdaptiveTheme.of(context).theme.textTheme.displaySmall!.copyWith(
                 color: Colors.black,

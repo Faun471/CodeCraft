@@ -135,6 +135,7 @@ class CustomListItemState extends State<CustomListItem> {
                         'assets/anim/locked.json',
                         fit: BoxFit.contain,
                       ),
+                      dialogWidth: 0.50,
                       context: context,
                       actions: [
                         Builder(

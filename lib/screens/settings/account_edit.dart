@@ -302,6 +302,7 @@ class AccountEditState extends State<AccountEdit> {
                                 width: 100,
                                 fit: BoxFit.contain,
                               ),
+                              dialogWidth: 0.25,
                               title: 'Success',
                               titleStyle: TextStyle(
                                 color: Color.fromARGB(255, 21, 21, 21),

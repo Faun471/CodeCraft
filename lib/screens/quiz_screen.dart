@@ -89,6 +89,7 @@ class QuizScreen extends StatelessWidget {
           'assets/anim/question.json',
           fit: BoxFit.contain,
         ),
+        dialogWidth: 0.25,
         context: context,
         actions: [
           Builder(

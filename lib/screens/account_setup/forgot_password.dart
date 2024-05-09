@@ -44,14 +44,42 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       await DatabaseHelper()
           .auth
           .sendPasswordResetEmail(email: _emailController.text.trim());
-      showDialog(
+      Dialogs.materialDialog(
         context: context,
-        builder: (context) {
-          return const AlertDialog(
-            content:
-                Text("Success! Check Your Email for the Password Reset Link."),
-          );
-        },
+        msg: 'Password Reset Link Sent to Your Email Address',
+        titleStyle: Theme.of(context).textTheme.displayLarge!.copyWith(
+            color: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white),
+        title: 'Success',
+        msgStyle: TextStyle(
+            color: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white),
+        lottieBuilder: Lottie.asset(
+          'assets/anim/congrats.json',
+          fit: BoxFit.contain,
+          alignment: Alignment.center,
+          repeat: false,
+        ),
+        dialogWidth: 0.25,
+        color: Theme.of(context).brightness == Brightness.light
+            ? Colors.white
+            : const Color.fromARGB(255, 21, 21, 21),
+        actions: [
+          IconsButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            text: 'Close',
+            iconData: Icons.close,
+            color: Colors.green,
+            textStyle: TextStyle(
+              color: Colors.white,
+            ),
+            iconColor: Colors.white,
+          ),
+        ],
       );
     } on FirebaseAuthException catch (e) {
       Dialogs.materialDialog(

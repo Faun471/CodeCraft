@@ -57,13 +57,13 @@ public class HelloWorld {
 
 Save the file and open a terminal. Navigate to the directory containing the file and compile the program using:
 
-```bat
+```bash
 javac HelloWorld.java
 ```
 
 Run the compiled program with:
 
-```bat
+```bash
 java HelloWorld
 ```
 

@@ -1,23 +1,25 @@
-import 'package:codecraft/screens/account_setup/account_setup.dart';
-import 'package:codecraft/screens/account_setup/account_type_selection.dart';
-import 'package:codecraft/screens/body.dart';
-import 'package:codecraft/widgets/custom_text_fields.dart';
+// File: lib/register.dart
+
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:codecraft/screens/account_setup/account_setup.dart';
+import 'package:codecraft/screens/account_setup/account_type_selection.dart';
 import 'package:codecraft/screens/account_setup/login.dart';
+import 'package:codecraft/screens/body.dart';
 import 'package:codecraft/services/auth_helper.dart';
 import 'package:codecraft/services/database_helper.dart';
+import 'package:codecraft/widgets/custom_text_fields.dart';
 
 class Register extends StatefulWidget {
   const Register({Key? key}) : super(key: key);
 
   @override
-  _RegisterBodyState createState() => _RegisterBodyState();
+  _RegisterState createState() => _RegisterState();
 }
 
-class _RegisterBodyState extends State<Register> {
+class _RegisterState extends State<Register> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController miController = TextEditingController();
@@ -29,45 +31,42 @@ class _RegisterBodyState extends State<Register> {
       TextEditingController();
   final FocusNode passwordFocusNode = FocusNode();
   final FocusNode confirmPasswordFocusNode = FocusNode();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        _buildHeader(context),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: _buildRegisterForm(),
+        ),
+        _buildOrDivider(context),
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: _buildGoogleSignInButton(context),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Column(
+      children: [
         Padding(
           padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
-          child: AutoSizeText('Create your account',
-              style: AdaptiveTheme.of(context).theme.textTheme.displayLarge!),
+          child: AutoSizeText(
+            'Create your account',
+            style: AdaptiveTheme.of(context).theme.textTheme.displayLarge!,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: _buildSignInLink(context),
         ),
-        const SizedBox(height: 10),
-        Padding(child: RegisterForm(), padding: EdgeInsets.all(20)),
-        Padding(
-            child: _buildOrDivider(context),
-            padding: EdgeInsets.only(left: 20, right: 20, bottom: 20)),
-        Padding(
-          child: FilledButton(
-            onPressed: _signInWithGoogle,
-            style: ButtonStyle(
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                  side: BorderSide(color: Colors.black),
-                ),
-              ),
-              backgroundColor: MaterialStateProperty.resolveWith(
-                (states) => Colors.white,
-              ),
-              minimumSize: MaterialStateProperty.all(const Size.fromHeight(60)),
-            ),
-            child: _buildGoogleSignInText(),
-          ),
-          padding: const EdgeInsets.all(20),
-        ),
-        const SizedBox(height: 20),
       ],
     );
   }
@@ -100,112 +99,58 @@ class _RegisterBodyState extends State<Register> {
   }
 
   Widget _buildOrDivider(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            height: 1,
-            color: Colors.grey,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          Expanded(child: Divider(color: Colors.grey)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              'Or log in with',
+              style: AdaptiveTheme.of(context).theme.textTheme.bodyMedium,
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Text(
-            'Or log in with',
-            style: AdaptiveTheme.of(context).theme.textTheme.bodyMedium,
-          ),
-        ),
-        Expanded(
-          child: Container(
-            height: 1,
-            color: Colors.grey,
-          ),
-        ),
-      ],
+          Expanded(child: Divider(color: Colors.grey)),
+        ],
+      ),
     );
   }
 
-  Widget _buildGoogleSignInText() {
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Image.asset(
-          'assets/images/google.png',
-          width: 30,
-          height: 30,
+  Widget _buildGoogleSignInButton(BuildContext context) {
+    return FilledButton(
+      onPressed: _signInWithGoogle,
+      style: ButtonStyle(
+        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            side: BorderSide(color: Colors.black),
+          ),
         ),
-        SizedBox(width: 15),
-        Text(
-          'Continue with Google',
-          style: const TextStyle(fontSize: 15, color: Colors.black),
-        ),
-      ],
+        backgroundColor: MaterialStateProperty.all(Colors.white),
+        minimumSize: MaterialStateProperty.all(Size.fromHeight(60)),
+      ),
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Image.asset('assets/images/google.png', width: 30, height: 30),
+          const SizedBox(width: 15),
+          Text(
+            'Continue with Google',
+            style: TextStyle(fontSize: 15, color: Colors.black),
+          ),
+        ],
+      ),
     );
   }
 
-  void _signInWithGoogle() {
-    Auth(DatabaseHelper().auth).signInWithGoogle().then(
-      (error) {
-        if (error == null) {
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => const Body()));
-        } else {
-          // Handle error
-        }
-      },
-    );
-  }
-
-  Form RegisterForm() {
-    final _formKey = GlobalKey<FormState>();
-
+  Form _buildRegisterForm() {
     return Form(
       key: _formKey,
       autovalidateMode: AutovalidateMode.disabled,
       child: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: CustomTextField(
-                  icon: Icons.person,
-                  labelText: 'First Name',
-                  controller: firstNameController,
-                ),
-                flex: 3,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: CustomTextField(
-                  labelText: 'MI',
-                  isRequired: false,
-                  controller: miController,
-                ),
-                flex: 1,
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                  child: CustomTextField(
-                    labelText: 'Last Name',
-                    icon: Icons.person,
-                    controller: lastNameController,
-                  ),
-                  flex: 3),
-              const SizedBox(width: 10),
-              Expanded(
-                child: CustomTextField(
-                  labelText: 'Suffix',
-                  isRequired: false,
-                  controller: suffixController,
-                ),
-                flex: 1,
-              ),
-            ],
-          ),
+          _buildNameFields(),
           const SizedBox(height: 10),
           CustomTextField(
             labelText: 'Email',
@@ -214,99 +159,143 @@ class _RegisterBodyState extends State<Register> {
             controller: emailController,
           ),
           const SizedBox(height: 10),
-          InternationalPhoneNumberInput(
-            onInputChanged: (PhoneNumber number) {},
-            maxLength: 12,
-            selectorConfig: const SelectorConfig(
-              selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
-              useBottomSheetSafeArea: true,
-              setSelectorButtonAsPrefixIcon: true,
-              leadingPadding: 20,
-            ),
-            ignoreBlank: false,
-            autoValidateMode: AutovalidateMode.disabled,
-            selectorTextStyle: TextStyle(
-              color:
-                  AdaptiveTheme.of(context).theme.textTheme.bodyMedium!.color,
-            ),
-            initialValue: PhoneNumber(
-              dialCode: "+63",
-              isoCode: "PH",
-            ),
-            textFieldController: phoneNumberController,
-            formatInput: true,
-            keyboardType: const TextInputType.numberWithOptions(
-              signed: true,
-              decimal: true,
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '* This field is required';
-              }
-
-              return null;
-            },
-            hintText: 'Phone Number',
-          ),
+          _buildPhoneNumberInput(),
           const SizedBox(height: 10),
-          PasswordTextField(
-            labelText: 'Password',
-            controller: passwordController,
-            focusNode: passwordFocusNode,
-            icon: Icons.lock,
-            mode: ValidationMode.password,
-          ),
-          const SizedBox(height: 10),
-          PasswordTextField(
-            labelText: 'Confirm Password',
-            controller: confirmPasswordController,
-            focusNode: confirmPasswordFocusNode,
-            icon: Icons.lock,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '* This field is required';
-              }
-
-              if (value != passwordController.text) {
-                return 'Passwords do not match';
-              }
-              return null;
-            },
-            mode: ValidationMode.password,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: ElevatedButton(
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AccountSetup(
-                        AccountTypeSelection(
-                          userData: {
-                            'first_name': firstNameController.text,
-                            'mi': miController.text,
-                            'last_name': lastNameController.text,
-                            'suffix': suffixController.text,
-                            'email': emailController.text,
-                            'phone_number': phoneNumberController.text,
-                            'password': passwordController.text,
-                          },
-                        ),
-                      ),
-                    ),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(60),
-              ),
-              child: Text('Create Account'),
-            ),
-          ),
+          _buildPasswordFields(),
+          _buildCreateAccountButton(),
         ],
       ),
     );
+  }
+
+  Row _buildNameFields() {
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: CustomTextField(
+            icon: Icons.person,
+            labelText: 'First Name',
+            controller: firstNameController,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          flex: 1,
+          child: CustomTextField(
+            labelText: 'MI',
+            isRequired: false,
+            controller: miController,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPhoneNumberInput() {
+    return InternationalPhoneNumberInput(
+      onInputChanged: (PhoneNumber number) {},
+      maxLength: 12,
+      selectorConfig: SelectorConfig(
+        selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+        useBottomSheetSafeArea: true,
+        setSelectorButtonAsPrefixIcon: true,
+        leadingPadding: 20,
+      ),
+      ignoreBlank: false,
+      autoValidateMode: AutovalidateMode.disabled,
+      selectorTextStyle: TextStyle(
+        color: AdaptiveTheme.of(context).theme.textTheme.bodyMedium!.color,
+      ),
+      initialValue: PhoneNumber(dialCode: "+63", isoCode: "PH"),
+      textFieldController: phoneNumberController,
+      formatInput: true,
+      keyboardType:
+          TextInputType.numberWithOptions(signed: true, decimal: true),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return '* This field is required';
+        }
+        return null;
+      },
+      hintText: 'Phone Number',
+    );
+  }
+
+  Widget _buildPasswordFields() {
+    return Column(
+      children: [
+        PasswordTextField(
+          labelText: 'Password',
+          controller: passwordController,
+          focusNode: passwordFocusNode,
+          icon: Icons.lock,
+          mode: ValidationMode.password,
+        ),
+        const SizedBox(height: 10),
+        PasswordTextField(
+          labelText: 'Confirm Password',
+          controller: confirmPasswordController,
+          focusNode: confirmPasswordFocusNode,
+          icon: Icons.lock,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return '* This field is required';
+            }
+            if (value != passwordController.text) {
+              return 'Passwords do not match';
+            }
+            return null;
+          },
+          mode: ValidationMode.password,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCreateAccountButton() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 24),
+      child: ElevatedButton(
+        onPressed: _createAccount,
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size.fromHeight(60),
+        ),
+        child: Text('Create Account'),
+      ),
+    );
+  }
+
+  void _signInWithGoogle() async {
+    final error = await Auth(DatabaseHelper().auth).signInWithGoogle();
+    if (error == null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Body()),
+      );
+    }
+  }
+
+  void _createAccount() {
+    if (_formKey.currentState!.validate()) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AccountSetup(
+            AccountTypeSelection(
+              userData: {
+                'first_name': firstNameController.text,
+                'mi': miController.text,
+                'last_name': lastNameController.text,
+                'suffix': suffixController.text,
+                'email': emailController.text,
+                'phone_number': phoneNumberController.text,
+                'password': passwordController.text,
+              },
+            ),
+          ),
+        ),
+      );
+    }
   }
 }

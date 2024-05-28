@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codecraft/screens/body.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/services/auth_helper.dart';
@@ -54,51 +53,45 @@ class _AccountTypeSelectionState extends State<AccountTypeSelection> {
           controller: controller,
           buttons: [
             ImageRadioButton(
-                image:
-                    'https://images.pexels.com/photos/6925184/pexels-photo-6925184.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-                text: 'Student',
-                value: 'student',
-                isSelected: true,
-                onChanged: null),
+              image:
+                  'https://images.pexels.com/photos/6925184/pexels-photo-6925184.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+              text: 'Apprentice',
+              value: 'apprentice',
+              isSelected: true,
+              onChanged: (_) {},
+            ),
             ImageRadioButton(
-                image:
-                    'https://images.pexels.com/photos/6925184/pexels-photo-6925184.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-                text: 'Teacher',
-                value: 'teacher',
-                isSelected: false,
-                onChanged: null),
+              image:
+                  'https://images.pexels.com/photos/6925184/pexels-photo-6925184.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+              text: 'Mentor',
+              value: 'mentor',
+              isSelected: false,
+              onChanged: (_) {},
+            ),
           ],
         ),
         const SizedBox(height: 30),
         ElevatedButton(
           onPressed: () {
+            widget.userData['accountType'] = controller.selectedValue!;
+
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => LoadingScreen(
                   futures: <Future>[
                     Auth(DatabaseHelper().auth).registerUser(
-                      widget.userData["email"]!,
-                      widget.userData["password"]!,
+                      widget.userData,
+                      controller.selectedValue!,
                     )
                   ],
                   onDone: (context, _) async {
                     print('Done');
+
                     if (DatabaseHelper().auth.currentUser == null) {
-                      print('User not logged in');
                       return;
                     }
-                    await DatabaseHelper().currentUser.set({
-                      'first_name': widget.userData["first_name"]!,
-                      'mi': widget.userData["mi"]!,
-                      'last_name': widget.userData["last_name"]!,
-                      'suffix': widget.userData["suffix"]!,
-                      'email': widget.userData["email"]!,
-                      'phone_number': widget.userData["phone_number"]!,
-                      'account_type': controller.selectedValue,
-                      'preferred_color': 'ff9c27b0',
-                      'level': 1,
-                    }, SetOptions(merge: true));
+
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(

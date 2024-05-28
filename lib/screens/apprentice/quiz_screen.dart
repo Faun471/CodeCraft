@@ -76,36 +76,37 @@ class QuizScreen extends StatelessWidget {
   }
 
   Future<void> _onWillPop(BuildContext context) async {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Dialogs.materialDialog(
-        color: AdaptiveTheme.of(context).brightness == Brightness.light
-            ? Colors.white
-            : const Color.fromARGB(255, 21, 21, 21),
-        msg: 'Are you sure you want to exit? Your progress will be lost.',
-        msgStyle: AdaptiveTheme.of(context).theme.textTheme.displaySmall!,
-        title: 'Exit',
-        titleStyle: AdaptiveTheme.of(context).theme.textTheme.displayLarge!,
-        lottieBuilder: Lottie.asset(
-          'assets/anim/question.json',
-          fit: BoxFit.contain,
-        ),
-        dialogWidth: 0.25,
-        context: context,
-        actions: [
-          Builder(
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        Dialogs.materialDialog(
+          color: AdaptiveTheme.of(context).brightness == Brightness.light
+              ? Colors.white
+              : const Color.fromARGB(255, 21, 21, 21),
+          msg: 'Are you sure you want to exit? Your progress will be lost.',
+          msgStyle: AdaptiveTheme.of(context).theme.textTheme.displaySmall!,
+          title: 'Exit',
+          titleStyle: AdaptiveTheme.of(context).theme.textTheme.displayLarge!,
+          lottieBuilder: Lottie.asset(
+            'assets/anim/question.json',
+            fit: BoxFit.contain,
+          ),
+          dialogWidth: 0.25,
+          context: context,
+          actions: [
+            Builder(
+                builder: (dialogContext) => IconsButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext);
+                      },
+                      text: 'Back to quiz.',
+                      color: const Color.fromARGB(255, 17, 172, 77),
+                      iconData: Icons.cancel_outlined,
+                      textStyle:
+                          const TextStyle(color: Colors.white, fontSize: 16),
+                      iconColor: Colors.white,
+                    )),
+            Builder(
               builder: (dialogContext) => IconsButton(
-                    onPressed: () {
-                      Navigator.pop(dialogContext);
-                    },
-                    text: 'Back to quiz.',
-                    color: const Color.fromARGB(255, 17, 172, 77),
-                    iconData: Icons.cancel_outlined,
-                    textStyle:
-                        const TextStyle(color: Colors.white, fontSize: 16),
-                    iconColor: Colors.white,
-                  )),
-          Builder(
-            builder: (dialogContext) => IconsButton(
                 onPressed: () {
                   Navigator.pop(dialogContext);
                   Navigator.pop(context);
@@ -114,10 +115,15 @@ class QuizScreen extends StatelessWidget {
                 iconData: Icons.check_circle,
                 iconColor: Colors.white,
                 color: Colors.red,
-                textStyle: const TextStyle(color: Colors.white, fontSize: 16)),
-          ),
-        ],
-      );
-    });
+                textStyle: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

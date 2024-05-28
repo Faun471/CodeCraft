@@ -2,9 +2,9 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/parsers/markdown_parser.dart';
 import 'package:codecraft/providers/theme_provider.dart';
+import 'package:codecraft/themes/theme.dart';
 import 'package:codecraft/widgets/split_screen.dart';
-import 'package:flutter_markdown/flutter_markdown.dart' as md;
-import 'package:flutter_syntax_view/flutter_syntax_view.dart';
+import 'package:highlight/highlight.dart' show Node, highlight;
 import 'package:markdown_editable_textinput/markdown_text_input.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:flutter/material.dart';
@@ -50,25 +50,29 @@ class MarkdownViewerState extends State<MarkdownViewer> {
 
   final List<WidgetConfig> configs = [
     CodeConfig(
-      style: const TextStyle(fontSize: 14, color: Colors.white),
+      style: TextStyle(
+        fontSize: 14,
+        color: SyntaxTheme.dracula.isLight ? Colors.black : Colors.white,
+      ),
     ),
     PreConfig(
       decoration: BoxDecoration(
-        color: SyntaxTheme.dracula().backgroundColor!,
+        color: SyntaxTheme.dracula.root.backgroundColor!,
         borderRadius: BorderRadius.circular(8),
       ),
-      textStyle: const TextStyle(fontSize: 14),
+      theme: SyntaxTheme.dracula.theme,
+      textStyle: TextStyle(fontSize: 14),
       builder: (code, language) {
         return CodeWrapperWidget(
           RichText(
             text: _SyntaxHighlighter(
-              theme: SyntaxTheme.dracula(),
-              language: Syntax.JAVA,
+              theme: SyntaxTheme.dracula,
+              language: language,
             ).format(code),
           ),
           code,
           language,
-          theme: SyntaxTheme.dracula(),
+          theme: SyntaxTheme.dracula,
         );
       },
     )
@@ -231,35 +235,63 @@ class MarkdownViewerState extends State<MarkdownViewer> {
   }
 }
 
-class _SyntaxHighlighter extends md.SyntaxHighlighter {
+class _SyntaxHighlighter {
   final SyntaxTheme theme;
-  final Syntax language;
+  final String? language;
 
   _SyntaxHighlighter({required this.theme, required this.language});
 
-  @override
   TextSpan format(String source) {
     return TextSpan(
       style: TextStyle(
         fontFamily: 'monospace',
         fontSize: 16.0,
         height: 1.5,
-        color: Colors.white,
+        color: theme.isLight ? Colors.black : Colors.white,
       ),
       children: [
-        JavaSyntaxHighlighter(SyntaxTheme.dracula()).format(source.trimRight()),
+        ..._convert(
+          highlight
+              .parse(
+                source.trimRight(),
+                language: language,
+              )
+              .nodes!,
+        ),
       ],
     );
   }
 
-  SyntaxBase getSytaxBase(Syntax syntax) {
-    switch (syntax) {
-      case Syntax.JAVA:
-        return JavaSyntaxHighlighter(SyntaxTheme.dracula());
-      case Syntax.DART:
-        return DartSyntaxHighlighter(SyntaxTheme.dracula());
-      default:
-        return YamlSyntaxHighlighter(SyntaxTheme.dracula());
+  List<TextSpan> _convert(List<Node> nodes) {
+    List<TextSpan> spans = [];
+    var currentSpans = spans;
+    List<List<TextSpan>> stack = [];
+
+    _traverse(Node node) {
+      if (node.value != null) {
+        currentSpans.add(node.className == null
+            ? TextSpan(text: node.value)
+            : TextSpan(text: node.value, style: theme.theme[node.className!]));
+      } else if (node.children != null) {
+        List<TextSpan> tmp = [];
+        currentSpans
+            .add(TextSpan(children: tmp, style: theme.theme[node.className!]));
+        stack.add(currentSpans);
+        currentSpans = tmp;
+
+        node.children!.forEach((n) {
+          _traverse(n);
+          if (n == node.children!.last) {
+            currentSpans = stack.isEmpty ? spans : stack.removeLast();
+          }
+        });
+      }
     }
+
+    for (var node in nodes) {
+      _traverse(node);
+    }
+
+    return spans;
   }
 }

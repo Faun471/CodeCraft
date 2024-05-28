@@ -25,43 +25,59 @@ class _LoadingScreenState extends State<LoadingScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             Future.delayed(
-              1.5.seconds,
+              const Duration(seconds: 1),
               () {
-                widget.onDone?.call(context, snapshot);
+                if (widget.onDone != null) {
+                  widget.onDone!(context, snapshot);
+                }
               },
             );
           }
 
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Center(
-                child: Image.asset(
-                  'assets/images/ccOrangeLogo.png',
-                  width: MediaQuery.of(context).size.width * 0.5,
-                  height: MediaQuery.of(context).size.height * 0.5,
-                ),
-              ),
-              LoadingAnimationWidget.flickr(
-                leftDotColor: Theme.of(context).primaryColor,
-                rightDotColor: Theme.of(context).colorScheme.secondary,
-                size: MediaQuery.of(context).size.width * 0.1,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Loading...',
-                style: Theme.of(context).textTheme.displayMedium,
-              )
-            ]
-                .animate(delay: 1.seconds)
-                .scaleXY(
-                    curve: Curves.easeInOutCubicEmphasized,
-                    duration: 1.5.seconds)
-                .fade(curve: Curves.easeOutBack, duration: 1.seconds),
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _buildLogo(context),
+                _buildLoadingAnimation(context),
+                const SizedBox(height: 20),
+                _buildLoadingText(context),
+              ]
+                  .animate(delay: const Duration(seconds: 1))
+                  .scaleXY(
+                      curve: Curves.easeInOutCubicEmphasized,
+                      duration: const Duration(seconds: 1))
+                  .fade(
+                      curve: Curves.easeOutBack,
+                      duration: const Duration(seconds: 1)),
+            ),
           );
         },
       ),
+    );
+  }
+
+  Widget _buildLogo(BuildContext context) {
+    return Image.asset(
+      'assets/images/ccOrangeLogo.png',
+      width: MediaQuery.of(context).size.width * 0.5,
+      height: MediaQuery.of(context).size.height * 0.5,
+    );
+  }
+
+  Widget _buildLoadingAnimation(BuildContext context) {
+    return LoadingAnimationWidget.flickr(
+      leftDotColor: Theme.of(context).primaryColor,
+      rightDotColor: Theme.of(context).colorScheme.secondary,
+      size: MediaQuery.of(context).size.width * 0.1,
+    );
+  }
+
+  Widget _buildLoadingText(BuildContext context) {
+    return Text(
+      'Loading...',
+      style: Theme.of(context).textTheme.displayMedium,
     );
   }
 }

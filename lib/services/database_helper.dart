@@ -7,25 +7,76 @@ class DatabaseHelper {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  static const String defaultOrgId = 'Default';
+
   factory DatabaseHelper() => _instance;
 
   DatabaseHelper._internal() {
-    Firebase.initializeApp();
+    _initializeFirebase();
   }
 
-  FirebaseAuth get auth {
-    return _auth;
+  Future<void> _initializeFirebase() async {
+    await Firebase.initializeApp();
   }
 
-  FirebaseFirestore get firestore {
-    return _firestore;
+  FirebaseAuth get auth => _auth;
+
+  FirebaseFirestore get firestore => _firestore;
+
+  CollectionReference get users => _firestore.collection('users');
+
+  CollectionReference get organizations =>
+      _firestore.collection('organizations');
+
+  CollectionReference get invitations => _firestore.collection('invitations');
+
+  CollectionReference get joinRequests =>
+      _firestore.collection('join_requests');
+
+  DocumentReference get currentUser {
+    return users.doc(_auth.currentUser!.uid);
   }
 
-  CollectionReference get users {
-    return _firestore.collection('users');
+  Future<void> createUser(String userId, Map<String, String> userData,
+      String accountType, String orgId) async {
+    await users.doc(userId).set({
+      'first_name': userData['first_name']!,
+      'mi': userData['mi']!,
+      'last_name': userData['last_name']!,
+      'suffix': userData['suffix']!,
+      'email': userData['email']!,
+      'phone_number': userData['phone_number']!,
+      'account_type': accountType,
+      'preferred_color': 'ff9c27b0',
+      'level': 1,
+      'orgId': orgId,
+    }, SetOptions(merge: true));
   }
 
-  DocumentReference<Object?> get currentUser {
-    return users.doc(_auth.currentUser!.email);
+  Future<String> createOrganization(String mentorId) async {
+    DocumentReference orgRef = await organizations.add({
+      'orgName': 'Mentor Organization',
+      'orgDescription': '',
+      'mentorId': mentorId,
+      'createdAt': Timestamp.now(),
+    });
+    return orgRef.id;
+  }
+
+  Future<List<Map<String, dynamic>>> getJoinRequests(String mentorId) async {
+    QuerySnapshot querySnapshot =
+        await joinRequests.where('mentorId', isEqualTo: mentorId).get();
+    return querySnapshot.docs
+        .map((doc) => doc.data() as Map<String, dynamic>)
+        .toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getOrganizationMembers(
+      String orgId) async {
+    QuerySnapshot querySnapshot =
+        await users.where('orgId', isEqualTo: orgId).get();
+    return querySnapshot.docs
+        .map((doc) => doc.data() as Map<String, dynamic>)
+        .toList();
   }
 }

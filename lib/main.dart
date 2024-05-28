@@ -80,23 +80,23 @@ class MyApp extends StatelessWidget {
           debugShowFloatingThemeButton: true,
           builder: (theme, darkTheme) {
             return MaterialApp(
-                title: 'CodeCraft',
-                theme: theme,
-                darkTheme: darkTheme,
-                themeMode: MediaQuery.platformBrightnessOf(appContext) ==
-                        Brightness.dark
-                    ? ThemeMode.dark
-                    : ThemeMode.light,
-                home: LoadingScreen(
-                  futures: [getLandingPage(context)],
-                  onDone: (context, snapshot) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => snapshot.data![0]),
-                    );
-                  },
-                ));
+              title: 'CodeCraft',
+              theme: theme,
+              darkTheme: darkTheme,
+              themeMode:
+                  MediaQuery.platformBrightnessOf(appContext) == Brightness.dark
+                      ? ThemeMode.dark
+                      : ThemeMode.light,
+              home: LoadingScreen(
+                futures: [getLandingPage(context)],
+                onDone: (context, snapshot) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => snapshot.data![0]),
+                  );
+                },
+              ),
+            );
           },
         );
       },
@@ -174,9 +174,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
           children: [
             Expanded(
               child: PageView(
-                  controller: _pageController,
-                  children: _onBoardingPages
-                    ..lastWhere((element) => element is OnboardingCard)),
+                controller: _pageController,
+                children: _onBoardingPages
+                  ..lastWhere((element) => element is OnboardingCard),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 24.0),

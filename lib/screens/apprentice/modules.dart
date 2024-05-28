@@ -67,7 +67,8 @@ class ModulesState extends State<Modules> {
                       return LoadingScreen(
                         futures: [
                           loadMarkdown(
-                              'assets/pages/${snapshot.data![index].markdownName}.md')
+                            'assets/pages/${snapshot.data![index].markdownName}.md',
+                          )
                         ],
                         onDone: (context, snapshot1) async {
                           Navigator.pop(context);

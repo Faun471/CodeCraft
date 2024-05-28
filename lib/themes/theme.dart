@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_highlight/theme_map.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
@@ -186,4 +187,169 @@ class AppTheme {
     outlinedButtonTheme: _baseOutlinedButtonTheme(),
     textTheme: _baseTextTheme(Colors.white),
   );
+
+  static Map<String, TextStyle> getSyntaxHighlighterTheme(SyntaxTheme theme) {
+    return themeMap[theme.themeName]!;
+  }
+}
+
+enum SyntaxTheme {
+  dark,
+  light,
+  dracula,
+  github,
+  monokai,
+  ocean,
+  palenight,
+  atelierEstuaryLight,
+  atelierEstuaryDark,
+  zenburn;
+
+  const SyntaxTheme();
+
+  bool get isLight {
+    switch (this) {
+      case SyntaxTheme.atelierEstuaryLight:
+      case SyntaxTheme.light:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  String _camelCaseToTitle(String text) {
+    return text
+        .split(RegExp(r"(?=[A-Z])"))
+        .join('-')
+        .toLowerCase()
+        .replaceAll('theme', '');
+  }
+
+  String get themeName {
+    return _camelCaseToTitle(this.toString().split('.').last);
+  }
+
+  Map<String, TextStyle> get theme {
+    return AppTheme.getSyntaxHighlighterTheme(this);
+  }
+
+  TextStyle get root {
+    return AppTheme.getSyntaxHighlighterTheme(this)['root']!;
+  }
+
+  TextStyle get keyword {
+    return AppTheme.getSyntaxHighlighterTheme(this)['keyword']!;
+  }
+
+  TextStyle get selectorTag {
+    return AppTheme.getSyntaxHighlighterTheme(this)['selector-tag']!;
+  }
+
+  TextStyle get tag {
+    return AppTheme.getSyntaxHighlighterTheme(this)['tag']!;
+  }
+
+  TextStyle get templateTag {
+    return AppTheme.getSyntaxHighlighterTheme(this)['template-tag']!;
+  }
+
+  TextStyle get number {
+    return AppTheme.getSyntaxHighlighterTheme(this)['number']!;
+  }
+
+  TextStyle get variable {
+    return AppTheme.getSyntaxHighlighterTheme(this)['variable']!;
+  }
+
+  TextStyle get templateVariable {
+    return AppTheme.getSyntaxHighlighterTheme(this)['template-variable']!;
+  }
+
+  TextStyle get attribute {
+    return AppTheme.getSyntaxHighlighterTheme(this)['attribute']!;
+  }
+
+  TextStyle get literal {
+    return AppTheme.getSyntaxHighlighterTheme(this)['literal']!;
+  }
+
+  TextStyle get subst {
+    return AppTheme.getSyntaxHighlighterTheme(this)['subst']!;
+  }
+
+  TextStyle get title {
+    return AppTheme.getSyntaxHighlighterTheme(this)['title']!;
+  }
+
+  TextStyle get name {
+    return AppTheme.getSyntaxHighlighterTheme(this)['name']!;
+  }
+
+  TextStyle get selectorId {
+    return AppTheme.getSyntaxHighlighterTheme(this)['selector-id']!;
+  }
+
+  TextStyle get selectorClass {
+    return AppTheme.getSyntaxHighlighterTheme(this)['selector-class']!;
+  }
+
+  TextStyle get section {
+    return AppTheme.getSyntaxHighlighterTheme(this)['section']!;
+  }
+
+  TextStyle get type {
+    return AppTheme.getSyntaxHighlighterTheme(this)['type']!;
+  }
+
+  TextStyle get symbol {
+    return AppTheme.getSyntaxHighlighterTheme(this)['symbol']!;
+  }
+
+  TextStyle get bullet {
+    return AppTheme.getSyntaxHighlighterTheme(this)['bullet']!;
+  }
+
+  TextStyle get link {
+    return AppTheme.getSyntaxHighlighterTheme(this)['link']!;
+  }
+
+  TextStyle get deletion {
+    return AppTheme.getSyntaxHighlighterTheme(this)['deletion']!;
+  }
+
+  TextStyle get string {
+    return AppTheme.getSyntaxHighlighterTheme(this)['string']!;
+  }
+
+  TextStyle get builtIn {
+    return AppTheme.getSyntaxHighlighterTheme(this)['built_in']!;
+  }
+
+  TextStyle get builtinName {
+    return AppTheme.getSyntaxHighlighterTheme(this)['builtin-name']!;
+  }
+
+  TextStyle get addition {
+    return AppTheme.getSyntaxHighlighterTheme(this)['addition']!;
+  }
+
+  TextStyle get comment {
+    return AppTheme.getSyntaxHighlighterTheme(this)['comment']!;
+  }
+
+  TextStyle get quote {
+    return AppTheme.getSyntaxHighlighterTheme(this)['quote']!;
+  }
+
+  TextStyle get meta {
+    return AppTheme.getSyntaxHighlighterTheme(this)['meta']!;
+  }
+
+  TextStyle get emphasis {
+    return AppTheme.getSyntaxHighlighterTheme(this)['emphasis']!;
+  }
+
+  TextStyle get strong {
+    return AppTheme.getSyntaxHighlighterTheme(this)['strong']!;
+  }
 }

@@ -1,10 +1,8 @@
 import 'package:codecraft/services/database_helper.dart';
-import 'package:codecraft/widgets/custom_text_fields.dart';
+import 'package:codecraft/utils/utils.dart';
+import 'package:codecraft/widgets/buttons/custom_text_fields.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
-import 'package:material_dialogs/material_dialogs.dart';
-import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -27,80 +25,22 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       await DatabaseHelper()
           .auth
           .sendPasswordResetEmail(email: _emailController.text.trim());
-      Dialogs.materialDialog(
-        context: context,
-        msg: 'Password Reset Link Sent to Your Email Address',
-        titleStyle: Theme.of(context).textTheme.displayLarge!.copyWith(
-            color: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white),
-        title: 'Success',
-        msgStyle: TextStyle(
-            color: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white),
-        lottieBuilder: Lottie.asset(
-          'assets/anim/congrats.json',
-          fit: BoxFit.contain,
-          alignment: Alignment.center,
-          repeat: false,
-        ),
-        dialogWidth: 0.25,
-        color: Theme.of(context).brightness == Brightness.light
-            ? Colors.white
-            : const Color.fromARGB(255, 21, 21, 21),
-        actions: [
-          IconsButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            text: 'Close',
-            iconData: Icons.close,
-            color: Colors.green,
-            textStyle: TextStyle(
-              color: Colors.white,
-            ),
-            iconColor: Colors.white,
-          ),
-        ],
-      );
+
+      Utils.displayDialog(
+          context: context,
+          title: 'Success',
+          content: 'Password Reset Link Sent to Your Email Address',
+          lottieAsset: 'assets/anim/congrats.json',
+          buttonText: 'Close',
+          onPressed: () => Navigator.pop(context));
     } on FirebaseAuthException catch (e) {
-      Dialogs.materialDialog(
-        context: context,
-        msg: e.message!,
-        titleStyle: Theme.of(context).textTheme.displayLarge!.copyWith(
-            color: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white),
-        title: 'Error',
-        msgStyle: TextStyle(
-            color: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white),
-        lottieBuilder: Lottie.asset(
-          'assets/anim/error.json',
-          fit: BoxFit.contain,
-          alignment: Alignment.center,
-        ),
-        dialogWidth: 0.25,
-        color: Theme.of(context).brightness == Brightness.light
-            ? Colors.white
-            : const Color.fromARGB(255, 21, 21, 21),
-        actions: [
-          IconsButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            text: 'Close',
-            iconData: Icons.close,
-            color: Colors.red,
-            textStyle: TextStyle(
-              color: Colors.white,
-            ),
-            iconColor: Colors.white,
-          ),
-        ],
-      );
+      Utils.displayDialog(
+          context: context,
+          title: 'Error',
+          content: e.message!,
+          lottieAsset: 'assets/anim/error.json',
+          buttonText: 'Close',
+          onPressed: () => Navigator.pop(context));
     }
   }
 

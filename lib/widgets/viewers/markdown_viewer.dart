@@ -1,17 +1,14 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:codecraft/models/app_user.dart';
-import 'package:codecraft/parsers/markdown_parser.dart';
-import 'package:codecraft/providers/theme_provider.dart';
+import 'package:codecraft/models/challenge.dart';
+
+import 'package:codecraft/screens/apprentice/challenge_page.dart';
 import 'package:codecraft/themes/theme.dart';
-import 'package:codecraft/widgets/split_screen.dart';
+import 'package:codecraft/widgets/codeblocks/code_wrapper.dart';
+import 'package:codecraft/widgets/screentypes/split_screen.dart';
 import 'package:highlight/highlight.dart' show Node, highlight;
 import 'package:markdown_editable_textinput/markdown_text_input.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
-import 'package:material_dialogs/material_dialogs.dart';
-import 'package:material_dialogs/widgets/buttons/icon_button.dart';
-import 'package:provider/provider.dart';
 
 class MarkdownViewer extends StatefulWidget {
   final String markdownData;
@@ -56,12 +53,6 @@ class MarkdownViewerState extends State<MarkdownViewer> {
       ),
     ),
     PreConfig(
-      decoration: BoxDecoration(
-        color: SyntaxTheme.dracula.root.backgroundColor!,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      theme: SyntaxTheme.dracula.theme,
-      textStyle: TextStyle(fontSize: 14),
       builder: (code, language) {
         return CodeWrapperWidget(
           RichText(
@@ -144,13 +135,51 @@ class MarkdownViewerState extends State<MarkdownViewer> {
   }
 
   Widget buildMarkdown(String data, MarkdownConfig config) {
-    return MarkdownWidget(
-      data: data,
-      tocController: tocController,
-      config: config.copy(
-        configs: configs,
-      ),
-      padding: EdgeInsets.all(24),
+    return Column(
+      children: [
+        Expanded(
+          child: MarkdownWidget(
+            data: data,
+            tocController: tocController,
+            config: config.copy(
+              configs: configs,
+            ),
+            padding: EdgeInsets.all(24),
+          ),
+        ),
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.1,
+          width: MediaQuery.of(context).size.width * 0.5,
+          child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChallengePage(
+                      challenge: Challenge(
+                          id: 'lesson1_challenge1',
+                          instructions:
+                              'Write a function that returns "Hello, World!" as a string.',
+                          sampleCode:
+                              'class HelloWorld {\n\tpublic String helloWorld() {\n \t\t// Write your code here\n\t}\n}',
+                          className: 'HelloWorld',
+                          unitTests: [
+                            UnitTest(
+                              input: '',
+                              expectedOutput: ExpectedOutput(
+                                value: 'Hello, World!',
+                                type: 'String',
+                              ),
+                              methodName: 'helloWorld',
+                            )
+                          ]),
+                    ),
+                  ),
+                );
+              },
+              child: Text('Proceed to challenge')),
+        )
+      ],
     );
   }
 
@@ -179,50 +208,6 @@ class MarkdownViewerState extends State<MarkdownViewer> {
           controller.text,
           controller: controller,
           maxLines: 25,
-        ),
-      ],
-    );
-  }
-
-  void showMaterialDialog({
-    required BuildContext context,
-    required String message,
-    required String title,
-    required LottieBuilder? lottieBuilder,
-  }) {
-    Dialogs.materialDialog(
-      msg: message,
-      dialogWidth: 0.25,
-      msgStyle:
-          AdaptiveTheme.of(context).theme.textTheme.displaySmall!.copyWith(
-                color: Colors.black,
-              ),
-      msgAlign: TextAlign.center,
-      titleStyle: TextStyle(
-        color:
-            Provider.of<ThemeProvider>(context, listen: false).preferredColor,
-        fontSize: MediaQuery.of(context).size.width * 0.05,
-        fontWeight: FontWeight.bold,
-      ),
-      titleAlign: TextAlign.center,
-      title: title,
-      lottieBuilder: lottieBuilder,
-      context: context,
-      useRootNavigator: true,
-      useSafeArea: true,
-      actions: [
-        Builder(
-          builder: (dialogContext) => IconsButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-            },
-            text: 'Okay!',
-            iconData: Icons.done,
-            color: Provider.of<ThemeProvider>(context, listen: false)
-                .preferredColor,
-            textStyle: const TextStyle(color: Colors.white),
-            iconColor: Colors.white,
-          ),
         ),
       ],
     );

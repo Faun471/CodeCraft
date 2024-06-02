@@ -8,12 +8,11 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codecraft/services/auth_helper.dart';
 import 'package:codecraft/services/database_helper.dart';
+import 'package:codecraft/utils/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:lottie/lottie.dart';
-import 'package:material_dialogs/dialogs.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -293,30 +292,13 @@ class AccountEditState extends State<AccountEdit> {
                             clearControllers();
                             imageChanged = false;
 
-                            Dialogs.materialDialog(
+                            Utils.displayDialog(
                               context: context,
-                              lottieBuilder: Lottie.asset(
-                                'assets/anim/congrats.json',
-                                repeat: false,
-                                height: 100,
-                                width: 100,
-                                fit: BoxFit.contain,
-                              ),
-                              dialogWidth: 0.25,
+                              lottieAsset: 'assets/anim/congrats.json',
                               title: 'Success',
-                              titleStyle: TextStyle(
-                                color: Color.fromARGB(255, 21, 21, 21),
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              msg:
+                              content:
                                   'Your account has been updated successfully. 🎉\nThe changes will be reflected shortly.',
-                              msgStyle: TextStyle(
-                                color: Color.fromARGB(255, 21, 21, 21),
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              onClose: (value) => setState(() {
+                              onDismiss: (value) => setState(() {
                                 isLoading = false;
                               }),
                             );

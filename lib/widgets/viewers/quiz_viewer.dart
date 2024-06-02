@@ -197,7 +197,7 @@ class QuizViewerState extends State<QuizViewer> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector( 
+    return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => setState(() {
         if (!canAnswer && !_animating) {
@@ -235,8 +235,6 @@ class QuizViewerState extends State<QuizViewer> {
                     );
                   },
                 ),
-              // TODO: save the value of the remaining seconds, and replace the progress bar's
-              // value with the remaining seconds, instead of having a filled red progress bar.
               if (!canAnswer)
                 ProgressBar(
                   value: (_start / widget.quiz.timer),

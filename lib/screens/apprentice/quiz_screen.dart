@@ -1,11 +1,9 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:codecraft/models/quiz.dart';
-import 'package:codecraft/widgets/quiz_viewer.dart';
+import 'package:codecraft/utils/utils.dart';
+import 'package:codecraft/widgets/viewers/quiz_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:lottie/lottie.dart';
-import 'package:material_dialogs/material_dialogs.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 
 class QuizScreen extends StatelessWidget {
@@ -78,20 +76,13 @@ class QuizScreen extends StatelessWidget {
   Future<void> _onWillPop(BuildContext context) async {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) {
-        Dialogs.materialDialog(
-          color: AdaptiveTheme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : const Color.fromARGB(255, 21, 21, 21),
-          msg: 'Are you sure you want to exit? Your progress will be lost.',
-          msgStyle: AdaptiveTheme.of(context).theme.textTheme.displaySmall!,
-          title: 'Exit',
-          titleStyle: AdaptiveTheme.of(context).theme.textTheme.displayLarge!,
-          lottieBuilder: Lottie.asset(
-            'assets/anim/question.json',
-            fit: BoxFit.contain,
-          ),
-          dialogWidth: 0.25,
+        Utils.displayDialog(
           context: context,
+          title: 'Exit',
+          content: 'Are you sure you want to exit? Your progress will be lost.',
+          buttonText: 'Back to quiz.',
+          onPressed: () => Navigator.pop(context),
+          lottieAsset: 'assets/anim/question.json',
           actions: [
             Builder(
                 builder: (dialogContext) => IconsButton(

@@ -1,4 +1,4 @@
-import 'package:codecraft/widgets/logo_with_background.dart';
+import 'package:codecraft/widgets/screentypes/logo_with_background.dart';
 import 'package:flutter/material.dart';
 
 class AccountSetup extends StatefulWidget {

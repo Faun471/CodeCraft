@@ -11,32 +11,14 @@ class ThemeProvider extends ChangeNotifier {
 
   Future<void> updateColor(Color newColor, BuildContext? context) async {
     _preferredColor = newColor;
-    await saveColorToFirestore();
-    if (context != null) _updateTheme(context);
-    notifyListeners();
-  }
 
-  Future<void> saveColorToFirestore() async {
     DatabaseHelper().currentUser.set({
       'preferredColor': _preferredColor.value.toRadixString(16),
     }, SetOptions(merge: true));
-  }
 
-  Future<Color> loadState() async {
-    DocumentSnapshot doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(DatabaseHelper().auth.currentUser!.email)
-        .get();
-
-    if (!doc.exists) {
-      _preferredColor = Colors.orange;
-      await saveColorToFirestore();
-      return _preferredColor;
-    }
+    if (context != null) _updateTheme(context);
 
     notifyListeners();
-
-    return Color(int.parse(doc['preferredColor'] as String, radix: 16));
   }
 
   void _updateTheme(BuildContext context, {bool notify = true}) {

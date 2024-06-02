@@ -8,11 +8,9 @@ import 'package:codecraft/screens/account_setup/register.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/services/auth_helper.dart';
 import 'package:codecraft/services/database_helper.dart';
-import 'package:codecraft/widgets/custom_text_fields.dart';
+import 'package:codecraft/utils/utils.dart';
+import 'package:codecraft/widgets/buttons/custom_text_fields.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
-import 'package:material_dialogs/material_dialogs.dart';
-import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 import 'package:provider/provider.dart';
 
 class Login extends StatefulWidget {
@@ -189,29 +187,15 @@ class _LoginState extends State<Login> {
                         );
                       }));
                     } else {
-                      Dialogs.materialDialog(
+                      Utils.displayDialog(
                         context: context,
-                        msg: error,
                         title: 'Error',
-                        color: Colors.white,
-                        dialogWidth: 0.25,
-                        lottieBuilder: Lottie.asset(
-                          'assets/anim/error.json',
-                          fit: BoxFit.contain,
-                          alignment: Alignment.center,
-                        ),
-                        actions: [
-                          IconsButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            text: 'Close',
-                            iconData: Icons.close,
-                            color: Colors.red,
-                            textStyle: TextStyle(color: Colors.white),
-                            iconColor: Colors.white,
-                          ),
-                        ],
+                        content: error,
+                        buttonText: 'Close',
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        lottieAsset: 'assets/anim/error.json',
                       );
                     }
                   },

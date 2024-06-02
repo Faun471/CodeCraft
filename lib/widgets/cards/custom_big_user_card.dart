@@ -2,7 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-class CustomBigUserCard extends StatelessWidget {
+class UserCard extends StatelessWidget {
   final Color? backgroundColor;
   final Color? settingColor;
   final double? cardRadius;
@@ -13,7 +13,7 @@ class CustomBigUserCard extends StatelessWidget {
   final CachedNetworkImage userProfilePic;
   final double? height;
 
-  const CustomBigUserCard({
+  const UserCard({
     super.key,
     this.backgroundColor,
     this.settingColor,

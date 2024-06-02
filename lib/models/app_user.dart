@@ -37,4 +37,6 @@ class AppUser extends ChangeNotifier {
   }
 
   get data => _data;
+
+  get userId => FirebaseAuth.instance.currentUser!.uid;
 }

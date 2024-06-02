@@ -2,7 +2,7 @@ import 'package:codecraft/screens/body.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/services/auth_helper.dart';
 import 'package:codecraft/services/database_helper.dart';
-import 'package:codecraft/widgets/image_button.dart';
+import 'package:codecraft/widgets/buttons/image_button.dart';
 import 'package:flutter/material.dart';
 
 class AccountTypeSelection extends StatefulWidget {

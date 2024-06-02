@@ -1,4 +1,5 @@
 import 'package:codecraft/models/invitation.dart';
+import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/services/invitation_service.dart';
 import 'package:flutter/material.dart';
 
@@ -6,7 +7,7 @@ class InvitationProvider with ChangeNotifier {
   final InvitationService _invitationService = InvitationService();
 
   Future<void> joinOrgWithCode(String code) async {
-    String apprenticeId = 'currentUser';
+    String apprenticeId = DatabaseHelper().auth.currentUser!.uid;
     Invitation? invitation = await _invitationService.getInvitation(code);
     if (invitation != null) {
       await _invitationService.createJoinRequest(code, apprenticeId);

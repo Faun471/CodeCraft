@@ -1,0 +1,16 @@
+{
+    "id": "hello-world",
+    "instructions": "Create a method that returns the string 'Hello, World!'",
+    "sampleCode": "class HelloWorld {\n    public static String hello() {\n        return \"Hello, World!\";\n    }\n}",
+    "className": "HelloWorld",
+    "unitTests": [
+        {
+            "input": "",
+            "expectedOutput": {
+                "type": "string",
+                "expectedOutput": "Hello, World!"
+            },
+            "methodName": "helloWorld"
+        }
+    ]
+}

@@ -9,12 +9,11 @@ import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/screens/settings/account_edit.dart';
 import 'package:codecraft/screens/account_setup/login.dart';
 import 'package:codecraft/services/database_helper.dart';
-import 'package:codecraft/widgets/colour_scheme_button.dart';
-import 'package:codecraft/widgets/custom_big_user_card.dart';
+import 'package:codecraft/utils/utils.dart';
+import 'package:codecraft/widgets/buttons/colour_scheme_button.dart';
+import 'package:codecraft/widgets/cards/custom_big_user_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:lottie/lottie.dart';
 import 'package:material_dialogs/material_dialogs.dart';
 import 'package:material_dialogs/shared/types.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
@@ -71,9 +70,8 @@ class SettingsState extends State<Settings> {
   }
 
   Widget buildUserCard(BuildContext context) {
-    return CustomBigUserCard(
-      userName:
-          "$displayName Lvl ${AppUser.instance.data['level'] ?? 1}",
+    return UserCard(
+      userName: "$displayName Lvl ${AppUser.instance.data['level'] ?? 1}",
       userProfilePic: CachedNetworkImage(
         height: 150,
         width: 150,
@@ -243,21 +241,15 @@ class SettingsState extends State<Settings> {
   SettingsItem buildSignOutItem(BuildContext context) {
     return SettingsItem(
       onTap: () async {
-        Dialogs.materialDialog(
+        Utils.displayDialog(
           context: context,
           title: 'Logout',
-          msg: 'Are you sure you want to logout?',
-          color: AdaptiveTheme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : const Color.fromARGB(255, 21, 21, 21),
-          lottieBuilder: Lottie.asset(
-            'assets/anim/question.json',
-            repeat: true,
-            fit: BoxFit.contain,
-            height: 200,
-            width: 200,
-          ),
-          dialogWidth: 0.25,
+          content: 'Are you sure you want to logout?',
+          buttonText: 'No',
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          lottieAsset: 'assets/anim/question.json',
           actions: [
             IconsButton(
               onPressed: () {
@@ -265,22 +257,9 @@ class SettingsState extends State<Settings> {
               },
               text: 'No',
               iconData: Icons.close,
-              textStyle:
-                  AdaptiveTheme.of(context).brightness == Brightness.light
-                      ? const TextStyle(color: Color.fromARGB(255, 21, 21, 21))
-                      : const TextStyle(color: Colors.white),
-              iconColor:
-                  AdaptiveTheme.of(context).brightness == Brightness.light
-                      ? const Color.fromARGB(255, 21, 21, 21)
-                      : Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: BorderSide(
-                  color:
-                      AdaptiveTheme.of(context).brightness == Brightness.light
-                          ? const Color.fromARGB(255, 21, 21, 21)
-                          : Colors.white,
-                ),
+              color: Theme.of(context).primaryColorDark,
+              textStyle: const TextStyle(
+                color: Colors.white,
               ),
             ),
             IconsButton(
@@ -291,7 +270,7 @@ class SettingsState extends State<Settings> {
                     builder: (context) => LoadingScreen(
                       futures: [
                         DatabaseHelper().auth.signOut(),
-                        Future.delayed(5.seconds)
+                        Future.delayed(const Duration(seconds: 5)),
                       ],
                       onDone: (context, _) => Navigator.pushReplacement(
                         context,
@@ -309,7 +288,6 @@ class SettingsState extends State<Settings> {
               iconData: Icons.logout,
               color: Colors.red,
               textStyle: const TextStyle(color: Colors.white),
-              iconColor: Colors.white,
             ),
           ],
         );

@@ -2,17 +2,19 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:codecraft/firebase_options.dart';
 import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/page.dart';
-import 'package:codecraft/providers/level_provider.dart';
+import 'package:codecraft/providers/code_execution_provider.dart';
+import 'package:codecraft/providers/invitation_provider.dart';
 import 'package:codecraft/providers/theme_provider.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/account_setup/login.dart';
 import 'package:codecraft/screens/body.dart';
 import 'package:codecraft/screens/account_setup/register.dart';
 import 'package:codecraft/screens/loading_screen.dart';
+import 'package:codecraft/screens/mentor/mentor_dashboard.dart';
 import 'package:codecraft/services/auth_helper.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/themes/theme.dart';
-import 'package:codecraft/widgets/onboarding_card.dart';
+import 'package:codecraft/widgets/cards/onboarding_card.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -47,10 +49,20 @@ Future<Widget> getLandingPage(BuildContext context) async {
       ModulePage.loadPagesFromYamlDirectory(),
     ],
     onDone: (context, snapshot) {
+      if (AppUser.instance.data['account_type'] == 'apprentice') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Body(),
+          ),
+        );
+        return;
+      }
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => Body(),
+          builder: (context) => MentorDashboard(),
         ),
       );
     },
@@ -66,11 +78,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<LevelProvider>(
-            create: (context) => LevelProvider()),
         ChangeNotifierProvider<ThemeProvider>(
             create: (context) => ThemeProvider()),
         ChangeNotifierProvider<AppUser>(create: (context) => AppUser.instance),
+        ChangeNotifierProvider<InvitationProvider>(
+            create: (context) => InvitationProvider()),
+        ChangeNotifierProvider<CodeExecutionProvider>(
+            create: (context) => CodeExecutionProvider()),
       ],
       builder: (appContext, child) {
         return AdaptiveTheme(

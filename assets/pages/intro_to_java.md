@@ -72,3 +72,7 @@ If everything is set up correctly, you should see the output: Hello, World!
 ### Conclusion
 
 Java's versatility, portability, and strong features make it a popular choice for a wide range of applications, from web development to mobile apps and enterprise-level systems. Learning Java provides a solid foundation for anyone entering the world of programming.
+
+#### Challenge
+
+<challenge-button>

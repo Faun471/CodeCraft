@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/account_setup/login.dart';
-import 'package:codecraft/screens/mentor/modules.dart';
+import 'package:codecraft/screens/apprentice/modules.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';

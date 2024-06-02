@@ -1,13 +1,12 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/page.dart';
-import 'package:codecraft/providers/level_provider.dart';
 import 'package:codecraft/screens/loading_screen.dart';
-import 'package:codecraft/widgets/custom_list_view.dart';
-import 'package:codecraft/widgets/markdown_viewer.dart';
+import 'package:codecraft/widgets/cards/module_card.dart';
+import 'package:codecraft/widgets/viewers/markdown_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:provider/provider.dart';
 import 'package:yaml/yaml.dart';
 
 class Modules extends StatefulWidget {
@@ -26,15 +25,7 @@ class ModulesState extends State<Modules> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      Provider.of<LevelProvider>(context, listen: false)
-          .currentLevel
-          .then((value) {
-        setState(() {
-          currentLevel = value;
-        });
-      });
-    });
+    currentLevel = AppUser.instance.data!['level'];
   }
 
   @override
@@ -54,7 +45,7 @@ class ModulesState extends State<Modules> {
         return ListView.builder(
           itemCount: snapshot.data!.length,
           itemBuilder: (context, index) {
-            CustomListItem item = CustomListItem(
+            ModuleCard item = ModuleCard(
               title: snapshot.data![index].title,
               description: snapshot.data![index].description,
               unlockLevel: snapshot.data![index].level,

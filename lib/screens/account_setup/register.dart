@@ -10,7 +10,7 @@ import 'package:codecraft/screens/account_setup/login.dart';
 import 'package:codecraft/screens/body.dart';
 import 'package:codecraft/services/auth_helper.dart';
 import 'package:codecraft/services/database_helper.dart';
-import 'package:codecraft/widgets/custom_text_fields.dart';
+import 'package:codecraft/widgets/buttons/custom_text_fields.dart';
 
 class Register extends StatefulWidget {
   const Register({Key? key}) : super(key: key);
@@ -152,11 +152,20 @@ class _RegisterState extends State<Register> {
         children: [
           _buildNameFields(),
           const SizedBox(height: 10),
-          CustomTextField(
-            labelText: 'Email',
-            icon: Icons.email,
-            mode: ValidationMode.email,
-            controller: emailController,
+          Row(
+            children: [
+              CustomTextField(
+                labelText: 'Email',
+                icon: Icons.email,
+                mode: ValidationMode.email,
+                controller: emailController,
+              ),
+              CustomTextField(
+                labelText: 'Last Name',
+                icon: Icons.person,
+                controller: lastNameController,
+              ),
+            ],
           ),
           const SizedBox(height: 10),
           _buildPhoneNumberInput(),

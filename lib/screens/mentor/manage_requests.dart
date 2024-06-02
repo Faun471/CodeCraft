@@ -1,5 +1,10 @@
+import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/providers/invitation_provider.dart';
+import 'package:codecraft/services/database_helper.dart';
+import 'package:codecraft/services/invitation_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -19,37 +24,68 @@ class ManageRequestsScreen extends StatelessWidget {
           );
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Text('No join requests');
         } else {
-          return ListView.builder(
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, index) {
-              var request = snapshot.data![index];
-              return ListTile(
-                title: Text('Apprentice: ${request['apprenticeId']}'),
-                subtitle: Text('Status: ${request['status']}'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.check),
-                      onPressed: () async {
-                        await invitationProvider.updateRequestStatus(
-                            request['id'], 'approved');
+          return Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: FutureBuilder(
+                      future: InvitationService().getCurrentCode(
+                          DatabaseHelper().auth.currentUser!.uid),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState != ConnectionState.done) {
+                          return CircularProgressIndicator();
+                        } else {
+                          return Text('Code: ${snapshot.data}');
+                        }
                       },
                     ),
-                    IconButton(
-                      icon: Icon(Icons.close),
+                  ),
+                  Expanded(
+                    child: ElevatedButton(
                       onPressed: () async {
-                        await invitationProvider.updateRequestStatus(
-                            request['id'], 'rejected');
+                        await invitationProvider.createNewInvitation(
+                            DatabaseHelper().auth.currentUser!.uid,
+                            AppUser.instance.data['orgId']);
                       },
+                      child: Text('Generate Code'),
                     ),
-                  ],
+                  ),
+                ],
+              ),
+              if (!snapshot.data!.isEmpty)
+                ListView.builder(
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    var request = snapshot.data![index];
+                    return ListTile(
+                      title: Text('Apprentice: ${request['apprenticeId']}'),
+                      subtitle: Text('Status: ${request['status']}'),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.check),
+                            onPressed: () async {
+                              await invitationProvider.updateRequestStatus(
+                                  request['id'], 'approved');
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.close),
+                            onPressed: () async {
+                              await invitationProvider.updateRequestStatus(
+                                  request['id'], 'rejected');
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
+            ],
           );
         }
       },

@@ -16,7 +16,7 @@ class OnboardingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: MediaQuery.sizeOf(context).height * 0.80,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -68,7 +68,7 @@ class OnboardingCard extends StatelessWidget {
             ElevatedButton(
               onPressed: () => onPressed(),
               style: ElevatedButton.styleFrom(
-                minimumSize: Size.fromHeight(60),
+                minimumSize: const Size.fromHeight(60),
               ),
               child: Text(
                 buttonText,

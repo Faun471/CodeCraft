@@ -7,7 +7,7 @@ import 'package:codecraft/providers/invitation_provider.dart';
 import 'package:codecraft/providers/theme_provider.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/account_setup/login.dart';
-import 'package:codecraft/screens/body.dart';
+import 'package:codecraft/screens/apprentice/apprentice_home.dart';
 import 'package:codecraft/screens/account_setup/register.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/screens/mentor/mentor_dashboard.dart';
@@ -40,7 +40,7 @@ Future<Widget> getLandingPage(BuildContext context) async {
   bool userLoggedIn = await auth.isLoggedIn();
 
   if (!userLoggedIn) {
-    return kIsWeb ? AccountSetup(Login()) : const OnboardingPage();
+    return kIsWeb ? const AccountSetup(Login()) : const OnboardingPage();
   }
 
   return LoadingScreen(
@@ -53,7 +53,7 @@ Future<Widget> getLandingPage(BuildContext context) async {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => Body(),
+            builder: (context) => const Body(),
           ),
         );
         return;
@@ -62,7 +62,7 @@ Future<Widget> getLandingPage(BuildContext context) async {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => MentorDashboard(),
+          builder: (context) => const MentorDashboard(),
         ),
       );
     },
@@ -130,7 +130,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> _onBoardingPages = [
+    List<Widget> onBoardingPages = [
       OnboardingCard(
         image: "assets/images/ccOrangeLogo.png",
         title: "Welcome to CodeCraft",
@@ -168,7 +168,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => AccountSetup(
+              builder: (context) => const AccountSetup(
                 Register(),
               ),
             ),
@@ -189,7 +189,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             Expanded(
               child: PageView(
                 controller: _pageController,
-                children: _onBoardingPages
+                children: onBoardingPages
                   ..lastWhere((element) => element is OnboardingCard),
               ),
             ),
@@ -197,7 +197,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               padding: const EdgeInsets.only(top: 24.0),
               child: SmoothPageIndicator(
                 controller: _pageController,
-                count: _onBoardingPages.length,
+                count: onBoardingPages.length,
                 effect: ExpandingDotsEffect(
                   activeDotColor: Colors.orange,
                   dotColor: Colors.orange.shade300,

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:logging/logging.dart';
 
 class LoadingScreen extends StatefulWidget {
   final List<Future> futures;
   final Function(BuildContext, AsyncSnapshot)? onDone;
 
   const LoadingScreen({
-    Key? key,
+    super.key,
     required this.futures,
     this.onDone,
-  }) : super(key: key);
+  });
 
   @override
   _LoadingScreenState createState() => _LoadingScreenState();
@@ -24,10 +25,13 @@ class _LoadingScreenState extends State<LoadingScreen> {
         future: Future.wait(widget.futures),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
+            Logger('Loading Screen')
+                .info('LoadingScreen: All futures completed');
+
             Future.delayed(
-              const Duration(seconds: 1),
+              20.milliseconds,
               () {
-                if (widget.onDone != null) {
+                if (widget.onDone != null && context.mounted) {
                   widget.onDone!(context, snapshot);
                 }
               },

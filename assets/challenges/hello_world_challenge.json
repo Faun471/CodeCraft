@@ -8,7 +8,7 @@
             "input": "",
             "expectedOutput": {
                 "type": "string",
-                "expectedOutput": "Hello, World!"
+                "value": "Hello, World!"
             },
             "methodName": "helloWorld"
         }

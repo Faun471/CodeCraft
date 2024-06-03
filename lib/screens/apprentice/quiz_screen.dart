@@ -22,7 +22,7 @@ class QuizScreen extends StatelessWidget {
       ),
       body: PopScope(
         canPop: false,
-        onPopInvoked: (didPop) async {
+        onPopInvokedWithResult: (didPop, _) async {
           if (didPop) return;
           await _onWillPop(context);
         },

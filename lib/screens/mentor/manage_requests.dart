@@ -2,13 +2,13 @@ import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/providers/invitation_provider.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/services/invitation_service.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 class ManageRequestsScreen extends StatelessWidget {
+  const ManageRequestsScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     final invitationProvider = Provider.of<InvitationProvider>(context);
@@ -36,7 +36,7 @@ class ManageRequestsScreen extends StatelessWidget {
                           DatabaseHelper().auth.currentUser!.uid),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState != ConnectionState.done) {
-                          return CircularProgressIndicator();
+                          return const CircularProgressIndicator();
                         } else {
                           return Text('Code: ${snapshot.data}');
                         }
@@ -50,12 +50,12 @@ class ManageRequestsScreen extends StatelessWidget {
                             DatabaseHelper().auth.currentUser!.uid,
                             AppUser.instance.data['orgId']);
                       },
-                      child: Text('Generate Code'),
+                      child: const Text('Generate Code'),
                     ),
                   ),
                 ],
               ),
-              if (!snapshot.data!.isEmpty)
+              if (snapshot.data!.isNotEmpty)
                 ListView.builder(
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
@@ -67,14 +67,14 @@ class ManageRequestsScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.check),
+                            icon: const Icon(Icons.check),
                             onPressed: () async {
                               await invitationProvider.updateRequestStatus(
                                   request['id'], 'approved');
                             },
                           ),
                           IconButton(
-                            icon: Icon(Icons.close),
+                            icon: const Icon(Icons.close),
                             onPressed: () async {
                               await invitationProvider.updateRequestStatus(
                                   request['id'], 'rejected');

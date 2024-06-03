@@ -9,8 +9,7 @@ class CodeWrapperWidget extends StatefulWidget {
   final SyntaxTheme theme;
 
   const CodeWrapperWidget(this.child, this.text, this.language,
-      {Key? key, required this.theme})
-      : super(key: key);
+      {super.key, required this.theme});
 
   @override
   State<CodeWrapperWidget> createState() => _PreWrapperState();
@@ -35,13 +34,13 @@ class _PreWrapperState extends State<CodeWrapperWidget> {
     return Stack(
       children: [
         Container(
-          child: widget.child,
           decoration: BoxDecoration(
             color: widget.theme.root.backgroundColor,
             borderRadius: BorderRadius.circular(8),
           ),
           padding: const EdgeInsets.all(16),
           width: double.infinity,
+          child: widget.child,
         ),
         Align(
           alignment: Alignment.topRight,

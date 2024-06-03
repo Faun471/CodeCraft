@@ -3,6 +3,7 @@ import 'package:codecraft/models/challenge.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
+import 'package:logging/logging.dart';
 
 class CodeExecutionProvider with ChangeNotifier {
   String _output = '';
@@ -34,7 +35,7 @@ class CodeExecutionProvider with ChangeNotifier {
         .post(url, headers: headers, body: jsonEncode(payload))
         .catchError((error) {
       _output = 'Error: $error';
-      print('Error: $error');
+      Logger('CodeExecutionProvider').severe('Error: $error');
       notifyListeners();
       return Response('', 500, reasonPhrase: 'Error: $error');
     });
@@ -71,10 +72,10 @@ class CodeExecutionProvider with ChangeNotifier {
     buffer.writeln(userScript); // User's code
     buffer.writeln('public class Main {');
     buffer.writeln('  public static void main(String[] args) {');
+    buffer.writeln('    $className instance = new $className();');
 
     for (int i = 0; i < unitTests.length; i++) {
       UnitTest test = unitTests[i];
-      buffer.writeln('    ${className} instance = new ${className}();');
       buffer.writeln(
           '    if (instance.${test.methodName}(${test.input}) == ${_expectedOutputToString(test.expectedOutput)}) {');
       buffer.writeln('      System.out.println("Test ${i + 1} passed");');

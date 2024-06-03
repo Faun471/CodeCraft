@@ -7,13 +7,13 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/account_setup/account_type_selection.dart';
 import 'package:codecraft/screens/account_setup/login.dart';
-import 'package:codecraft/screens/body.dart';
+import 'package:codecraft/screens/apprentice/apprentice_home.dart';
 import 'package:codecraft/services/auth_helper.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/widgets/buttons/custom_text_fields.dart';
 
 class Register extends StatefulWidget {
-  const Register({Key? key}) : super(key: key);
+  const Register({super.key});
 
   @override
   _RegisterState createState() => _RegisterState();
@@ -103,7 +103,7 @@ class _RegisterState extends State<Register> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: [
-          Expanded(child: Divider(color: Colors.grey)),
+          const Expanded(child: Divider(color: Colors.grey)),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
@@ -111,7 +111,7 @@ class _RegisterState extends State<Register> {
               style: AdaptiveTheme.of(context).theme.textTheme.bodyMedium,
             ),
           ),
-          Expanded(child: Divider(color: Colors.grey)),
+          const Expanded(child: Divider(color: Colors.grey)),
         ],
       ),
     );
@@ -121,21 +121,21 @@ class _RegisterState extends State<Register> {
     return FilledButton(
       onPressed: _signInWithGoogle,
       style: ButtonStyle(
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+          const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0)),
             side: BorderSide(color: Colors.black),
           ),
         ),
-        backgroundColor: MaterialStateProperty.all(Colors.white),
-        minimumSize: MaterialStateProperty.all(Size.fromHeight(60)),
+        backgroundColor: WidgetStateProperty.all(Colors.white),
+        minimumSize: WidgetStateProperty.all(const Size.fromHeight(60)),
       ),
       child: Wrap(
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Image.asset('assets/images/google.png', width: 30, height: 30),
           const SizedBox(width: 15),
-          Text(
+          const Text(
             'Continue with Google',
             style: TextStyle(fontSize: 15, color: Colors.black),
           ),
@@ -205,7 +205,7 @@ class _RegisterState extends State<Register> {
     return InternationalPhoneNumberInput(
       onInputChanged: (PhoneNumber number) {},
       maxLength: 12,
-      selectorConfig: SelectorConfig(
+      selectorConfig: const SelectorConfig(
         selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
         useBottomSheetSafeArea: true,
         setSelectorButtonAsPrefixIcon: true,
@@ -220,7 +220,7 @@ class _RegisterState extends State<Register> {
       textFieldController: phoneNumberController,
       formatInput: true,
       keyboardType:
-          TextInputType.numberWithOptions(signed: true, decimal: true),
+          const TextInputType.numberWithOptions(signed: true, decimal: true),
       validator: (value) {
         if (value == null || value.isEmpty) {
           return '* This field is required';
@@ -264,13 +264,13 @@ class _RegisterState extends State<Register> {
 
   Widget _buildCreateAccountButton() {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 24),
+      padding: const EdgeInsets.symmetric(vertical: 24),
       child: ElevatedButton(
         onPressed: _createAccount,
         style: ElevatedButton.styleFrom(
           minimumSize: const Size.fromHeight(60),
         ),
-        child: Text('Create Account'),
+        child: const Text('Create Account'),
       ),
     );
   }
@@ -278,6 +278,10 @@ class _RegisterState extends State<Register> {
   void _signInWithGoogle() async {
     final error = await Auth(DatabaseHelper().auth).signInWithGoogle();
     if (error == null) {
+      if (!mounted) {
+        return;
+      }
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const Body()),

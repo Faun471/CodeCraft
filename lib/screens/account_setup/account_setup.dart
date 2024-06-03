@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class AccountSetup extends StatefulWidget {
   final Widget widget;
 
-  const AccountSetup(this.widget, {Key? key}) : super(key: key);
+  const AccountSetup(this.widget, {super.key});
 
   @override
   _AccountSetupState createState() => _AccountSetupState();

@@ -40,6 +40,7 @@ class CustomTextField extends StatefulWidget with TextFieldMixin {
   final bool isRequired;
 
   CustomTextField({
+    super.key,
     required this.labelText,
     required this.controller,
     this.icon,
@@ -100,6 +101,7 @@ class PasswordTextField extends StatefulWidget with TextFieldMixin {
   final bool isRequired;
 
   PasswordTextField({
+    super.key,
     required this.labelText,
     required this.controller,
     required this.focusNode,

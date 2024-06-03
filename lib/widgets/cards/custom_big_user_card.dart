@@ -66,10 +66,10 @@ class UserCard extends StatelessWidget {
                   children: [
                     // User profile
                     ClipOval(
-                        child: userProfilePic, clipBehavior: Clip.antiAlias),
+                        clipBehavior: Clip.antiAlias, child: userProfilePic),
                     Expanded(
                       child: Container(
-                        padding: EdgeInsets.only(right: 30),
+                        padding: const EdgeInsets.only(right: 30),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -93,8 +93,7 @@ class UserCard extends StatelessWidget {
                   ],
                 ),
                 Container(
-                  child:
-                      cardActionWidget != null ? cardActionWidget : Container(),
+                  child: cardActionWidget ?? Container(),
                 )
               ],
             ),

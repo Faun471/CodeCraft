@@ -26,6 +26,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           .auth
           .sendPasswordResetEmail(email: _emailController.text.trim());
 
+      if (!mounted) {
+        return;
+      }
+
       Utils.displayDialog(
           context: context,
           title: 'Success',
@@ -60,7 +64,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             ),
           ),
         ),
-        SizedBox(height: 40),
+        const SizedBox(height: 40),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 25.0),
           child: Text(
@@ -69,18 +73,18 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             style: TextStyle(fontSize: 15),
           ),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 25.0),
+          padding: const EdgeInsets.symmetric(horizontal: 25.0),
           child: CustomTextField(
             labelText: 'Email',
             icon: Icons.email,
             controller: _emailController,
           ),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 25.0),
+          padding: const EdgeInsets.symmetric(horizontal: 25.0),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
@@ -89,13 +93,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             child: MaterialButton(
               onPressed: () async {
                 await passwordReset();
-              }, //call out niyo na lang dito si passwordReset
-              child: Text(
+              },
+              minWidth: double.infinity,
+              height: 50.0, //call out niyo na lang dito si passwordReset
+              child: const Text(
                 'Reset Password',
                 style: TextStyle(color: Colors.white),
               ),
-              minWidth: double.infinity,
-              height: 50.0,
             ),
           ),
         ),

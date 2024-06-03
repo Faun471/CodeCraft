@@ -8,7 +8,7 @@
             "input": "1, 2",
             "expectedOutput": {
                 "type": "Integer",
-                "expectedOutput": "3"
+                "value": "3"
             },
             "methodName": "sum"
         },
@@ -16,7 +16,7 @@
             "input": "0, 0",
             "expectedOutput": {
                 "type": "Integer",
-                "expectedOutput": "0"
+                "value": "0"
             },
             "methodName": "sum"
         },
@@ -24,7 +24,7 @@
             "input": "-1, 1",
             "expectedOutput": {
                 "type": "Integer",
-                "expectedOutput": "0"
+                "value": "0"
             },
             "methodName": "sum"
         },
@@ -32,7 +32,7 @@
             "input": "100, 100",
             "expectedOutput": {
                 "type": "Integer",
-                "expectedOutput": "200"
+                "value": "200"
             },
             "methodName": "sum"
         },
@@ -40,7 +40,7 @@
             "input": "-100, -100",
             "expectedOutput": {
                 "type": "Integer",
-                "expectedOutput": "-200"
+                "value": "-200"
             },
             "methodName": "sum"
         }

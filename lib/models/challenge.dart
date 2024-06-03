@@ -1,3 +1,6 @@
+import 'package:json/json.dart';
+
+@JsonCodable()
 class Challenge {
   final String id;
   final String instructions;
@@ -12,46 +15,25 @@ class Challenge {
     required this.className,
     required this.unitTests,
   });
-
-  factory Challenge.fromJson(Map<String, dynamic> json) {
-    return Challenge(
-      id: json['id'],
-      instructions: json['instructions'],
-      sampleCode: json['sampleCode'],
-      className: json['className'],
-      unitTests: (json['unitTests'] as List)
-          .map((unitTest) => UnitTest.fromJson(unitTest))
-          .toList(),
-    );
-  }
 }
 
+@JsonCodable()
 class UnitTest {
-  final String input;
-  final ExpectedOutput expectedOutput;
-  final String methodName;
+  String input;
+  ExpectedOutput expectedOutput;
+  String methodName;
 
   UnitTest({
     required this.input,
     required this.expectedOutput,
     required this.methodName,
   });
-
-  factory UnitTest.fromJson(Map<String, dynamic> json) {
-    return UnitTest(
-      input: json['input'],
-      expectedOutput: ExpectedOutput(
-        value: json['expectedOutput']['value'],
-        type: json['expectedOutput']['type'],
-      ),
-      methodName: json['methodName'],
-    );
-  }
 }
 
+@JsonCodable()
 class ExpectedOutput {
-  final String value;
-  final String type;
+  String value;
+  String type;
 
   ExpectedOutput({
     required this.value,

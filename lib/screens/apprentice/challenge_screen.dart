@@ -2,23 +2,23 @@ import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/challenge.dart';
 import 'package:codecraft/providers/code_execution_provider.dart';
 import 'package:codecraft/services/challenge_service.dart';
-import 'package:codecraft/services/submission_service.dart';
+import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/codeblocks/code_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:re_editor/re_editor.dart';
 import 'package:re_highlight/languages/java.dart';
 
-class ChallengePage extends StatefulWidget {
+class ChallengeScreen extends StatefulWidget {
   final Challenge challenge;
 
-  ChallengePage({required this.challenge});
+  const ChallengeScreen({super.key, required this.challenge});
 
   @override
-  _ChallengePageState createState() => _ChallengePageState();
+  _ChallengeScreenState createState() => _ChallengeScreenState();
 }
 
-class _ChallengePageState extends State<ChallengePage> {
+class _ChallengeScreenState extends State<ChallengeScreen> {
   final CodeLineEditingController _codeController = CodeLineEditingController();
   String _instructions = '';
   String _output = '';
@@ -46,8 +46,18 @@ class _ChallengePageState extends State<ChallengePage> {
         widget.challenge.id,
       );
 
-      await SubmissionService()
-          .submitCode(AppUser.instance.userId, widget.challenge.id, script);
+      if (!mounted) {
+        return;
+      }
+
+      Utils.displayDialog(
+        context: context,
+        title: 'Level Up',
+        content: 'You have completed this challenge. Well done!',
+        lottieAsset: 'assets/anim/level_up.json',
+      );
+
+      AppUser.instance.levelUp();
     }
 
     setState(() {
@@ -59,7 +69,7 @@ class _ChallengePageState extends State<ChallengePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Coding Challenge'),
+        title: const Text('Coding Challenge'),
       ),
       body: Row(
         children: [
@@ -75,7 +85,7 @@ class _ChallengePageState extends State<ChallengePage> {
                     ),
                   ),
                 ),
-                Divider(),
+                const Divider(),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -87,7 +97,7 @@ class _ChallengePageState extends State<ChallengePage> {
               ],
             ),
           ),
-          VerticalDivider(),
+          const VerticalDivider(),
           Expanded(
             flex: 3,
             child: Column(
@@ -103,7 +113,7 @@ class _ChallengePageState extends State<ChallengePage> {
                 ),
                 ElevatedButton(
                   onPressed: _submitCode,
-                  child: Text('Submit'),
+                  child: const Text('Submit'),
                 ),
               ],
             ),

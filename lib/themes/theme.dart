@@ -3,8 +3,12 @@ import 'package:flutter_highlight/theme_map.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
+  static const double defaultFontSize = 14.0;
+  static const double titleFontSize = 20.0;
+  static const double borderRadius = 8.0;
+
   static TextStyle _baseTextStyle({
-    double fontSize = 14.0,
+    double fontSize = defaultFontSize,
     FontWeight fontWeight = FontWeight.normal,
     Color color = Colors.black,
   }) {
@@ -27,44 +31,33 @@ class AppTheme {
       iconTheme: IconThemeData(color: iconColor),
       titleTextStyle: _baseTextStyle(
         color: titleColor,
-        fontSize: 20,
+        fontSize: titleFontSize,
         fontWeight: FontWeight.bold,
       ),
       elevation: elevation,
     );
   }
 
-  static ButtonThemeData _baseButtonTheme({
-    Color buttonColor = Colors.orange,
-    double borderRadius = 8.0,
-  }) {
-    return ButtonThemeData(
-      buttonColor: buttonColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(borderRadius),
-      ),
-    );
-  }
-
   static ElevatedButtonThemeData _baseElevatedButtonTheme({
     Color backgroundColor = Colors.orange,
-    double borderRadius = 8.0,
+    double borderRadius = AppTheme.borderRadius,
   }) {
     return ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(borderRadius),
-              ),
-              backgroundColor: backgroundColor)
-          .merge(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
+        backgroundColor: backgroundColor,
+      ).merge(
         ButtonStyle(
-          foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-            return states.contains(MaterialState.disabled)
+          foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+            return states.contains(WidgetState.disabled)
                 ? Colors.grey
                 : Colors.white;
           }),
-          textStyle: MaterialStateProperty.all<TextStyle>(
-              const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          textStyle: WidgetStateProperty.all<TextStyle>(
+            const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );
@@ -72,7 +65,7 @@ class AppTheme {
 
   static OutlinedButtonThemeData _baseOutlinedButtonTheme({
     Color sideColor = Colors.white,
-    double borderRadius = 8.0,
+    double borderRadius = AppTheme.borderRadius,
   }) {
     return OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
@@ -82,14 +75,14 @@ class AppTheme {
         side: BorderSide(color: sideColor),
       ).merge(
         ButtonStyle(
-          foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-            return states.contains(MaterialState.disabled)
+          foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+            return states.contains(WidgetState.disabled)
                 ? Colors.grey
-                : states.contains(MaterialState.pressed)
+                : states.contains(WidgetState.pressed)
                     ? Colors.orange
                     : Colors.white;
           }),
-          textStyle: MaterialStateProperty.all<TextStyle>(
+          textStyle: WidgetStateProperty.all<TextStyle>(
             const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
@@ -113,7 +106,7 @@ class AppTheme {
       ),
       disabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Color.fromARGB(255, 150, 147, 147)),
+        borderSide: const BorderSide(color: Color.fromARGB(255, 150, 147, 147)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
@@ -127,24 +120,26 @@ class AppTheme {
   static TextTheme _baseTextTheme(Color color) {
     return TextTheme(
       displayLarge: _baseTextStyle(
-          fontSize: 24, fontWeight: FontWeight.bold, color: color),
+          fontSize: 34, fontWeight: FontWeight.bold, color: color),
       displayMedium: _baseTextStyle(
-          fontSize: 20, fontWeight: FontWeight.bold, color: color),
+          fontSize: 28, fontWeight: FontWeight.bold, color: color),
       displaySmall: _baseTextStyle(
-          fontSize: 18, fontWeight: FontWeight.bold, color: color),
+          fontSize: 24, fontWeight: FontWeight.bold, color: color),
+      headlineLarge: _baseTextStyle(
+          fontSize: 32, fontWeight: FontWeight.bold, color: color),
       headlineMedium: _baseTextStyle(
-          fontSize: 16, fontWeight: FontWeight.bold, color: color),
+          fontSize: 28, fontWeight: FontWeight.bold, color: color),
       headlineSmall: _baseTextStyle(
-          fontSize: 14, fontWeight: FontWeight.bold, color: color),
+          fontSize: 24, fontWeight: FontWeight.bold, color: color),
       titleLarge: _baseTextStyle(
-          fontSize: 12, fontWeight: FontWeight.bold, color: color),
+          fontSize: 22, fontWeight: FontWeight.bold, color: color),
       titleMedium: _baseTextStyle(
-          fontSize: 10, fontWeight: FontWeight.bold, color: color),
+          fontSize: 20, fontWeight: FontWeight.bold, color: color),
       titleSmall: _baseTextStyle(
-          fontSize: 8, fontWeight: FontWeight.bold, color: color),
-      bodyLarge: _baseTextStyle(fontSize: 14, color: color),
-      bodyMedium: _baseTextStyle(fontSize: 12, color: color),
-      bodySmall: _baseTextStyle(fontSize: 10, color: color),
+          fontSize: 18, fontWeight: FontWeight.bold, color: color),
+      bodyLarge: _baseTextStyle(fontSize: 16, color: color),
+      bodyMedium: _baseTextStyle(fontSize: 14, color: color),
+      bodySmall: _baseTextStyle(fontSize: 12, color: color),
       labelLarge: _baseTextStyle(
           fontSize: 14, fontWeight: FontWeight.bold, color: color),
       labelMedium: _baseTextStyle(
@@ -154,9 +149,7 @@ class AppTheme {
     );
   }
 
-  static ThemeData baseTheme = ThemeData();
-
-  static ThemeData lightTheme = baseTheme.copyWith(
+  static ThemeData lightTheme = ThemeData(
     primaryColor: Colors.amber,
     appBarTheme: _baseAppBarTheme(),
     colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber).copyWith(
@@ -164,13 +157,12 @@ class AppTheme {
       secondary: Colors.deepOrange,
     ),
     inputDecorationTheme: _baseInputDecorationTheme(
-        Color.fromARGB(255, 21, 21, 21),
+        const Color.fromARGB(255, 21, 21, 21),
         focusedBorderColor: Colors.orange,
         borderColor: Colors.black),
-    buttonTheme: _baseButtonTheme(),
     elevatedButtonTheme: _baseElevatedButtonTheme(),
     outlinedButtonTheme: _baseOutlinedButtonTheme(),
-    textTheme: _baseTextTheme(Color.fromARGB(255, 21, 21, 21)),
+    textTheme: _baseTextTheme(const Color.fromARGB(255, 21, 21, 21)),
   );
 
   static ThemeData darkTheme = ThemeData.dark().copyWith(
@@ -182,7 +174,6 @@ class AppTheme {
     appBarTheme: _baseAppBarTheme(),
     inputDecorationTheme: _baseInputDecorationTheme(Colors.white,
         focusedBorderColor: Colors.amber, borderColor: Colors.white),
-    buttonTheme: _baseButtonTheme(),
     elevatedButtonTheme: _baseElevatedButtonTheme(),
     outlinedButtonTheme: _baseOutlinedButtonTheme(),
     textTheme: _baseTextTheme(Colors.white),
@@ -226,7 +217,7 @@ enum SyntaxTheme {
   }
 
   String get themeName {
-    return _camelCaseToTitle(this.toString().split('.').last);
+    return _camelCaseToTitle(toString().split('.').last);
   }
 
   Map<String, TextStyle> get theme {

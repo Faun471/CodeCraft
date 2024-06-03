@@ -275,7 +275,7 @@ class SettingsState extends State<Settings> {
                       onDone: (context, _) => Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => AccountSetup(
+                          builder: (context) => const AccountSetup(
                             Login(),
                           ),
                         ),

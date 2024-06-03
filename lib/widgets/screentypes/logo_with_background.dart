@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class LogoWithBackground extends StatelessWidget {
   final bool isVertical;
 
-  LogoWithBackground({Key? key, required this.isVertical}) : super(key: key);
+  const LogoWithBackground({super.key, required this.isVertical});
 
   @override
   Widget build(BuildContext context) {
@@ -16,11 +16,14 @@ class LogoWithBackground extends StatelessWidget {
           : (MediaQuery.sizeOf(context).width / 1.75),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
-          topRight: isVertical ? Radius.circular(0) : Radius.circular(20),
-          bottomRight: isVertical ? Radius.circular(0) : Radius.circular(20),
-          bottomLeft: isVertical ? Radius.circular(0) : Radius.circular(0),
+          topRight:
+              isVertical ? const Radius.circular(0) : const Radius.circular(20),
+          bottomRight:
+              isVertical ? const Radius.circular(0) : const Radius.circular(20),
+          bottomLeft:
+              isVertical ? const Radius.circular(0) : const Radius.circular(0),
         ),
-        image: DecorationImage(
+        image: const DecorationImage(
           image: AssetImage('assets/images/bg-psych.png'),
           fit: BoxFit.cover,
         ),
@@ -28,6 +31,10 @@ class LogoWithBackground extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
+            top: 25,
+            left: 0,
+            right: 0,
+            bottom: 0,
             child: Align(
               alignment: Alignment.center,
               child: Image.asset(
@@ -43,10 +50,6 @@ class LogoWithBackground extends StatelessWidget {
                 scale: isVertical ? 0.9 : 1.0,
               ),
             ),
-            top: 25,
-            left: 0,
-            right: 0,
-            bottom: 0,
           )
         ],
       ),

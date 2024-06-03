@@ -3,7 +3,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/account_setup/forgot_password.dart';
-import 'package:codecraft/screens/body.dart';
+import 'package:codecraft/screens/apprentice/apprentice_home.dart';
 import 'package:codecraft/screens/account_setup/register.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/services/auth_helper.dart';
@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
+  const Login({super.key});
 
   @override
   _LoginState createState() => _LoginState();
@@ -31,17 +31,17 @@ class _LoginState extends State<Login> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(left: 20, right: 20, top: 20),
+          padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
           child: AutoSizeText(
             'Welcome Back!',
             style: AdaptiveTheme.of(context).theme.textTheme.displayLarge,
           ),
         ),
         const SizedBox(height: 10),
-        Padding(child: LoginForm(), padding: EdgeInsets.all(20)),
+        Padding(padding: const EdgeInsets.all(20), child: loginForm()),
         const SizedBox(height: 20),
         Padding(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Row(
             children: [
               Expanded(
@@ -51,7 +51,7 @@ class _LoginState extends State<Login> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Text(
                   'Or log in with',
                   style: AdaptiveTheme.of(context).theme.textTheme.bodyLarge,
@@ -67,16 +67,21 @@ class _LoginState extends State<Login> {
           ),
         ),
         Padding(
+          padding: const EdgeInsets.all(20),
           child: FilledButton(
             onPressed: () {
               Auth(DatabaseHelper().auth).signInWithGoogle().then(
                 (error) {
                   // If the error message is null, then the registration is successful.
-                  if (error == null) {
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) {
-                      return const Body();
-                    }));
+                  if (error == null && context.mounted) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return const Body();
+                        },
+                      ),
+                    );
                   } else {
                     // _showErrorDialog(context, error);
                   }
@@ -84,16 +89,16 @@ class _LoginState extends State<Login> {
               );
             },
             style: ButtonStyle(
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                   const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(4.0)),
                       side: BorderSide(color: Color.fromARGB(255, 21, 21, 21))),
                 ),
-                backgroundColor: MaterialStateProperty.resolveWith(
+                backgroundColor: WidgetStateProperty.resolveWith(
                   (states) => Colors.white,
                 ),
                 minimumSize:
-                    MaterialStateProperty.all(const Size.fromHeight(60))),
+                    WidgetStateProperty.all(const Size.fromHeight(60))),
             child: const Wrap(
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
@@ -113,18 +118,17 @@ class _LoginState extends State<Login> {
               ],
             ),
           ),
-          padding: EdgeInsets.all(20),
         ),
         const SizedBox(height: 20),
       ],
     );
   }
 
-  Form LoginForm() {
-    final _formKey = GlobalKey<FormState>();
+  Form loginForm() {
+    final formKey = GlobalKey<FormState>();
 
     return Form(
-      key: _formKey,
+      key: formKey,
       autovalidateMode: AutovalidateMode.disabled,
       child: Column(
         children: [
@@ -145,8 +149,8 @@ class _LoginState extends State<Login> {
             children: [
               TextButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context){
-                    return AccountSetup(ForgotPasswordPage());
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return const AccountSetup(ForgotPasswordPage());
                   }));
                 },
                 child: Text(
@@ -165,12 +169,16 @@ class _LoginState extends State<Login> {
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
-              if (_formKey.currentState!.validate()) {
+              if (formKey.currentState!.validate()) {
                 Auth(DatabaseHelper().auth)
                     .loginUser(emailController.text, passwordController.text)
                     .then(
                   (error) {
                     if (error == null) {
+                      if (!mounted) {
+                        return;
+                      }
+
                       Navigator.pushReplacement(context,
                           MaterialPageRoute(builder: (context) {
                         return LoadingScreen(
@@ -181,12 +189,16 @@ class _LoginState extends State<Login> {
                           onDone: (context, _) {
                             Navigator.pushReplacement(context,
                                 MaterialPageRoute(builder: (context) {
-                              return Body();
+                              return const Body();
                             }));
                           },
                         );
                       }));
                     } else {
+                      if (!mounted) {
+                        return;
+                      }
+
                       Utils.displayDialog(
                         context: context,
                         title: 'Error',
@@ -204,7 +216,7 @@ class _LoginState extends State<Login> {
             },
             style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(60)),
-            child: Text('Log In'),
+            child: const Text('Log In'),
           ),
           const SizedBox(height: 10),
           OutlinedButton(
@@ -216,7 +228,7 @@ class _LoginState extends State<Login> {
             },
             style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(60),
-                side: BorderSide(color: Colors.grey)),
+                side: const BorderSide(color: Colors.grey)),
             child: Text(
               'Create Account',
               style: AdaptiveTheme.of(context).theme.textTheme.labelLarge,

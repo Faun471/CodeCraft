@@ -10,9 +10,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:yaml/yaml.dart';
 
 class Modules extends StatefulWidget {
-  final bool isCompleted;
-
-  const Modules({super.key, required this.isCompleted});
+  const Modules({super.key});
 
   @override
   ModulesState createState() => ModulesState();
@@ -45,7 +43,7 @@ class ModulesState extends State<Modules> {
         return ListView.builder(
           itemCount: snapshot.data!.length,
           itemBuilder: (context, index) {
-            ModuleCard item = ModuleCard(
+            return ModuleCard(
               title: snapshot.data![index].title,
               description: snapshot.data![index].description,
               unlockLevel: snapshot.data![index].level,
@@ -62,8 +60,7 @@ class ModulesState extends State<Modules> {
                           )
                         ],
                         onDone: (context, snapshot1) async {
-                          Navigator.pop(context);
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => MarkdownViewer(
@@ -79,20 +76,6 @@ class ModulesState extends State<Modules> {
                 );
               },
             );
-
-            if (currentLevel == -1) {
-              return null;
-            }
-
-            if (currentLevel == 0) {
-              return item;
-            } else if (!widget.isCompleted && item.unlockLevel > currentLevel) {
-              return item;
-            } else if (widget.isCompleted && item.unlockLevel <= currentLevel) {
-              return item;
-            } else {
-              return SizedBox.shrink();
-            }
           },
         );
       },

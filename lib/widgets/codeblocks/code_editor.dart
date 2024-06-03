@@ -33,14 +33,14 @@ class _CodeEditorWidgetState extends State<CodeEditorWidget> {
       promptsBuilder: DefaultCodeAutocompletePromptsBuilder(
         language: widget.selectedLanguage ?? langDart,
         directPrompts: [
-          CodeKeywordPrompt(word: 'String'),
-          CodeFunctionPrompt(word: 'System.out.println', type: 'void'),
-          CodeFunctionPrompt(word: 'main', type: 'void'),
+          const CodeKeywordPrompt(word: 'String'),
+          const CodeFunctionPrompt(word: 'System.out.println', type: 'void'),
+          const CodeFunctionPrompt(word: 'main', type: 'void'),
         ],
       ),
       child: CodeEditor(
         controller: widget.controller,
-        chunkAnalyzer: DefaultCodeChunkAnalyzer(),
+        chunkAnalyzer: const DefaultCodeChunkAnalyzer(),
         indicatorBuilder:
             (context, editingController, chunkController, notifier) {
           return Row(
@@ -57,7 +57,7 @@ class _CodeEditorWidgetState extends State<CodeEditorWidget> {
         findBuilder: (context, controller, readOnly) =>
             CodeFindPanelView(controller: controller, readOnly: readOnly),
         style: CodeEditorStyle(
-          backgroundColor: Color.fromARGB(255, 30, 30, 30),
+          backgroundColor: const Color.fromARGB(255, 30, 30, 30),
           fontFamily: GoogleFonts.firaCode().fontFamily,
           textColor: Colors.white,
           fontSize: 14.0,
@@ -148,7 +148,7 @@ class _DefaultCodeAutocompleteListViewState
                   alignment: Alignment.centerLeft,
                   decoration: BoxDecoration(
                       color: index == widget.notifier.value.index
-                          ? Color.fromARGB(255, 60, 60, 60)
+                          ? const Color.fromARGB(255, 60, 60, 60)
                           : null,
                       borderRadius: radius),
                   child: RichText(
@@ -169,7 +169,7 @@ class _DefaultCodeAutocompleteListViewState
 
 extension _CodePromptExtension on CodePrompt {
   InlineSpan createSpan(BuildContext context, String input) {
-    final TextStyle style = TextStyle(color: Colors.white);
+    const TextStyle style = TextStyle(color: Colors.white);
     final InlineSpan span = style.createSpan(
       value: word,
       anchor: input,

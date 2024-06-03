@@ -2,9 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 class AppUser extends ChangeNotifier {
-  static AppUser _instance = AppUser._privateConstructor();
+  static final AppUser _instance = AppUser._privateConstructor();
 
   AppUser._privateConstructor({Map<String, dynamic>? data})
       : _data = data ?? {};
@@ -25,7 +26,7 @@ class AppUser extends ChangeNotifier {
         _data = doc.data() as Map<String, dynamic>;
       }
 
-      print(_data);
+      Logger('AppUser').info('Fetched data: $_data');
     });
     notifyListeners();
   }
@@ -33,6 +34,12 @@ class AppUser extends ChangeNotifier {
   Future<void> updateData(Map<String, dynamic> newData) async {
     _data = {..._data, ...newData};
     await DatabaseHelper().currentUser.set(data, SetOptions(merge: true));
+    notifyListeners();
+  }
+
+  Future<void> levelUp() async {
+    await updateData({'level': _data['level'] + 1});
+
     notifyListeners();
   }
 

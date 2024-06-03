@@ -10,10 +10,8 @@ abstract class Io {
     Reference storageReference = FirebaseStorage.instance.ref().child(
         '${DatabaseHelper().auth.currentUser!.email!}/profile_pictures/$fileName');
 
-    UploadTask uploadTask = storageReference.putData(
+    storageReference.putData(
         image, SettableMetadata(contentType: 'image/jpeg'));
-
-    await uploadTask.whenComplete(() => print('Image uploaded'));
 
     return fileName;
   }

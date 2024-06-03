@@ -1,8 +1,9 @@
+import 'package:codecraft/screens/mentor/create_challenge_screen.dart';
 import 'package:codecraft/screens/mentor/manage_requests.dart';
 import 'package:flutter/material.dart';
 
 class MentorDashboard extends StatefulWidget {
-  const MentorDashboard({Key? key}) : super(key: key);
+  const MentorDashboard({super.key});
 
   @override
   _MentorDashboardState createState() => _MentorDashboardState();
@@ -13,7 +14,7 @@ class _MentorDashboardState extends State<MentorDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Mentor Dashboard'),
+        title: const Text('Mentor Dashboard'),
       ),
       body: Center(
         child: Column(
@@ -24,9 +25,18 @@ class _MentorDashboardState extends State<MentorDashboard> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => ManageRequestsScreen()));
+                        builder: (context) => const ManageRequestsScreen()));
               },
-              child: Text('Manage Requests'),
+              child: const Text('Manage Requests'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CreateChallengeScreen()));
+              },
+              child: const Text('Create Challenge'),
             ),
           ],
         ),

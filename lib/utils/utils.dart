@@ -44,20 +44,28 @@ class Utils {
             buttonText != null && buttonText.isNotEmpty && isDismissible
                 ? IconsButton(
                     onPressed: () {
-                      if (onPressed != null)
+                      if (onPressed != null) {
                         onPressed();
-                      else
+                      } else {
                         Navigator.pop(context);
+                      }
                     },
                     text: buttonText,
                     iconData: Icons.close,
                     color: Theme.of(context).primaryColorDark,
-                    textStyle: TextStyle(
+                    textStyle: const TextStyle(
                       color: Colors.white,
                     ),
                   )
                 : Container()
           ],
     );
+  }
+
+  static String toSnakeCase(String text) {
+    return text.replaceAllMapped(
+        RegExp(r'[A-Z]'),
+        (Match match) =>
+            (match.start > 0 ? '_' : '') + match.group(0)!.toLowerCase());
   }
 }

@@ -1,4 +1,4 @@
-import 'package:codecraft/screens/body.dart';
+import 'package:codecraft/screens/apprentice/apprentice_home.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/services/auth_helper.dart';
 import 'package:codecraft/services/database_helper.dart';
@@ -8,8 +8,7 @@ import 'package:flutter/material.dart';
 class AccountTypeSelection extends StatefulWidget {
   final Map<String, String> userData;
 
-  const AccountTypeSelection({Key? key, required this.userData})
-      : super(key: key);
+  const AccountTypeSelection({super.key, required this.userData});
 
   @override
   _AccountTypeSelectionState createState() => _AccountTypeSelectionState();
@@ -37,9 +36,7 @@ class _AccountTypeSelectionState extends State<AccountTypeSelection> {
           padding: const EdgeInsets.all(16.0),
           child: Center(
             child: Text(
-              'This action cannot be undone. Please select your account type carefully.\n' +
-                  'You will not be able to change this later.\n' +
-                  'You can always create a new account with a different account type.',
+              'This action cannot be undone. Please select your account type carefully.\nYou will not be able to change this later.\nYou can always create a new account with a different account type.',
               style: Theme.of(context).textTheme.titleLarge!.copyWith(
                     color: Colors.grey,
                   ),
@@ -86,8 +83,6 @@ class _AccountTypeSelectionState extends State<AccountTypeSelection> {
                     )
                   ],
                   onDone: (context, _) async {
-                    print('Done');
-
                     if (DatabaseHelper().auth.currentUser == null) {
                       return;
                     }

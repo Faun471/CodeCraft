@@ -7,19 +7,25 @@ class ChallengeService {
   Future<void> createChallenge(
       Challenge challenge, String organizationId) async {
     try {
-      await _firestore.collection('challenges').add({
+      await FirebaseFirestore.instance
+          .collection('challenges')
+          .doc(challenge.id)
+          .set({
         'instructions': challenge.instructions,
         'sampleCode': challenge.sampleCode,
         'className': challenge.className,
         'unitTests': challenge.unitTests
             .map((test) => {
                   'input': test.input,
-                  'expectedOutput': test.expectedOutput,
+                  'expectedOutput': {
+                    'value': test.expectedOutput.value,
+                    'type': test.expectedOutput.type,
+                  },
                   'methodName': test.methodName,
                 })
             .toList(),
         'organizationId': organizationId,
-      });
+      }, SetOptions(merge: true));
     } catch (e) {
       throw Exception('Error creating challenge: $e');
     }
@@ -53,8 +59,11 @@ class ChallengeService {
   }
 
   Future<Challenge> getChallenge(String challengeId) async {
-    DocumentSnapshot doc =
-        await _firestore.collection('challenges').doc(challengeId).get();
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('challenges')
+        .doc(challengeId)
+        .get();
+
     return Challenge(
       id: doc.id,
       instructions: doc['instructions'],
@@ -63,7 +72,10 @@ class ChallengeService {
       unitTests: (doc['unitTests'] as List)
           .map((e) => UnitTest(
                 input: e['input'],
-                expectedOutput: e['expectedOutput'],
+                expectedOutput: ExpectedOutput(
+                  value: e['expectedOutput']['value'],
+                  type: e['expectedOutput']['type'],
+                ),
                 methodName: e['methodName'],
               ))
           .toList(),
@@ -73,11 +85,9 @@ class ChallengeService {
   Future<void> markChallengeAsCompleted(
       String userId, String challengeId) async {
     try {
-      await _firestore.collection('completedChallenges').add({
-        'userId': userId,
-        'challengeId': challengeId,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
+      await _firestore.collection('completedChallenges').doc(userId).set({
+        'challengeIds': FieldValue.arrayUnion([challengeId]),
+      }, SetOptions(merge: true));
     } catch (e) {
       throw Exception('Error marking challenge as completed: $e');
     }

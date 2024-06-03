@@ -1,13 +1,15 @@
-import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/challenge.dart';
-
-import 'package:codecraft/screens/apprentice/challenge_page.dart';
+import 'package:html/dom.dart' as h;
+import 'package:html/parser.dart';
+import 'package:html/dom_parsing.dart';
+import 'package:codecraft/screens/apprentice/challenge_screen.dart';
+import 'package:codecraft/screens/loading_screen.dart';
+import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/themes/theme.dart';
 import 'package:codecraft/widgets/codeblocks/code_wrapper.dart';
-import 'package:codecraft/widgets/screentypes/split_screen.dart';
 import 'package:highlight/highlight.dart' show Node, highlight;
-import 'package:markdown_editable_textinput/markdown_text_input.dart';
 import 'package:markdown_widget/markdown_widget.dart';
+import 'package:markdown/markdown.dart' as m;
 import 'package:flutter/material.dart';
 
 class MarkdownViewer extends StatefulWidget {
@@ -25,8 +27,6 @@ class MarkdownViewer extends StatefulWidget {
 }
 
 class MarkdownViewerState extends State<MarkdownViewer> {
-  late bool isEditMode = false;
-
   TextEditingController controller = TextEditingController();
   FocusNode focusNode = FocusNode();
   String get markdownData => controller.text;
@@ -66,7 +66,7 @@ class MarkdownViewerState extends State<MarkdownViewer> {
           theme: SyntaxTheme.dracula,
         );
       },
-    )
+    ),
   ];
 
   late MarkdownConfig config;
@@ -79,23 +79,12 @@ class MarkdownViewerState extends State<MarkdownViewer> {
         ? MarkdownConfig.darkConfig
         : MarkdownConfig.defaultConfig.copy(
             configs: [
-              PConfig(textStyle: TextStyle(fontSize: 16, color: Colors.black)),
+              const PConfig(
+                  textStyle: TextStyle(fontSize: 16, color: Colors.black)),
             ],
           );
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          if (AppUser.instance.data['accountType'] == 'teacher' && isEditMode)
-            IconButton(
-              icon: Icon(Icons.save_rounded),
-              onPressed: () {},
-            ),
-        ],
-      ),
-      floatingActionButton: AppUser.instance.data['accountType'] == 'teacher'
-          ? buildFloatingActionButton()
-          : null,
-      drawer: isVertical && !isEditMode
+      drawer: isVertical
           ? Drawer(
               child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -115,16 +104,11 @@ class MarkdownViewerState extends State<MarkdownViewer> {
           : null,
       body: Row(
         children: [
-          if (!isVertical && !isEditMode) Expanded(child: buildTocWidget()),
-          if (!isVertical && isEditMode)
+          if (!isVertical) Expanded(child: buildTocWidget()),
+          if (!isVertical)
             Expanded(
-              child: DraggableSplitScreen(
-                leftWidget: buildEditText(),
-                rightWidget: buildMarkdown(markdownData, config),
-              ),
+              child: buildMarkdown(markdownData, config),
             ),
-          if (!isEditMode)
-            Expanded(flex: 3, child: buildMarkdown(markdownData, config))
         ],
       ),
     );
@@ -144,70 +128,15 @@ class MarkdownViewerState extends State<MarkdownViewer> {
             config: config.copy(
               configs: configs,
             ),
-            padding: EdgeInsets.all(24),
+            markdownGenerator: MarkdownGenerator(
+              generators: [
+                challengeGeneratorWithTag,
+              ],
+              textGenerator: (node, config, visitor) =>
+                  CustomTextNode(node.textContent, config, visitor),
+            ),
+            padding: const EdgeInsets.all(24),
           ),
-        ),
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.1,
-          width: MediaQuery.of(context).size.width * 0.5,
-          child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChallengePage(
-                      challenge: Challenge(
-                          id: 'lesson1_challenge1',
-                          instructions:
-                              'Write a function that returns "Hello, World!" as a string.',
-                          sampleCode:
-                              'class HelloWorld {\n\tpublic String helloWorld() {\n \t\t// Write your code here\n\t}\n}',
-                          className: 'HelloWorld',
-                          unitTests: [
-                            UnitTest(
-                              input: '',
-                              expectedOutput: ExpectedOutput(
-                                value: 'Hello, World!',
-                                type: 'String',
-                              ),
-                              methodName: 'helloWorld',
-                            )
-                          ]),
-                    ),
-                  ),
-                );
-              },
-              child: Text('Proceed to challenge')),
-        )
-      ],
-    );
-  }
-
-  Widget buildFloatingActionButton() {
-    return FloatingActionButton(
-      isExtended: true,
-      onPressed: () {
-        setState(() {
-          isEditMode = !isEditMode;
-        });
-      },
-      child: Icon(
-        isEditMode ? Icons.edit_off : Icons.edit,
-        color: Colors.white,
-      ),
-    );
-  }
-
-  Widget buildEditText() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        MarkdownTextInput(
-          () {},
-          controller.text,
-          controller: controller,
-          maxLines: 25,
         ),
       ],
     );
@@ -252,7 +181,7 @@ class _SyntaxHighlighter {
     var currentSpans = spans;
     List<List<TextSpan>> stack = [];
 
-    _traverse(Node node) {
+    traverse(Node node) {
       if (node.value != null) {
         currentSpans.add(node.className == null
             ? TextSpan(text: node.value)
@@ -264,19 +193,224 @@ class _SyntaxHighlighter {
         stack.add(currentSpans);
         currentSpans = tmp;
 
-        node.children!.forEach((n) {
-          _traverse(n);
+        for (var n in node.children!) {
+          traverse(n);
           if (n == node.children!.last) {
             currentSpans = stack.isEmpty ? spans : stack.removeLast();
           }
-        });
+        }
       }
     }
 
     for (var node in nodes) {
-      _traverse(node);
+      traverse(node);
     }
 
     return spans;
+  }
+}
+
+SpanNodeGeneratorWithTag challengeGeneratorWithTag = SpanNodeGeneratorWithTag(
+    tag: _challengeTag,
+    generator: (e, config, visitor) => ChallengeButtonNode(e.attributes));
+
+const _challengeTag = 'challenge';
+
+class ChallengeButtonNode extends ElementNode {
+  final Map<String, String> attributes;
+
+  ChallengeButtonNode(this.attributes);
+
+  @override
+  InlineSpan build() {
+    String? challengeId;
+
+    if (attributes.containsKey('challenge-id')) {
+      challengeId = attributes['challenge-id'];
+    }
+
+    return WidgetSpan(child: ChallengeButton(challengeId: challengeId));
+  }
+}
+
+class ChallengeButton extends StatefulWidget {
+  final String? challengeId;
+
+  const ChallengeButton({super.key, this.challengeId});
+
+  @override
+  _ChallengeButtonState createState() => _ChallengeButtonState();
+}
+
+class _ChallengeButtonState extends State<ChallengeButton> {
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.all(Colors.blue),
+        fixedSize: WidgetStateProperty.all(const Size(200, 50)),
+      ),
+      onPressed: () async {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LoadingScreen(
+              futures: [
+                ChallengeService().getChallenge(widget.challengeId!),
+              ],
+              onDone: (context, p1) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChallengeScreen(
+                      challenge: p1.data[0] as Challenge,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
+      child: const Text('Proceed to challenge'),
+    );
+  }
+}
+
+class CustomTextNode extends ElementNode {
+  final String text;
+  final MarkdownConfig config;
+  final WidgetVisitor visitor;
+
+  CustomTextNode(this.text, this.config, this.visitor);
+
+  @override
+  void onAccepted(SpanNode parent) {
+    final textStyle = config.p.textStyle.merge(parentStyle);
+    children.clear();
+    if (!text.contains(htmlRep)) {
+      accept(TextNode(text: text, style: textStyle));
+      return;
+    }
+    final spans = parseHtml(
+      m.Text(text),
+      visitor: WidgetVisitor(
+        config: visitor.config,
+        generators: visitor.generators,
+        richTextBuilder: visitor.richTextBuilder,
+      ),
+      parentStyle: parentStyle,
+    );
+    for (var element in spans) {
+      accept(element);
+    }
+  }
+}
+
+void htmlToMarkdown(h.Node? node, int deep, List<m.Node> mNodes) {
+  if (node == null) return;
+  if (node is h.Text) {
+    mNodes.add(m.Text(node.text));
+  } else if (node is h.Element) {
+    final tag = node.localName;
+    List<m.Node> children = [];
+    for (var e in node.children) {
+      htmlToMarkdown(e, deep + 1, children);
+    }
+    m.Element element;
+    if (tag == MarkdownTag.img.name || tag == 'video') {
+      element = HtmlElement(tag!, children, node.text);
+      element.attributes.addAll(node.attributes.cast());
+    } else {
+      element = HtmlElement(tag!, children, node.text);
+      element.attributes.addAll(node.attributes.cast());
+    }
+    mNodes.add(element);
+  }
+}
+
+final RegExp htmlRep = RegExp(r'<[^>]*>', multiLine: true, caseSensitive: true);
+
+///parse [m.Node] to [h.Node]
+List<SpanNode> parseHtml(
+  m.Text node, {
+  ValueCallback<dynamic>? onError,
+  WidgetVisitor? visitor,
+  TextStyle? parentStyle,
+}) {
+  try {
+    final text = node.textContent.replaceAll(
+        visitor?.splitRegExp ?? WidgetVisitor.defaultSplitRegExp, '');
+    if (!text.contains(htmlRep)) return [TextNode(text: node.text)];
+    h.DocumentFragment document = parseFragment(text);
+    return HtmlToSpanVisitor(visitor: visitor, parentStyle: parentStyle)
+        .toVisit(document.nodes.toList());
+  } catch (e) {
+    onError?.call(e);
+    return [TextNode(text: node.text)];
+  }
+}
+
+class HtmlElement extends m.Element {
+  @override
+  final String textContent;
+
+  HtmlElement(super.tag, super.children, this.textContent);
+}
+
+class HtmlToSpanVisitor extends TreeVisitor {
+  final List<SpanNode> _spans = [];
+  final List<SpanNode> _spansStack = [];
+  final WidgetVisitor visitor;
+  final TextStyle parentStyle;
+
+  HtmlToSpanVisitor({WidgetVisitor? visitor, TextStyle? parentStyle})
+      : visitor = visitor ?? WidgetVisitor(),
+        parentStyle = parentStyle ?? const TextStyle();
+
+  List<SpanNode> toVisit(List<h.Node> nodes) {
+    _spans.clear();
+    for (final node in nodes) {
+      final emptyNode = ConcreteElementNode(style: parentStyle);
+      _spans.add(emptyNode);
+      _spansStack.add(emptyNode);
+      visit(node);
+      _spansStack.removeLast();
+    }
+    final result = List.of(_spans);
+    _spans.clear();
+    _spansStack.clear();
+    return result;
+  }
+
+  @override
+  void visitText(h.Text node) {
+    final last = _spansStack.last;
+    if (last is ElementNode) {
+      final textNode = TextNode(text: node.text);
+      last.accept(textNode);
+    }
+  }
+
+  @override
+  void visitElement(h.Element node) {
+    final localName = node.localName ?? '';
+    final mdElement = m.Element(localName, []);
+    mdElement.attributes.addAll(node.attributes.cast());
+    SpanNode spanNode = visitor.getNodeByElement(mdElement, visitor.config);
+    if (spanNode is! ElementNode) {
+      final n = ConcreteElementNode(tag: localName, style: parentStyle);
+      n.accept(spanNode);
+      spanNode = n;
+    }
+    final last = _spansStack.last;
+    if (last is ElementNode) {
+      last.accept(spanNode);
+    }
+    _spansStack.add(spanNode);
+    for (var child in node.nodes.toList(growable: false)) {
+      visit(child);
+    }
+    _spansStack.removeLast();
   }
 }

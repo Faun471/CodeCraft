@@ -53,11 +53,11 @@ class InvitationService {
   }
 
   String _generateRandomCode(int length) {
-    const _allowedChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final _random = Random();
+    const allowedChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final random = Random();
 
     return List.generate(length, (index) {
-      return _allowedChars[_random.nextInt(_allowedChars.length)];
+      return allowedChars[random.nextInt(allowedChars.length)];
     }).join();
   }
 

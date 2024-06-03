@@ -14,8 +14,8 @@ class ImageRadioButton extends StatelessWidget {
     required this.value,
     this.isSelected = false,
     required this.onChanged,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -79,8 +79,8 @@ class ImageRadioButtonGroup extends StatefulWidget {
     this.mainAxisAlignment = MainAxisAlignment.start,
     this.crossAxisAlignment = CrossAxisAlignment.start,
     this.controller,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _ImageRadioButtonGroupState createState() => _ImageRadioButtonGroupState();

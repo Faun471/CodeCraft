@@ -15,6 +15,7 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:logging/logging.dart';
 
 class AccountEdit extends StatefulWidget {
   const AccountEdit({super.key});
@@ -51,14 +52,6 @@ class AccountEditState extends State<AccountEdit> {
     miController = TextEditingController();
     lastNameController = TextEditingController();
     suffixController = TextEditingController();
-    userData = {};
-
-    if (userData.isNotEmpty) return;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await getUserData();
-      print(userData);
-    });
   }
 
   Future<void> getUserData() async {
@@ -66,7 +59,6 @@ class AccountEditState extends State<AccountEdit> {
       if (value.exists) {
         userData = value.data() as Map<String, dynamic>;
         userData['displayName'] = user!.displayName;
-        print(user!.displayName);
       }
 
       setState(() {
@@ -122,7 +114,7 @@ class AccountEditState extends State<AccountEdit> {
                           right: 0,
                           child: IconButton(
                             style: ButtonStyle(
-                                backgroundColor: MaterialStateColor.resolveWith(
+                                backgroundColor: WidgetStateColor.resolveWith(
                                     (states) =>
                                         const Color.fromARGB(255, 212, 212, 212)
                                             .withOpacity(0.5))),
@@ -143,9 +135,9 @@ class AccountEditState extends State<AccountEdit> {
                   const SizedBox(height: 20),
                   TextField(
                     decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         labelText: 'Display Name',
-                        prefixIcon: Icon(Icons.person),
+                        prefixIcon: const Icon(Icons.person),
                         hintText: userData['displayName'] ?? 'Enter your name',
                         helperText: 'Leave blank to keep the same name'),
                     controller: displayNameController,
@@ -200,9 +192,9 @@ class AccountEditState extends State<AccountEdit> {
                         flex: 3,
                         child: TextField(
                           decoration: InputDecoration(
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
                               labelText: "First Name",
-                              prefixIcon: Icon(Icons.person),
+                              prefixIcon: const Icon(Icons.person),
                               hintText: userData['firstName'] ??
                                   'Enter your first name',
                               helperText:
@@ -215,7 +207,7 @@ class AccountEditState extends State<AccountEdit> {
                         flex: 1,
                         child: TextField(
                           decoration: InputDecoration(
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
                               labelText: "MI",
                               hintText:
                                   userData['mi'] ?? 'Enter your middle initial',
@@ -232,9 +224,9 @@ class AccountEditState extends State<AccountEdit> {
                         flex: 3,
                         child: TextField(
                           decoration: InputDecoration(
-                            border: OutlineInputBorder(),
+                            border: const OutlineInputBorder(),
                             labelText: "Last Name",
-                            prefixIcon: Icon(Icons.person),
+                            prefixIcon: const Icon(Icons.person),
                             hintText:
                                 userData['lastName'] ?? 'Enter your last name',
                             helperText:
@@ -248,7 +240,7 @@ class AccountEditState extends State<AccountEdit> {
                         flex: 1,
                         child: TextField(
                           decoration: InputDecoration(
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
                               labelText: "Suffix",
                               hintText:
                                   userData['suffix'] ?? 'Enter your suffix',
@@ -266,7 +258,7 @@ class AccountEditState extends State<AccountEdit> {
                         .elevatedButtonTheme
                         .style!
                         .copyWith(
-                          minimumSize: MaterialStateProperty.resolveWith<Size?>(
+                          minimumSize: WidgetStateProperty.resolveWith<Size?>(
                             (_) => const Size.fromHeight(60),
                           ),
                         ),
@@ -291,6 +283,10 @@ class AccountEditState extends State<AccountEdit> {
 
                             clearControllers();
                             imageChanged = false;
+
+                            if (!context.mounted) {
+                              return;
+                            }
 
                             Utils.displayDialog(
                               context: context,
@@ -331,7 +327,7 @@ class AccountEditState extends State<AccountEdit> {
           .uploadImageToStorage(imageFile)
           .then((value) async => getDownloadLink(value));
     } catch (error) {
-      print("Error updating profile picture: $error");
+      Logger('AccountEdit').severe('Error updating profile picture: $error');
     }
   }
 

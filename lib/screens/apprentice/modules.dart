@@ -1,5 +1,4 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/page.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/widgets/cards/module_card.dart';
@@ -17,13 +16,9 @@ class Modules extends StatefulWidget {
 }
 
 class ModulesState extends State<Modules> {
-  late int currentLevel = -1;
-
   @override
   void initState() {
     super.initState();
-
-    currentLevel = AppUser.instance.data!['level'];
   }
 
   @override
@@ -64,9 +59,8 @@ class ModulesState extends State<Modules> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => MarkdownViewer(
-                                  markdownData: snapshot1.data[0]!,
-                                  quizName:
-                                      'assets/quizzes/${snapshot.data![index].quizName}.yaml'),
+                                markdownData: snapshot1.data[0]!,
+                              ),
                             ),
                           );
                         },

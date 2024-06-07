@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:logging/logging.dart';
 
 class LoadingScreen extends StatefulWidget {
+  static const route = '/loading-screen';
+
   final List<Future> futures;
+
   final Function(BuildContext, AsyncSnapshot)? onDone;
 
   const LoadingScreen({
@@ -25,9 +27,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
         future: Future.wait(widget.futures),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            Logger('Loading Screen')
-                .info('LoadingScreen: All futures completed');
-
             Future.delayed(
               20.milliseconds,
               () {

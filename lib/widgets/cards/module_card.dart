@@ -2,10 +2,11 @@ import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-class ModuleCard extends StatefulWidget {
+class ModuleCard extends ConsumerStatefulWidget {
   final String title;
   final String description;
   final String? imageUrl;
@@ -37,34 +38,12 @@ class ModuleCard extends StatefulWidget {
   ModuleCardState createState() => ModuleCardState();
 }
 
-class ModuleCardState extends State<ModuleCard> {
-  late bool isLocked;
-  late int currentLevel = -1;
-
-  @override
-  void initState() {
-    super.initState();
-    updateLockState();
-  }
-
-  void updateLockState() async {
-    if (!mounted) return;
-
-    currentLevel = await AppUser.instance.data!['level'];
-    if (mounted) {
-      setState(() {
-        isLocked = currentLevel < widget.unlockLevel;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
+class ModuleCardState extends ConsumerState<ModuleCard> {
   @override
   Widget build(BuildContext context) {
+    final appUser = ref.read(appUserNotifierProvider).value!;
+
+    int currentLevel = appUser.data['level'] ?? 0;
     double screenWidth = MediaQuery.of(context).size.width;
     double imageWidth = screenWidth * (widget.imageWidthPercentage / 100);
     bool isLocked = currentLevel < widget.unlockLevel;

@@ -2,24 +2,24 @@
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:codecraft/services/auth/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/account_setup/account_type_selection.dart';
 import 'package:codecraft/screens/account_setup/login.dart';
 import 'package:codecraft/screens/apprentice/apprentice_home.dart';
-import 'package:codecraft/services/auth_helper.dart';
-import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/widgets/buttons/custom_text_fields.dart';
 
-class Register extends StatefulWidget {
+class Register extends ConsumerStatefulWidget {
   const Register({super.key});
 
   @override
   _RegisterState createState() => _RegisterState();
 }
 
-class _RegisterState extends State<Register> {
+class _RegisterState extends ConsumerState<Register> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController miController = TextEditingController();
@@ -154,17 +154,15 @@ class _RegisterState extends State<Register> {
           const SizedBox(height: 10),
           Row(
             children: [
-              CustomTextField(
-                labelText: 'Email',
-                icon: Icons.email,
-                mode: ValidationMode.email,
-                controller: emailController,
+              Expanded(
+                child: CustomTextField(
+                  labelText: 'Email',
+                  icon: Icons.email,
+                  mode: ValidationMode.email,
+                  controller: emailController,
+                ),
               ),
-              CustomTextField(
-                labelText: 'Last Name',
-                icon: Icons.person,
-                controller: lastNameController,
-              ),
+              const SizedBox(width: 10),
             ],
           ),
           const SizedBox(height: 10),
@@ -190,11 +188,10 @@ class _RegisterState extends State<Register> {
         ),
         const SizedBox(width: 10),
         Expanded(
-          flex: 1,
           child: CustomTextField(
-            labelText: 'MI',
-            isRequired: false,
-            controller: miController,
+            labelText: 'Last Name',
+            icon: Icons.person,
+            controller: lastNameController,
           ),
         ),
       ],
@@ -276,7 +273,7 @@ class _RegisterState extends State<Register> {
   }
 
   void _signInWithGoogle() async {
-    final error = await Auth(DatabaseHelper().auth).signInWithGoogle();
+    final error = await ref.watch(authProvider).signInWithGoogle();
     if (error == null) {
       if (!mounted) {
         return;
@@ -284,7 +281,7 @@ class _RegisterState extends State<Register> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Body()),
+        MaterialPageRoute(builder: (context) => const ApprenticeHome()),
       );
     }
   }
@@ -297,12 +294,12 @@ class _RegisterState extends State<Register> {
           builder: (context) => AccountSetup(
             AccountTypeSelection(
               userData: {
-                'first_name': firstNameController.text,
+                'firstName': firstNameController.text,
                 'mi': miController.text,
-                'last_name': lastNameController.text,
+                'lastName': lastNameController.text,
                 'suffix': suffixController.text,
                 'email': emailController.text,
-                'phone_number': phoneNumberController.text,
+                'phoneNumber': phoneNumberController.text,
                 'password': passwordController.text,
               },
             ),

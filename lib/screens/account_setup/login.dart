@@ -1,26 +1,27 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:codecraft/models/app_user.dart';
+import 'package:codecraft/providers/theme_provider.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/account_setup/forgot_password.dart';
 import 'package:codecraft/screens/apprentice/apprentice_home.dart';
 import 'package:codecraft/screens/account_setup/register.dart';
 import 'package:codecraft/screens/loading_screen.dart';
-import 'package:codecraft/services/auth_helper.dart';
-import 'package:codecraft/services/database_helper.dart';
+import 'package:codecraft/screens/mentor/mentor_home.dart';
+import 'package:codecraft/services/auth/auth_provider.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/buttons/custom_text_fields.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Login extends StatefulWidget {
+class Login extends ConsumerStatefulWidget {
   const Login({super.key});
 
   @override
   _LoginState createState() => _LoginState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginState extends ConsumerState<Login> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final FocusNode focusNode = FocusNode();
@@ -70,7 +71,7 @@ class _LoginState extends State<Login> {
           padding: const EdgeInsets.all(20),
           child: FilledButton(
             onPressed: () {
-              Auth(DatabaseHelper().auth).signInWithGoogle().then(
+              ref.watch(authProvider).signInWithGoogle().then(
                 (error) {
                   // If the error message is null, then the registration is successful.
                   if (error == null && context.mounted) {
@@ -78,7 +79,7 @@ class _LoginState extends State<Login> {
                       context,
                       MaterialPageRoute(
                         builder: (context) {
-                          return const Body();
+                          return const ApprenticeHome();
                         },
                       ),
                     );
@@ -170,35 +171,12 @@ class _LoginState extends State<Login> {
           ElevatedButton(
             onPressed: () {
               if (formKey.currentState!.validate()) {
-                Auth(DatabaseHelper().auth)
+                ref
+                    .watch(authProvider)
                     .loginUser(emailController.text, passwordController.text)
                     .then(
-                  (error) {
-                    if (error == null) {
-                      if (!mounted) {
-                        return;
-                      }
-
-                      Navigator.pushReplacement(context,
-                          MaterialPageRoute(builder: (context) {
-                        return LoadingScreen(
-                          futures: [
-                            Provider.of<AppUser>(context, listen: false)
-                                .fetchData()
-                          ],
-                          onDone: (context, _) {
-                            Navigator.pushReplacement(context,
-                                MaterialPageRoute(builder: (context) {
-                              return const Body();
-                            }));
-                          },
-                        );
-                      }));
-                    } else {
-                      if (!mounted) {
-                        return;
-                      }
-
+                  (error) async {
+                    if (error != null && mounted) {
                       Utils.displayDialog(
                         context: context,
                         title: 'Error',
@@ -208,6 +186,48 @@ class _LoginState extends State<Login> {
                           Navigator.pop(context);
                         },
                         lottieAsset: 'assets/anim/error.json',
+                      );
+
+                      return;
+                    }
+
+                    final accountType =
+                        await ref.refresh(appUserNotifierProvider.future);
+
+                    await ref.refresh(themeNotifierProvider.future).then(
+                      (themeState) async {
+                        if (mounted) {
+                          await ref
+                              .watch(themeNotifierProvider.notifier)
+                              .updateColor(
+                                themeState.preferredColor,
+                                context,
+                              );
+                        }
+                      },
+                    );
+
+                    if (mounted) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return LoadingScreen(
+                              futures: [
+                                Future.delayed(const Duration(seconds: 1)),
+                              ],
+                              onDone: (context, _) {
+                                Navigator.pushReplacement(context,
+                                    MaterialPageRoute(builder: (context) {
+                                  return accountType.accountType! ==
+                                          'apprentice'
+                                      ? const ApprenticeHome()
+                                      : const MentorHome();
+                                }));
+                              },
+                            );
+                          },
+                        ),
                       );
                     }
                   },

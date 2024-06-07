@@ -1,0 +1,258 @@
+[
+    {
+        "id": "palindrome",
+        "instructions": "Create a method that takes a string as an argument and returns true if the string is a palindrome, and false otherwise.",
+        "sampleCode": "class Palindrome {\n    public static boolean isPalindrome(String s) {\n        // Your code here\n    }\n}",
+        "className": "Palindrome",
+        "unitTests": [
+            {
+                "input": "\"madam\"",
+                "expectedOutput": {
+                    "type": "Boolean",
+                    "value": "true"
+                },
+                "methodName": "isPalindrome"
+            },
+            {
+                "input": "\"hello\"",
+                "expectedOutput": {
+                    "type": "Boolean",
+                    "value": "false"
+                },
+                "methodName": "isPalindrome"
+            },
+            {
+                "input": "\"racecar\"",
+                "expectedOutput": {
+                    "type": "Boolean",
+                    "value": "true"
+                },
+                "methodName": "isPalindrome"
+            },
+            {
+                "input": "\"level\"",
+                "expectedOutput": {
+                    "type": "Boolean",
+                    "value": "true"
+                },
+                "methodName": "isPalindrome"
+            },
+            {
+                "input": "\"world\"",
+                "expectedOutput": {
+                    "type": "Boolean",
+                    "value": "false"
+                },
+                "methodName": "isPalindrome"
+            }
+        ]
+    },
+    {
+        "id": "fibonacci",
+        "instructions": "Create a method that takes an integer n as an argument and returns the n-th Fibonacci number.",
+        "sampleCode": "class Fibonacci {\n    public static int fibonacci(int n) {\n        // Your code here\n    }\n}",
+        "className": "Fibonacci",
+        "unitTests": [
+            {
+                "input": "0",
+                "expectedOutput": {
+                    "type": "Integer",
+                    "value": "0"
+                },
+                "methodName": "fibonacci"
+            },
+            {
+                "input": "1",
+                "expectedOutput": {
+                    "type": "Integer",
+                    "value": "1"
+                },
+                "methodName": "fibonacci"
+            },
+            {
+                "input": "5",
+                "expectedOutput": {
+                    "type": "Integer",
+                    "value": "5"
+                },
+                "methodName": "fibonacci"
+            },
+            {
+                "input": "10",
+                "expectedOutput": {
+                    "type": "Integer",
+                    "value": "55"
+                },
+                "methodName": "fibonacci"
+            },
+            {
+                "input": "15",
+                "expectedOutput": {
+                    "type": "Integer",
+                    "value": "610"
+                },
+                "methodName": "fibonacci"
+            }
+        ]
+    },
+    {
+        "id": "gcd",
+        "instructions": "Create a method that takes two integers as arguments and returns their greatest common divisor (GCD).",
+        "sampleCode": "class GCD {\n    public static int gcd(int a, int b) {\n        // Your code here\n    }\n}",
+        "className": "GCD",
+        "unitTests": [
+            {
+                "input": "54, 24",
+                "expectedOutput": {
+                    "type": "Integer",
+                    "value": "6"
+                },
+                "methodName": "gcd"
+            },
+            {
+                "input": "48, 18",
+                "expectedOutput": {
+                    "type": "Integer",
+                    "value": "6"
+                },
+                "methodName": "gcd"
+            },
+            {
+                "input": "101, 103",
+                "expectedOutput": {
+                    "type": "Integer",
+                    "value": "1"
+                },
+                "methodName": "gcd"
+            },
+            {
+                "input": "14, 28",
+                "expectedOutput": {
+                    "type": "Integer",
+                    "value": "14"
+                },
+                "methodName": "gcd"
+            },
+            {
+                "input": "44, 19",
+                "expectedOutput": {
+                    "type": "Integer",
+                    "value": "1"
+                },
+                "methodName": "gcd"
+            }
+        ]
+    },
+    {
+        "id": "prime",
+        "instructions": "Create a method that takes an integer as an argument and returns true if the integer is prime, and false otherwise.",
+        "sampleCode": "class PrimeCheck {\n    public static boolean isPrime(int n) {\n        // Your code here\n    }\n}",
+        "className": "PrimeCheck",
+        "unitTests": [
+            {
+                "input": "2",
+                "expectedOutput": {
+                    "type": "Boolean",
+                    "value": "true"
+                },
+                "methodName": "isPrime"
+            },
+            {
+                "input": "4",
+                "expectedOutput": {
+                    "type": "Boolean",
+                    "value": "false"
+                },
+                "methodName": "isPrime"
+            },
+            {
+                "input": "17",
+                "expectedOutput": {
+                    "type": "Boolean",
+                    "value": "true"
+                },
+                "methodName": "isPrime"
+            },
+            {
+                "input": "18",
+                "expectedOutput": {
+                    "type": "Boolean",
+                    "value": "false"
+                },
+                "methodName": "isPrime"
+            },
+            {
+                "input": "19",
+                "expectedOutput": {
+                    "type": "Boolean",
+                    "value": "true"
+                },
+                "methodName": "isPrime"
+            }
+        ]
+    },
+    {
+        "id": "anagram",
+        "instructions": "Create a method that takes two strings as arguments and returns true if the strings are anagrams of each other, and false otherwise.",
+        "sampleCode": "class AnagramCheck {\n    public static boolean isAnagram(String s1, String s2) {\n        // Your code here\n    }\n}",
+        "className": "AnagramCheck",
+        "unitTests": [
+            {
+                "input": "\"listen\", \"silent\"",
+                "expectedOutput": {
+                    "type": "Boolean",
+                    "value": "true"
+                },
+                "methodName": "isAnagram"
+            },
+            {
+                "input": "\"hello\", \"world\"",
+                "expectedOutput": {
+                    "type": "Boolean",
+                    "value": "false"
+                },
+                "methodName": "isAnagram"
+            },
+            {
+                "input": "\"triangle\", \"integral\"",
+                "expectedOutput": {
+                    "type": "Boolean",
+                    "value": "true"
+                },
+                "methodName": "isAnagram"
+            },
+            {
+                "input": "\"apple\", \"pale\"",
+                "expectedOutput": {
+                    "type": "Boolean",
+                    "value": "false"
+                },
+                "methodName": "isAnagram"
+            },
+            {
+                "input": "\"race\", \"care\"",
+                "expectedOutput": {
+                    "type": "Boolean",
+                    "value": "true"
+                },
+                "methodName": "isAnagram"
+            }
+        ]
+    },
+    {
+        "id": "hello-world",
+        "instructions": "Create a method that returns the string 'Hello, World!'",
+        "sampleCode": "class HelloWorld {\n    public static String hello() {\n        return \"Hello, World!\";\n    }\n}",
+        "className": "HelloWorld",
+        "methodName": "helloWorld",
+        "unitTests": [
+            {
+                "input": "",
+                "expectedOutput": {
+                    "type": "string",
+                    "value": "Hello, World!"
+                }
+            }
+        ]
+    }
+]

@@ -75,4 +75,4 @@ Java's versatility, portability, and strong features make it a popular choice fo
 
 #### Challenge
 
-<challenge challenge-id="sum">
+<challenge challenge-id="hello-world">

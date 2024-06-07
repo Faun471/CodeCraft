@@ -1,11 +1,11 @@
 import 'package:codecraft/screens/apprentice/apprentice_home.dart';
 import 'package:codecraft/screens/loading_screen.dart';
-import 'package:codecraft/services/auth_helper.dart';
-import 'package:codecraft/services/database_helper.dart';
+import 'package:codecraft/services/auth/auth_provider.dart';
 import 'package:codecraft/widgets/buttons/image_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AccountTypeSelection extends StatefulWidget {
+class AccountTypeSelection extends ConsumerStatefulWidget {
   final Map<String, String> userData;
 
   const AccountTypeSelection({super.key, required this.userData});
@@ -14,7 +14,7 @@ class AccountTypeSelection extends StatefulWidget {
   _AccountTypeSelectionState createState() => _AccountTypeSelectionState();
 }
 
-class _AccountTypeSelectionState extends State<AccountTypeSelection> {
+class _AccountTypeSelectionState extends ConsumerState<AccountTypeSelection> {
   late ImageRadioButtonController controller = ImageRadioButtonController();
 
   @override
@@ -77,20 +77,20 @@ class _AccountTypeSelectionState extends State<AccountTypeSelection> {
               MaterialPageRoute(
                 builder: (context) => LoadingScreen(
                   futures: <Future>[
-                    Auth(DatabaseHelper().auth).registerUser(
-                      widget.userData,
-                      controller.selectedValue!,
-                    )
+                    ref.watch(authProvider).registerUser(
+                          widget.userData,
+                          controller.selectedValue!,
+                        )
                   ],
                   onDone: (context, _) async {
-                    if (DatabaseHelper().auth.currentUser == null) {
+                    if (ref.watch(authProvider).auth.currentUser == null) {
                       return;
                     }
 
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const Body(),
+                        builder: (context) => const ApprenticeHome(),
                       ),
                     );
                   },

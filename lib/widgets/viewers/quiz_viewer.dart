@@ -3,14 +3,13 @@ import 'dart:async';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:codecraft/models/quiz.dart';
-import 'package:codecraft/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
-import 'package:provider/provider.dart';
 import 'package:simple_progress_indicators/simple_progress_indicators.dart';
 
-class QuizViewer extends StatefulWidget {
+class QuizViewer extends ConsumerStatefulWidget {
   final Quiz quiz;
   final Function(bool, Quiz) onQuizFinished;
 
@@ -25,7 +24,7 @@ class QuizViewer extends StatefulWidget {
   QuizViewerState createState() => QuizViewerState();
 }
 
-class QuizViewerState extends State<QuizViewer> {
+class QuizViewerState extends ConsumerState<QuizViewer> {
   late Timer _timer;
   late Color _color;
   double _start = 0;
@@ -99,7 +98,7 @@ class QuizViewerState extends State<QuizViewer> {
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
                 side: BorderSide(
-                  color: Provider.of<ThemeProvider>(context).preferredColor,
+                  color: Theme.of(context).primaryColor,
                   width: 2,
                 ),
               ),
@@ -121,7 +120,7 @@ class QuizViewerState extends State<QuizViewer> {
             if (!canAnswer)
               ColorEffect(
                 begin: Colors.transparent,
-                end: Provider.of<ThemeProvider>(context).preferredColor,
+                end: Theme.of(context).primaryColor,
                 duration: 300.ms,
               ),
           ])),

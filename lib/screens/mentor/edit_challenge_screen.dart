@@ -1,43 +1,50 @@
 import 'package:board_datetime_picker/board_datetime_picker.dart';
 import 'package:codecraft/models/app_user.dart';
+import 'package:codecraft/models/challenge.dart';
+import 'package:codecraft/providers/screen_provider.dart';
+import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/codeblocks/code_editor.dart';
 import 'package:flutter/material.dart';
-import 'package:codecraft/models/challenge.dart';
-import 'package:codecraft/services/challenge_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
+import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 import 'package:re_editor/re_editor.dart';
 
-class CreateChallengeScreen extends ConsumerStatefulWidget {
-  const CreateChallengeScreen({super.key});
+class EditChallengeScreen extends ConsumerStatefulWidget {
+  final Challenge challenge;
+  const EditChallengeScreen({super.key, required this.challenge});
 
   @override
-  _CreateChallengeScreenState createState() => _CreateChallengeScreenState();
+  _EditChallengeScreenState createState() => _EditChallengeScreenState();
 }
 
-class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
+class _EditChallengeScreenState extends ConsumerState<EditChallengeScreen> {
   final _formKey = GlobalKey<FormState>();
   final CodeLineEditingController controller = CodeLineEditingController();
-
-  String _duration = DateTime.now().add(const Duration(days: 1)).toString();
   final BoardDateTimeTextController dateTimeController =
       BoardDateTimeTextController();
   int _currentStep = 0;
 
-  String _instructions = '';
-  String _sampleCode = '';
-  String _className = '';
-  String _methodName = '';
-  List<UnitTest> _unitTests = [
-    UnitTest(
-      input: '',
-      expectedOutput: ExpectedOutput(
-        value: '',
-        type: '',
-      ),
-    ),
-  ];
+  late String _instructions;
+  late String _sampleCode;
+  late String _className;
+  late String _methodName;
+  late String _duration;
+  late List<UnitTest> _unitTests;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _instructions = widget.challenge.instructions;
+    _sampleCode = widget.challenge.sampleCode!;
+    controller.text = _sampleCode;
+    _duration = widget.challenge.duration;
+    _className = widget.challenge.className;
+    _methodName = widget.challenge.methodName;
+    _unitTests = widget.challenge.unitTests;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,11 +53,30 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
         children: [
           Column(
             children: [
+              const SizedBox(height: 20),
+              const Text(
+                'Edit Challenge',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'You are editing challenge ${widget.challenge.id}',
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+              ),
               Form(
                 key: _formKey,
                 child: Stepper(
                   currentStep: _currentStep,
                   onStepCancel: () {
+                    if (_currentStep == 0) {
+                      ref.watch(screenProvider.notifier).popScreen();
+                    }
+
                     if (_currentStep > 0) {
                       setState(() {
                         _currentStep -= 1;
@@ -71,8 +97,44 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                       _formKey.currentState!.save();
 
                       _sampleCode = controller.text;
-
-                      _submitChallenge();
+                      Utils.displayDialog(
+                        context: context,
+                        title: 'Are you sure about your changes?',
+                        content:
+                            "You are about to update the challenge ${widget.challenge.id} with the new changes.\n Are you sure you want to proceed?",
+                        lottieAsset: 'assets/anim/question.json',
+                        actions: [
+                          IconsButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            text: 'No, go back.',
+                            iconData: Icons.close,
+                            iconColor: Colors.white,
+                            color: Colors.red,
+                            textStyle: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                          IconsButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              await _submitChallenge();
+                            },
+                            text: 'Proceed with changes',
+                            iconData: Icons.check,
+                            iconColor: Colors.white,
+                            color: Colors.green,
+                            textStyle: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                        onDismiss: () =>
+                            ref.watch(screenProvider.notifier).popScreen(),
+                      );
                     }
                   },
                   steps: [
@@ -139,6 +201,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          initialValue: _instructions,
           decoration: const InputDecoration(labelText: 'Instructions'),
           autovalidateMode: AutovalidateMode.onUserInteraction,
           maxLines: 5,
@@ -178,6 +241,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          initialValue: _className,
           decoration: const InputDecoration(labelText: 'Class Name'),
           autovalidateMode: AutovalidateMode.onUserInteraction,
           validator: (value) {
@@ -221,12 +285,13 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
         padding: const EdgeInsets.all(8.0),
         child: BoardDateTimeInputField(
           controller: dateTimeController,
+          autofocus: true,
           pickerType: DateTimePickerType.datetime,
           initialDate: _duration.toDateTime(),
           minimumDate: DateTime.now(),
           maximumDate: DateTime.now().add(const Duration(days: 365)),
           options: const BoardDateTimeOptions(
-            languages: BoardPickerLanguages.en(),
+            inputable: false,
           ),
           textStyle: Theme.of(context).textTheme.bodyMedium,
           onChanged: (date) {
@@ -329,13 +394,13 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
 
   Future<void> _submitChallenge() async {
     final challenge = Challenge(
-      id: _className.toSnakeCase(),
+      id: widget.challenge.id,
       instructions: _instructions,
       sampleCode: _sampleCode,
       className: _className,
       methodName: _methodName,
+      duration: _duration,
       unitTests: _unitTests,
-      duration: '',
     );
 
     Logger('Create Challenge').info(challenge.toJson());
@@ -346,18 +411,5 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
     if (!mounted) {
       return;
     }
-
-    _resetChallenge();
-  }
-
-  void _resetChallenge() {
-    setState(() {
-      _className = '';
-      _methodName = '';
-      _instructions = '';
-      _sampleCode = '';
-      _unitTests = [];
-      _currentStep = 0;
-    });
   }
 }

@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class Auth {
@@ -11,8 +13,13 @@ class Auth {
     _user = _auth.currentUser;
   }
 
-  Future<bool> isLoggedIn() async {
+  User? get user => _user;
+
+  FirebaseAuth get auth => _auth;
+
+  bool isLoggedIn() {
     _user = _auth.currentUser;
+
     if (_user == null) {
       return false;
     }
@@ -135,33 +142,33 @@ class Auth {
     }
   }
 
-  Future<void> updateUser({
+  Future<void> updateUser(
+    WidgetRef ref, {
     String? displayName,
-    String? photoUrl,
     String? firstName,
     String? mi,
     String? lastName,
     String? suffix,
     String? phoneNumber,
   }) async {
-    if (displayName != null) {
+    if (displayName != null && displayName.isNotEmpty) {
       _user!.updateDisplayName(displayName);
     }
 
-    if (photoUrl != null) {
-      _user!.updatePhotoURL(photoUrl);
-    }
-
     Map<String, String?> updates = {
-      if (firstName != null) 'firstName': firstName,
-      if (mi != null) 'mi': mi,
-      if (lastName != null) 'lastName': lastName,
-      if (suffix != null) 'suffix': suffix,
-      if (phoneNumber != null) 'phoneNumber': phoneNumber,
+      if (displayName != null && displayName.isNotEmpty)
+        'displayName': displayName,
+      if (firstName != null && firstName.isNotEmpty) 'firstName': firstName,
+      if (mi != null && mi.isNotEmpty) 'mi': mi,
+      if (lastName != null && lastName.isNotEmpty) 'lastName': lastName,
+      if (suffix != null && suffix.isNotEmpty) 'suffix': suffix,
+      if (phoneNumber != null && phoneNumber.isNotEmpty)
+        'phoneNumber': phoneNumber,
     };
 
     if (updates.isNotEmpty) {
       await DatabaseHelper().currentUser.set(updates, SetOptions(merge: true));
+      await ref.watch(appUserNotifierProvider.notifier).updateData(updates);
     }
 
     return Future.value();

@@ -1,36 +1,73 @@
-import 'package:json/json.dart';
-
-@JsonCodable()
 class Challenge {
-  final String id;
-  final String instructions;
-  final String sampleCode;
-  final String className;
-  final List<UnitTest> unitTests;
+  String id;
+  String instructions;
+  String? sampleCode;
+  String className;
+  String methodName;
+  String duration;
+  List<UnitTest> unitTests;
 
   Challenge({
     required this.id,
     required this.instructions,
-    required this.sampleCode,
+    this.sampleCode,
     required this.className,
+    required this.methodName,
+    required this.duration,
     required this.unitTests,
   });
+
+  factory Challenge.fromJson(Map<String, dynamic> json) {
+    return Challenge(
+      id: json['id'] ?? '',
+      instructions: json['instructions'] ?? '',
+      sampleCode: json['sampleCode'],
+      className: json['className'] ?? '',
+      methodName: json['methodName'] ?? '',
+      duration: json['duration'] ?? '',
+      unitTests: (json['unitTests'] as List<dynamic>)
+          .map((e) => UnitTest.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'instructions': instructions,
+      'sampleCode': sampleCode,
+      'className': className,
+      'duration': duration,
+      'unitTests': unitTests.map((e) => e.toJson()).toList(),
+    };
+  }
 }
 
-@JsonCodable()
 class UnitTest {
   String input;
   ExpectedOutput expectedOutput;
-  String methodName;
 
   UnitTest({
     required this.input,
     required this.expectedOutput,
-    required this.methodName,
   });
+
+  factory UnitTest.fromJson(Map<String, dynamic> json) {
+    return UnitTest(
+      input: json['input'] ?? '',
+      expectedOutput: ExpectedOutput.fromJson(
+          json['expectedOutput'] as Map<String, dynamic>),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'input': input,
+      'expectedOutput': expectedOutput.toJson(),
+    };
+  }
 }
 
-@JsonCodable()
 class ExpectedOutput {
   String value;
   String type;
@@ -39,4 +76,18 @@ class ExpectedOutput {
     required this.value,
     required this.type,
   });
+
+  factory ExpectedOutput.fromJson(Map<String, dynamic> json) {
+    return ExpectedOutput(
+      value: json['value'] ?? '',
+      type: json['type'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'type': type,
+    };
+  }
 }

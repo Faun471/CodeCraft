@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.2.0
 
 environment:
-  sdk: '^3.5.0-152'
+  sdk: '^3.4.3'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -66,20 +66,30 @@ dependencies:
   flutter_svg: ^2.0.10+1
   universal_html: ^2.2.4
   smooth_page_indicator: ^1.1.0
+  smooth_list_view: ^1.0.5
   markdown_widget: ^2.3.2+6
   flutter_highlight: ^0.7.0
   flutter_code_editor: ^0.3.1
   http: ^1.2.1
-  re_editor: ^0.3.0
+  re_editor:
+    git:
+      url: https://github.com/reqable/re-editor.git
   re_highlight: ^0.0.3
   json: ^0.20.2
   highlight: ^0.7.0
-  html: ^0.15.4
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+  context_menus: ^2.0.0+1
+  board_datetime_picker: ^1.6.6
 
 dev_dependencies:
+  build_runner: ^2.4.10
+  custom_lint: ^0.6.4
   flutter_lints: ^4.0.0
   flutter_test:
     sdk: flutter
+  riverpod_generator: ^2.4.2
+  riverpod_lint: ^2.3.12
 
 
 # run `dart run flutter_launcher_icons:main` to generate icons
@@ -134,6 +144,7 @@ flutter:
     - assets/anim/timeout.json
     - assets/anim/error.json
     - assets/anim/soon.json
+    - assets/challenges/challenges.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

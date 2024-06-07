@@ -1,17 +1,18 @@
-import 'package:codecraft/services/database_helper.dart';
+import 'package:codecraft/services/auth/auth_provider.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/buttons/custom_text_fields.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ForgotPasswordPage extends StatefulWidget {
+class ForgotPasswordPage extends ConsumerStatefulWidget {
   const ForgotPasswordPage({super.key});
 
   @override
   _ForgotPasswordPageState createState() => _ForgotPasswordPageState();
 }
 
-class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   final _emailController = TextEditingController();
 
   @override
@@ -22,7 +23,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   Future<void> passwordReset() async {
     try {
-      await DatabaseHelper()
+      await ref
+          .watch(authProvider)
           .auth
           .sendPasswordResetEmail(email: _emailController.text.trim());
 

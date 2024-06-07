@@ -1,10 +1,10 @@
-import 'package:firebase_core/firebase_core.dart';
+import 'package:codecraft/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
-  static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   static const String defaultOrgId = 'Default';
@@ -16,45 +16,48 @@ class DatabaseHelper {
   }
 
   Future<void> _initializeFirebase() async {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform);
   }
-
-  FirebaseAuth get auth => _auth;
 
   FirebaseFirestore get firestore => _firestore;
 
   CollectionReference get users => _firestore.collection('users');
 
-  CollectionReference get organizations =>
+  CollectionReference get organisations =>
       _firestore.collection('organizations');
 
   CollectionReference get invitations => _firestore.collection('invitations');
 
-  CollectionReference get joinRequests =>
-      _firestore.collection('join_requests');
+  CollectionReference get joinRequests => _firestore.collection('joinRequests');
 
   DocumentReference get currentUser {
-    return users.doc(_auth.currentUser!.uid);
+    return users.doc(FirebaseAuth.instance.currentUser!.uid);
+  }
+
+  Future<Map<String, dynamic>> getUserData(String userId) async {
+    DocumentSnapshot doc = await users.doc(userId).get();
+    return doc.data() as Map<String, dynamic>;
   }
 
   Future<void> createUser(String userId, Map<String, String> userData,
       String accountType, String orgId) async {
     await users.doc(userId).set({
-      'first_name': userData['first_name']!,
+      'firstName': userData['firstName']!,
       'mi': userData['mi']!,
-      'last_name': userData['last_name']!,
+      'lastName': userData['lastName']!,
       'suffix': userData['suffix']!,
       'email': userData['email']!,
-      'phone_number': userData['phone_number']!,
-      'account_type': accountType,
-      'preferred_color': 'ff9c27b0',
+      'phoneNumber': userData['phoneNumber']!,
+      'accountType': accountType,
+      'preferredColor': 'ff9c27b0',
       'level': 1,
       'orgId': orgId,
     }, SetOptions(merge: true));
   }
 
   Future<String> createOrganization(String mentorId) async {
-    DocumentReference orgRef = await organizations.add({
+    DocumentReference orgRef = await organisations.add({
       'orgName': 'Mentor Organization',
       'orgDescription': '',
       'mentorId': mentorId,

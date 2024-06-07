@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codecraft/models/challenge.dart';
+import 'package:codecraft/services/database_helper.dart';
+import 'package:flutter/services.dart';
 
 class ChallengeService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -7,13 +10,17 @@ class ChallengeService {
   Future<void> createChallenge(
       Challenge challenge, String organizationId) async {
     try {
-      await FirebaseFirestore.instance
+      await _firestore
+          .collection('organizations')
+          .doc(organizationId)
           .collection('challenges')
           .doc(challenge.id)
           .set({
         'instructions': challenge.instructions,
         'sampleCode': challenge.sampleCode,
         'className': challenge.className,
+        'methodName': challenge.methodName,
+        'duration': challenge.duration,
         'unitTests': challenge.unitTests
             .map((test) => {
                   'input': test.input,
@@ -21,73 +28,102 @@ class ChallengeService {
                     'value': test.expectedOutput.value,
                     'type': test.expectedOutput.type,
                   },
-                  'methodName': test.methodName,
                 })
             .toList(),
-        'organizationId': organizationId,
       }, SetOptions(merge: true));
     } catch (e) {
       throw Exception('Error creating challenge: $e');
     }
   }
 
+  Future<void> createChallengesFromJson(
+      String jsonFilePath, String orgId) async {
+    try {
+      final String response = await rootBundle.loadString(jsonFilePath);
+      final List<dynamic> data = json.decode(response);
+      for (var jsonText in data) {
+        Challenge challenge = Challenge.fromJson(jsonText);
+        await createChallenge(challenge, orgId);
+      }
+    } catch (e) {
+      throw Exception('Error creating challenges: $e');
+    }
+  }
+
+  Future<void> deleteChallenge(
+      String organizationId, String challengeId) async {
+    try {
+      await _firestore
+          .collection('organizations')
+          .doc(organizationId)
+          .collection('challenges')
+          .doc(challengeId)
+          .delete();
+    } catch (e) {
+      throw Exception('Error deleting challenge: $e');
+    }
+  }
+
   Future<List<Challenge>> getChallenges(String organizationId) async {
     try {
-      QuerySnapshot snapshot = await _firestore
+      final snapshot = await _firestore
+          .collection('organizations')
+          .doc(organizationId)
           .collection('challenges')
-          .where('organizationId', isEqualTo: organizationId)
           .get();
 
-      return snapshot.docs
-          .map((doc) => Challenge(
-                id: doc.id,
-                instructions: doc['instructions'],
-                sampleCode: doc['sampleCode'],
-                className: doc['className'],
-                unitTests: (doc['unitTests'] as List)
-                    .map((e) => UnitTest(
-                          input: e['input'],
-                          expectedOutput: e['expectedOutput'],
-                          methodName: e['methodName'],
-                        ))
-                    .toList(),
-              ))
-          .toList();
+      List<Challenge> challenges = [];
+
+      for (var doc in snapshot.docs) {
+        Map<String, dynamic> data = doc.data();
+        data['id'] = doc.id;
+
+        challenges.add(Challenge.fromJson(data));
+      }
+
+      return challenges;
     } catch (e) {
       throw Exception('Error getting challenges: $e');
     }
   }
 
-  Future<Challenge> getChallenge(String challengeId) async {
-    DocumentSnapshot doc = await FirebaseFirestore.instance
-        .collection('challenges')
-        .doc(challengeId)
-        .get();
+  Future<Challenge> getChallenge(
+      String organizationId, String challengeId) async {
+    try {
+      DocumentSnapshot doc = await _firestore
+          .collection('organizations')
+          .doc(organizationId)
+          .collection('challenges')
+          .doc(challengeId)
+          .get();
 
-    return Challenge(
-      id: doc.id,
-      instructions: doc['instructions'],
-      sampleCode: doc['sampleCode'],
-      className: doc['className'],
-      unitTests: (doc['unitTests'] as List)
-          .map((e) => UnitTest(
-                input: e['input'],
-                expectedOutput: ExpectedOutput(
-                  value: e['expectedOutput']['value'],
-                  type: e['expectedOutput']['type'],
-                ),
-                methodName: e['methodName'],
-              ))
-          .toList(),
-    );
+      if (!doc.exists) {
+        throw Exception('Challenge not found');
+      }
+
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      data['id'] = doc.id;
+
+      return Challenge.fromJson(data);
+    } catch (e) {
+      throw Exception('Error getting challenge: $e');
+    }
   }
 
-  Future<void> markChallengeAsCompleted(
-      String userId, String challengeId) async {
+  Future<void> markChallengeAsCompleted(String challengeId) async {
     try {
-      await _firestore.collection('completedChallenges').doc(userId).set({
-        'challengeIds': FieldValue.arrayUnion([challengeId]),
-      }, SetOptions(merge: true));
+      await DatabaseHelper().currentUser.get().then((doc) {
+        if (doc.exists) {
+          var data = doc.data() as Map<String, dynamic>;
+          var completedChallenges = data['completedChallenges'] as List<String>;
+
+          completedChallenges.add(challengeId);
+
+          DatabaseHelper().currentUser.set({
+            'completedChallenges': completedChallenges,
+          }, SetOptions(merge: true));
+        }
+      });
     } catch (e) {
       throw Exception('Error marking challenge as completed: $e');
     }
@@ -106,5 +142,15 @@ class ChallengeService {
     } catch (e) {
       throw Exception('Error fetching completed challenges: $e');
     }
+  }
+}
+
+extension DateTimeParsing on String {
+  DateTime toDateTime() {
+    if (isEmpty) {
+      return DateTime.now();
+    }
+
+    return DateTime.parse(this);
   }
 }

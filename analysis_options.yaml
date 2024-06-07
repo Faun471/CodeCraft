@@ -29,5 +29,5 @@ linter:
 analyzer:
     errors:
         library_private_types_in_public_api: ignore
-    enable-experiment:
-        - macros
+    plugins:
+    - custom_lint

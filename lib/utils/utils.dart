@@ -59,11 +59,22 @@ class Utils {
                   )
                 : Container()
           ],
+      onClose: (_) {
+        if (onDismiss != null) {
+          onDismiss();
+        }
+      },
     );
   }
+}
 
-  static String toSnakeCase(String text) {
-    return text.replaceAllMapped(
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${substring(1)}";
+  }
+
+  String toSnakeCase() {
+    return replaceAllMapped(
         RegExp(r'[A-Z]'),
         (Match match) =>
             (match.start > 0 ? '_' : '') + match.group(0)!.toLowerCase());

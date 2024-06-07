@@ -3,30 +3,31 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:babstrap_settings_screen/babstrap_settings_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codecraft/models/app_user.dart';
+import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/providers/theme_provider.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/screens/settings/account_edit.dart';
 import 'package:codecraft/screens/account_setup/login.dart';
-import 'package:codecraft/services/database_helper.dart';
+import 'package:codecraft/services/auth/auth_provider.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/buttons/colour_scheme_button.dart';
 import 'package:codecraft/widgets/cards/custom_big_user_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_dialogs/material_dialogs.dart';
 import 'package:material_dialogs/shared/types.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
-import 'package:provider/provider.dart';
 
-class Settings extends StatefulWidget {
+class Settings extends ConsumerStatefulWidget {
   const Settings({super.key});
 
   @override
   SettingsState createState() => SettingsState();
 }
 
-class SettingsState extends State<Settings> {
+class SettingsState extends ConsumerState<Settings> {
   late User currentUser;
   late String imageUrl;
   late String displayName;
@@ -36,7 +37,7 @@ class SettingsState extends State<Settings> {
   void initState() {
     super.initState();
 
-    currentUser = DatabaseHelper().auth.currentUser!;
+    currentUser = ref.read(authProvider).auth.currentUser!;
 
     imageUrl = currentUser.photoURL ?? '';
 
@@ -70,8 +71,10 @@ class SettingsState extends State<Settings> {
   }
 
   Widget buildUserCard(BuildContext context) {
+    final appUser = ref.watch(appUserNotifierProvider);
+
     return UserCard(
-      userName: "$displayName Lvl ${AppUser.instance.data['level'] ?? 1}",
+      userName: "${appUser.value!.displayName} Lvl ${appUser.value!.level}",
       userProfilePic: CachedNetworkImage(
         height: 150,
         width: 150,
@@ -90,7 +93,7 @@ class SettingsState extends State<Settings> {
             .bodySmall!
             .copyWith(color: Colors.white),
       ),
-      backgroundColor: Provider.of<ThemeProvider>(context).preferredColor,
+      backgroundColor: Theme.of(context).primaryColor,
       cardActionWidget: buildSettingsItem(context),
     );
   }
@@ -123,18 +126,8 @@ class SettingsState extends State<Settings> {
           iconsColor: Colors.black,
           backgroundColor: Colors.white,
         ),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const AccountEdit(),
-          ),
-        ).then((value) {
-          WidgetsBinding.instance.addPostFrameCallback((_) async {
-            await currentUser.reload();
-
-            setState(() {});
-          });
-        }),
+        onTap: () =>
+            ref.watch(screenProvider.notifier).pushScreen(const AccountEdit()),
       ),
     );
   }
@@ -190,12 +183,14 @@ class SettingsState extends State<Settings> {
 
                 return ColorSchemeButton(
                   color: colorSchemes[index],
-                  isSelected: Provider.of<ThemeProvider>(context, listen: false)
-                          .preferredColor
-                          .value ==
-                      colorSchemes[index].value,
+                  isSelected: ref
+                          .watch(themeNotifierProvider)
+                          .valueOrNull!
+                          .preferredColor ==
+                      colorSchemes[index],
                   onSelect: () {
-                    Provider.of<ThemeProvider>(context, listen: false)
+                    ref
+                        .read(themeNotifierProvider.notifier)
                         .updateColor(colorSchemes[index], context);
                   },
                 );
@@ -269,17 +264,20 @@ class SettingsState extends State<Settings> {
                   MaterialPageRoute(
                     builder: (context) => LoadingScreen(
                       futures: [
-                        DatabaseHelper().auth.signOut(),
-                        Future.delayed(const Duration(seconds: 5)),
+                        ref.watch(authProvider).auth.signOut(),
+                        Future.delayed(const Duration(seconds: 2)),
                       ],
-                      onDone: (context, _) => Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AccountSetup(
-                            Login(),
+                      onDone: (context, _) {
+                        return Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AccountSetup(
+                              Login(),
+                            ),
                           ),
-                        ),
-                      ),
+                          (Route<dynamic> route) => false,
+                        );
+                      },
                     ),
                   ),
                 );

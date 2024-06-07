@@ -1,93 +1,88 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:codecraft/firebase_options.dart';
 import 'package:codecraft/models/app_user.dart';
-import 'package:codecraft/models/page.dart';
-import 'package:codecraft/providers/code_execution_provider.dart';
-import 'package:codecraft/providers/invitation_provider.dart';
 import 'package:codecraft/providers/theme_provider.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/account_setup/login.dart';
 import 'package:codecraft/screens/apprentice/apprentice_home.dart';
 import 'package:codecraft/screens/account_setup/register.dart';
 import 'package:codecraft/screens/loading_screen.dart';
-import 'package:codecraft/screens/mentor/mentor_dashboard.dart';
-import 'package:codecraft/services/auth_helper.dart';
+import 'package:codecraft/screens/mentor/mentor_home.dart';
+import 'package:codecraft/services/auth/auth_provider.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/themes/theme.dart';
 import 'package:codecraft/widgets/cards/onboarding_card.dart';
+import 'package:context_menus/context_menus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await initDatabase();
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
 
-  runApp(MyApp(savedThemeMode: savedThemeMode));
-}
-
-Future<void> initDatabase() async {
-  DatabaseHelper();
-}
-
-Future<Widget> getLandingPage(BuildContext context) async {
-  Auth auth = Auth(DatabaseHelper().auth);
-  bool userLoggedIn = await auth.isLoggedIn();
-
-  if (!userLoggedIn) {
-    return kIsWeb ? const AccountSetup(Login()) : const OnboardingPage();
-  }
-
-  return LoadingScreen(
-    futures: [
-      AppUser.instance.fetchData(),
-      ModulePage.loadPagesFromYamlDirectory(),
-    ],
-    onDone: (context, snapshot) {
-      if (AppUser.instance.data['account_type'] == 'apprentice') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const Body(),
-          ),
-        );
-        return;
-      }
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const MentorDashboard(),
-        ),
-      );
-    },
+  runApp(
+    ProviderScope(child: MyApp(savedThemeMode: savedThemeMode)),
   );
 }
 
-class MyApp extends StatelessWidget {
+Future<Widget> getLandingPage() async {
+  final auth = FirebaseAuth.instance;
+  final isLoggedIn = auth.currentUser != null;
+
+  if (!isLoggedIn) {
+    return kIsWeb ? const AccountSetup(Login()) : const OnboardingPage();
+  }
+
+  final String accountType =
+      await DatabaseHelper().currentUser.get().then((doc) {
+    if (doc.exists) {
+      final userData = doc.data() as Map<String, dynamic>;
+      return userData['accountType'];
+    } else {
+      return '';
+    }
+  });
+
+  if (accountType == 'apprentice') {
+    return const ApprenticeHome();
+  } else if (accountType == 'mentor') {
+    return const MentorHome();
+  }
+
+  return const AccountSetup(Register());
+}
+
+class _EagerInitialization extends ConsumerWidget {
+  const _EagerInitialization({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(authProvider);
+    ref.watch(appUserNotifierProvider);
+    ref.watch(themeNotifierProvider);
+
+    return child;
+  }
+}
+
+class MyApp extends ConsumerWidget {
   final AdaptiveThemeMode? savedThemeMode;
 
   const MyApp({super.key, this.savedThemeMode});
 
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<ThemeProvider>(
-            create: (context) => ThemeProvider()),
-        ChangeNotifierProvider<AppUser>(create: (context) => AppUser.instance),
-        ChangeNotifierProvider<InvitationProvider>(
-            create: (context) => InvitationProvider()),
-        ChangeNotifierProvider<CodeExecutionProvider>(
-            create: (context) => CodeExecutionProvider()),
-      ],
-      builder: (appContext, child) {
-        return AdaptiveTheme(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return _EagerInitialization(
+      child: ContextMenuOverlay(
+        child: AdaptiveTheme(
           light: AppTheme.lightTheme,
           dark: AppTheme.darkTheme,
           initial: savedThemeMode ?? AdaptiveThemeMode.light,
@@ -98,22 +93,41 @@ class MyApp extends StatelessWidget {
               theme: theme,
               darkTheme: darkTheme,
               themeMode:
-                  MediaQuery.platformBrightnessOf(appContext) == Brightness.dark
+                  MediaQuery.platformBrightnessOf(context) == Brightness.dark
                       ? ThemeMode.dark
                       : ThemeMode.light,
               home: LoadingScreen(
-                futures: [getLandingPage(context)],
-                onDone: (context, snapshot) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => snapshot.data![0]),
+                futures: [
+                  getLandingPage(),
+                ],
+                onDone: (context, snapshot) async {
+                  await ref.refresh(themeNotifierProvider.future).then(
+                    (themeState) async {
+                      if (context.mounted) {
+                        await ref
+                            .watch(themeNotifierProvider.notifier)
+                            .updateColor(
+                              themeState.preferredColor,
+                              context,
+                            );
+                      }
+                    },
                   );
+
+                  if (context.mounted) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => snapshot.data[0],
+                      ),
+                    );
+                  }
                 },
               ),
             );
           },
-        );
-      },
+        ),
+      ),
     );
   }
 }

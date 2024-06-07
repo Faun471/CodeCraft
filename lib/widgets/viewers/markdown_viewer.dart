@@ -1,7 +1,5 @@
 import 'package:codecraft/models/challenge.dart';
-import 'package:html/dom.dart' as h;
-import 'package:html/parser.dart';
-import 'package:html/dom_parsing.dart';
+import 'package:codecraft/parser/html_parser.dart';
 import 'package:codecraft/screens/apprentice/challenge_screen.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/services/challenge_service.dart';
@@ -9,17 +7,16 @@ import 'package:codecraft/themes/theme.dart';
 import 'package:codecraft/widgets/codeblocks/code_wrapper.dart';
 import 'package:highlight/highlight.dart' show Node, highlight;
 import 'package:markdown_widget/markdown_widget.dart';
-import 'package:markdown/markdown.dart' as m;
 import 'package:flutter/material.dart';
 
 class MarkdownViewer extends StatefulWidget {
   final String markdownData;
-  final String quizName;
+  final bool? displayToc;
 
   const MarkdownViewer({
     super.key,
     required this.markdownData,
-    required this.quizName,
+    this.displayToc = true,
   });
 
   @override
@@ -84,7 +81,7 @@ class MarkdownViewerState extends State<MarkdownViewer> {
             ],
           );
     return Scaffold(
-      drawer: isVertical
+      drawer: isVertical && widget.displayToc == true
           ? Drawer(
               child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -104,11 +101,18 @@ class MarkdownViewerState extends State<MarkdownViewer> {
           : null,
       body: Row(
         children: [
-          if (!isVertical) Expanded(child: buildTocWidget()),
-          if (!isVertical)
+          if (!isVertical && widget.displayToc == true)
             Expanded(
-              child: buildMarkdown(markdownData, config),
+              flex: 1,
+              child: buildTocWidget(),
             ),
+          Expanded(
+            flex: 3,
+            child: buildMarkdown(
+              markdownData,
+              config,
+            ),
+          ),
         ],
       ),
     );
@@ -234,9 +238,10 @@ class ChallengeButtonNode extends ElementNode {
 }
 
 class ChallengeButton extends StatefulWidget {
+  final String? orgId;
   final String? challengeId;
 
-  const ChallengeButton({super.key, this.challengeId});
+  const ChallengeButton({super.key, this.challengeId, this.orgId});
 
   @override
   _ChallengeButtonState createState() => _ChallengeButtonState();
@@ -256,7 +261,7 @@ class _ChallengeButtonState extends State<ChallengeButton> {
           MaterialPageRoute(
             builder: (context) => LoadingScreen(
               futures: [
-                ChallengeService().getChallenge(widget.challengeId!),
+                ChallengeService().getChallenge('Default', widget.challengeId!),
               ],
               onDone: (context, p1) {
                 Navigator.pushReplacement(
@@ -274,143 +279,5 @@ class _ChallengeButtonState extends State<ChallengeButton> {
       },
       child: const Text('Proceed to challenge'),
     );
-  }
-}
-
-class CustomTextNode extends ElementNode {
-  final String text;
-  final MarkdownConfig config;
-  final WidgetVisitor visitor;
-
-  CustomTextNode(this.text, this.config, this.visitor);
-
-  @override
-  void onAccepted(SpanNode parent) {
-    final textStyle = config.p.textStyle.merge(parentStyle);
-    children.clear();
-    if (!text.contains(htmlRep)) {
-      accept(TextNode(text: text, style: textStyle));
-      return;
-    }
-    final spans = parseHtml(
-      m.Text(text),
-      visitor: WidgetVisitor(
-        config: visitor.config,
-        generators: visitor.generators,
-        richTextBuilder: visitor.richTextBuilder,
-      ),
-      parentStyle: parentStyle,
-    );
-    for (var element in spans) {
-      accept(element);
-    }
-  }
-}
-
-void htmlToMarkdown(h.Node? node, int deep, List<m.Node> mNodes) {
-  if (node == null) return;
-  if (node is h.Text) {
-    mNodes.add(m.Text(node.text));
-  } else if (node is h.Element) {
-    final tag = node.localName;
-    List<m.Node> children = [];
-    for (var e in node.children) {
-      htmlToMarkdown(e, deep + 1, children);
-    }
-    m.Element element;
-    if (tag == MarkdownTag.img.name || tag == 'video') {
-      element = HtmlElement(tag!, children, node.text);
-      element.attributes.addAll(node.attributes.cast());
-    } else {
-      element = HtmlElement(tag!, children, node.text);
-      element.attributes.addAll(node.attributes.cast());
-    }
-    mNodes.add(element);
-  }
-}
-
-final RegExp htmlRep = RegExp(r'<[^>]*>', multiLine: true, caseSensitive: true);
-
-///parse [m.Node] to [h.Node]
-List<SpanNode> parseHtml(
-  m.Text node, {
-  ValueCallback<dynamic>? onError,
-  WidgetVisitor? visitor,
-  TextStyle? parentStyle,
-}) {
-  try {
-    final text = node.textContent.replaceAll(
-        visitor?.splitRegExp ?? WidgetVisitor.defaultSplitRegExp, '');
-    if (!text.contains(htmlRep)) return [TextNode(text: node.text)];
-    h.DocumentFragment document = parseFragment(text);
-    return HtmlToSpanVisitor(visitor: visitor, parentStyle: parentStyle)
-        .toVisit(document.nodes.toList());
-  } catch (e) {
-    onError?.call(e);
-    return [TextNode(text: node.text)];
-  }
-}
-
-class HtmlElement extends m.Element {
-  @override
-  final String textContent;
-
-  HtmlElement(super.tag, super.children, this.textContent);
-}
-
-class HtmlToSpanVisitor extends TreeVisitor {
-  final List<SpanNode> _spans = [];
-  final List<SpanNode> _spansStack = [];
-  final WidgetVisitor visitor;
-  final TextStyle parentStyle;
-
-  HtmlToSpanVisitor({WidgetVisitor? visitor, TextStyle? parentStyle})
-      : visitor = visitor ?? WidgetVisitor(),
-        parentStyle = parentStyle ?? const TextStyle();
-
-  List<SpanNode> toVisit(List<h.Node> nodes) {
-    _spans.clear();
-    for (final node in nodes) {
-      final emptyNode = ConcreteElementNode(style: parentStyle);
-      _spans.add(emptyNode);
-      _spansStack.add(emptyNode);
-      visit(node);
-      _spansStack.removeLast();
-    }
-    final result = List.of(_spans);
-    _spans.clear();
-    _spansStack.clear();
-    return result;
-  }
-
-  @override
-  void visitText(h.Text node) {
-    final last = _spansStack.last;
-    if (last is ElementNode) {
-      final textNode = TextNode(text: node.text);
-      last.accept(textNode);
-    }
-  }
-
-  @override
-  void visitElement(h.Element node) {
-    final localName = node.localName ?? '';
-    final mdElement = m.Element(localName, []);
-    mdElement.attributes.addAll(node.attributes.cast());
-    SpanNode spanNode = visitor.getNodeByElement(mdElement, visitor.config);
-    if (spanNode is! ElementNode) {
-      final n = ConcreteElementNode(tag: localName, style: parentStyle);
-      n.accept(spanNode);
-      spanNode = n;
-    }
-    final last = _spansStack.last;
-    if (last is ElementNode) {
-      last.accept(spanNode);
-    }
-    _spansStack.add(spanNode);
-    for (var child in node.nodes.toList(growable: false)) {
-      visit(child);
-    }
-    _spansStack.removeLast();
   }
 }

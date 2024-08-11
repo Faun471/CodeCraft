@@ -140,54 +140,102 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
                         completedSnapshot.data!;
 
                     final availableQuizzes = snapshot.data!
-                        .where(
-                          (quiz) => !completedQuizzes.contains(quiz.id),
-                        )
+                        .where((quiz) => !completedQuizzes.contains(quiz.id))
                         .toList();
 
-                    if (availableQuizzes.isEmpty) {
-                      return const Center(
-                        child:
-                            Text('You have completed all available quizzes!'),
-                      );
-                    }
+                    final completedQuizzesList = snapshot.data!
+                        .where((quiz) => completedQuizzes.contains(quiz.id))
+                        .toList();
 
-                    return SmoothListView.builder(
-                      duration: const Duration(milliseconds: 300),
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: availableQuizzes.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(availableQuizzes[index].title),
-                          subtitle: Text(
-                            'Questions: ${availableQuizzes[index].questions.length}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                    return Column(
+                      children: [
+                        if (availableQuizzes.isNotEmpty) ...[
+                          const Text(
+                            'Available Quizzes',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          leading: const Icon(Icons.quiz),
-                          trailing: const Icon(Icons.arrow_forward_ios),
-                          onTap: () {
-                            Navigator.push(context, MaterialPageRoute(
-                              builder: (context) {
-                                return QuizViewer(
-                                  quiz: availableQuizzes[index],
-                                  onQuizFinished: (isCompleted, quiz) {
-                                    if (isCompleted) {
-                                      QuizService()
-                                          .markQuizAsCompleted(quiz.id!);
-                                    }
+                          const SizedBox(height: 10),
+                          SmoothListView.builder(
+                            duration: const Duration(milliseconds: 300),
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: availableQuizzes.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(availableQuizzes[index].title),
+                                subtitle: Text(
+                                  'Questions: ${availableQuizzes[index].questions.length}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                leading: const Icon(Icons.quiz),
+                                trailing: const Icon(Icons.arrow_forward_ios),
+                                onTap: () {
+                                  Navigator.push(context, MaterialPageRoute(
+                                    builder: (context) {
+                                      return QuizViewer(
+                                        quiz: availableQuizzes[index],
+                                        onQuizFinished: (isCompleted, quiz) {
+                                          if (isCompleted) {
+                                            QuizService()
+                                                .markQuizAsCompleted(quiz.id!);
+                                          }
 
-                                    Navigator.pop(context);
+                                          Navigator.pop(context);
 
-                                    setState(() {});
-                                  },
-                                );
-                              },
-                            ));
-                          },
-                        );
-                      },
+                                          setState(() {});
+                                        },
+                                      );
+                                    },
+                                  ));
+                                },
+                              );
+                            },
+                          ),
+                        ],
+                        if (completedQuizzesList.isNotEmpty) ...[
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Completed Quizzes',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          SmoothListView.builder(
+                            duration: const Duration(milliseconds: 300),
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: completedQuizzesList.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(completedQuizzesList[index].title),
+                                subtitle: Text(
+                                  'Questions: ${completedQuizzesList[index].questions.length}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                leading: const Icon(Icons.check_circle),
+                                trailing: const Icon(Icons.arrow_forward_ios),
+                                onTap: () {
+                                  // TODO - create the completed quiz screen
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CompletedQuizScreen(
+                                          quiz: completedQuizzesList[index]),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ],
+                      ],
                     );
                   },
                 );

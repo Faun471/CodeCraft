@@ -1,6 +1,5 @@
 import 'package:codecraft/screens/body.dart';
 import 'package:codecraft/screens/mentor/manage_requests.dart';
-import 'package:codecraft/screens/mentor/quizzes/create_quiz_screen.dart';
 import 'package:codecraft/screens/mentor/quizzes/manage_quizzes_screen.dart';
 import 'package:codecraft/screens/settings/settings.dart';
 import 'package:flutter/material.dart';

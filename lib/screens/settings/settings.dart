@@ -9,6 +9,7 @@ import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/screens/settings/account_edit.dart';
 import 'package:codecraft/screens/account_setup/login.dart';
+import 'package:codecraft/screens/settings/otp.dart';
 import 'package:codecraft/services/auth/auth_provider.dart';
 import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/utils/utils.dart';
@@ -65,6 +66,12 @@ class SettingsState extends ConsumerState<Settings> {
             buildUserCard(context),
             buildAppearanceSettings(context),
             buildAccountSettings(context),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => const Otp()));
+                },
+                child: Text('Test')),
           ],
         ),
       ),

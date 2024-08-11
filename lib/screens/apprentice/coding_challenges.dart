@@ -22,6 +22,12 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
   Widget build(BuildContext context) {
     final appUser = ref.watch(appUserNotifierProvider).value;
 
+    if (appUser == null) {
+      return const Center(
+        child: Text('An error occurred, please try again later!'),
+      );
+    }
+
     if (!isInOrganisation()) {
       return SingleChildScrollView(
         child: Column(
@@ -80,7 +86,7 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
             ),
           ),
           const SizedBox(height: 20),
-          if (appUser!.orgId == 'default') ...[
+          if (appUser.orgId == 'default') ...[
             const Text(
               'Please join an organization to access coding challenges.',
               style: TextStyle(
@@ -99,8 +105,7 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
           ],
           if (appUser.orgId != 'default')
             FutureBuilder<List<Challenge>>(
-              future: ChallengeService().getChallenges(
-                  ref.watch(appUserNotifierProvider).value!.orgId ?? ''),
+              future: ChallengeService().getChallenges(appUser.orgId!),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return LoadingAnimationWidget.flickr(
@@ -116,6 +121,12 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
                   );
                 }
 
+                if (snapshot.data!.isEmpty) {
+                  return const Center(
+                    child: Text('No challenges available!'),
+                  );
+                }
+
                 snapshot.data!.removeWhere((challenge) =>
                     challenge.duration.toDateTime().isBefore(DateTime.now()));
 
@@ -127,12 +138,6 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
                 snapshot.data!.removeWhere(
                   (challenge) => completedChallenges.contains(challenge.id),
                 );
-
-                if (snapshot.data!.isEmpty) {
-                  return const Center(
-                    child: Text('No challenges available!'),
-                  );
-                }
 
                 return SmoothListView.builder(
                   duration: const Duration(milliseconds: 300),

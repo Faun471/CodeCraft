@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class Otp extends StatelessWidget {
   const Otp({super.key});
@@ -7,20 +8,18 @@ class Otp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: const Color(0xFFF7F6FB),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: const Icon(
+              IconButton(
+                icon: const Icon(
                   Icons.arrow_back,
                   size: 32,
-                  color: Colors.black54,
                 ),
+                onPressed: () => Navigator.pop(context),
               ),
               const SizedBox(height: 18),
               const Text(
@@ -36,7 +35,6 @@ class Otp extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black38,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -44,7 +42,6 @@ class Otp extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(28),
                 decoration: BoxDecoration(
-                  color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -64,8 +61,6 @@ class Otp extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.orange,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24.0),
                           ),
@@ -84,11 +79,10 @@ class Otp extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               const Text(
-                "Didn't you receive any code?",
+                "Didn't receive the code?",
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black38,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -98,7 +92,6 @@ class Otp extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.orange,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -124,20 +117,21 @@ class Otp extends StatelessWidget {
               FocusScope.of(context).previousFocus();
             }
           },
-          showCursor: false,
+          showCursor: true,
           readOnly: false,
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(4),
+          ],
           keyboardType: TextInputType.number,
           maxLength: 1,
           decoration: InputDecoration(
             counter: const Offstage(),
             enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(width: 2, color: Colors.black12),
               borderRadius: BorderRadius.circular(12),
             ),
             focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(width: 2, color: Colors.purple),
               borderRadius: BorderRadius.circular(12),
             ),
           ),

@@ -74,6 +74,10 @@ class ChallengeService {
 
       List<Challenge> challenges = [];
 
+      if (snapshot.docs.isEmpty) {
+        return challenges;
+      }
+
       for (var doc in snapshot.docs) {
         Map<String, dynamic> data = doc.data();
         data['id'] = doc.id;

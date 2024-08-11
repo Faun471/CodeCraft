@@ -1,6 +1,9 @@
+import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/screens/apprentice/apprentice_home.dart';
 import 'package:codecraft/screens/loading_screen.dart';
+import 'package:codecraft/screens/mentor/mentor_home.dart';
 import 'package:codecraft/services/auth/auth_provider.dart';
+import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/widgets/buttons/image_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -69,14 +72,28 @@ class _AccountTypeSelectionState extends ConsumerState<AccountTypeSelection> {
         ),
         const SizedBox(height: 30),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             widget.userData['accountType'] = controller.selectedValue!;
+
+            if (widget.userData['googleSignIn'] == 'true') {
+              String uid = widget.userData['uid']!;
+              String accountType = controller.selectedValue ?? 'apprentice';
+
+              String orgId = accountType == 'mentor'
+                  ? await DatabaseHelper().createOrganization(uid)
+                  : DatabaseHelper.defaultOrgId;
+
+              await DatabaseHelper()
+                  .createUser(uid, widget.userData, accountType, orgId);
+            }
+
+            if (!context.mounted) return;
 
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => LoadingScreen(
-                  futures: <Future>[
+                  futures: [
                     ref.watch(authProvider).registerUser(
                           widget.userData,
                           controller.selectedValue!,
@@ -87,12 +104,28 @@ class _AccountTypeSelectionState extends ConsumerState<AccountTypeSelection> {
                       return;
                     }
 
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ApprenticeHome(),
-                      ),
-                    );
+                    await ref
+                        .refresh(appUserNotifierProvider.future)
+                        .whenComplete(() {
+                      if (!context.mounted) return;
+
+                      if (controller.selectedValue == 'mentor') {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MentorHome(),
+                          ),
+                        );
+                        return;
+                      }
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ApprenticeHome(),
+                        ),
+                      );
+                    });
                   },
                 ),
               ),

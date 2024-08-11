@@ -5,6 +5,7 @@ import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/themes/theme.dart';
 import 'package:codecraft/widgets/codeblocks/code_wrapper.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:highlight/highlight.dart' show Node, highlight;
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:flutter/material.dart';
@@ -81,6 +82,7 @@ class MarkdownViewerState extends State<MarkdownViewer> {
             ],
           );
     return Scaffold(
+      appBar: widget.displayToc == true ? AppBar() : null,
       drawer: isVertical && widget.displayToc == true
           ? Drawer(
               child: Column(
@@ -262,13 +264,32 @@ class _ChallengeButtonState extends State<ChallengeButton> {
             builder: (context) => LoadingScreen(
               futures: [
                 ChallengeService().getChallenge('Default', widget.challengeId!),
+                ChallengeService().getCompletedChallenges(
+                  FirebaseAuth.instance.currentUser!.uid,
+                )
               ],
-              onDone: (context, p1) {
+              onDone: (context, snapshot) {
+                if (snapshot.data[0] == null) {
+                  return;
+                }
+
+                if (snapshot.error != null) {
+                  return;
+                }
+
+                if (snapshot.data.isEmpty) {
+                  return;
+                }
+
+                final challenge = snapshot.data[0] as Challenge;
+
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                     builder: (context) => ChallengeScreen(
-                      challenge: p1.data[0] as Challenge,
+                      challenge: snapshot.data[0] as Challenge,
+                      shouldLevelUp: (!(snapshot.data[1]! as List<String>)
+                          .contains((snapshot.data[0] as Challenge).id)),
                     ),
                   ),
                 );

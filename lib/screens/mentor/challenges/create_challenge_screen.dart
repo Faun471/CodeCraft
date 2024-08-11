@@ -335,7 +335,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
       className: _className,
       methodName: _methodName,
       unitTests: _unitTests,
-      duration: '',
+      duration: _duration,
     );
 
     Logger('Create Challenge').info(challenge.toJson());

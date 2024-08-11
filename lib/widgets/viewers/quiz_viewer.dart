@@ -92,7 +92,6 @@ class QuizViewerState extends ConsumerState<QuizViewer> {
           duration: const Duration(milliseconds: 300),
           child: OutlinedButton(
               style: OutlinedButton.styleFrom(
-                backgroundColor: Colors.transparent,
                 minimumSize: const Size.fromHeight(50),
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -196,128 +195,131 @@ class QuizViewerState extends ConsumerState<QuizViewer> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => setState(() {
-        if (!canAnswer && !_animating) {
-          if (currentQuestionIndex < widget.quiz.questions.length - 1) {
-            currentQuestionIndex++;
-            canAnswer = true;
-            userAnswer = '';
-            _start = widget.quiz.timer.toDouble();
-            _shouldAnimateLottie = false;
-            startTimer();
-          } else {
-            widget.onQuizFinished(
-                score == widget.quiz.questions.length, widget.quiz);
+    return Scaffold(
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() {
+          if (!canAnswer && !_animating) {
+            if (currentQuestionIndex < widget.quiz.questions.length - 1) {
+              currentQuestionIndex++;
+              canAnswer = true;
+              userAnswer = '';
+              _start = widget.quiz.timer.toDouble();
+              _shouldAnimateLottie = false;
+              startTimer();
+            } else {
+              widget.onQuizFinished(
+                  score == widget.quiz.questions.length, widget.quiz);
+            }
           }
-        }
-      }),
-      child: Stack(
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (canAnswer)
-                TweenAnimationBuilder(
-                  tween: ColorTween(begin: Colors.green, end: Colors.red),
-                  duration: widget.quiz.timer.seconds,
-                  builder: (BuildContext context, Color? color, Widget? child) {
-                    _color = color!;
-                    return AnimatedProgressBar(
-                      width: MediaQuery.of(context).size.width,
-                      value: _start / widget.quiz.timer.toDouble(),
-                      duration: 1.seconds,
-                      color: color,
-                      backgroundColor: Colors.grey.withOpacity(0.8),
-                      curve: Curves.linear,
-                    );
-                  },
-                ),
-              if (!canAnswer)
-                ProgressBar(
-                  value: (_start / widget.quiz.timer),
-                  width: MediaQuery.of(context).size.width,
-                  color: _color,
-                  backgroundColor: Colors.grey.withOpacity(0.8),
-                ),
-              buildQuestionText(),
-              ...widget.quiz.questions[currentQuestionIndex].answerOptions
-                  .map((answer) => buildAnswerButton(answer)),
-              const SizedBox(
-                height: 64,
-              ),
-            ],
-          ),
-          if (!canAnswer)
-            Align(
-              alignment: Alignment.center,
-              child: Lottie.asset(
-                userAnswer.isNotEmpty && userAnswer == 'Time\'s Up!'
-                    ? 'assets/anim/timeout.json'
-                    : widget.quiz.checkAnswer(
-                            widget.quiz.questions[currentQuestionIndex],
-                            userAnswer)
-                        ? 'assets/anim/correct.json'
-                        : 'assets/anim/incorrect.json',
-                height: userAnswer == 'Time\'s Up!' ? 200 : 125,
-                width: userAnswer == 'Time\'s Up!' ? 200 : 125,
-                fit: BoxFit.cover,
-                repeat: false,
-                animate: _shouldAnimateLottie,
-              ),
-            ).animate(
-              delay: 750.ms,
-              effects: [
-                FadeEffect(
-                    begin: 0.0, end: 1.0, duration: 300.ms, delay: 150.ms),
-                ScaleEffect(
-                    begin: Offset.zero,
-                    end: const Offset(1, 1),
-                    duration: 300.ms,
-                    delay: 200.ms,
-                    curve: Curves.fastEaseInToSlowEaseOut),
-                MoveEffect(
-                  begin: const Offset(-200, 0),
-                  end: Offset.zero,
-                  duration: 750.ms,
+        }),
+        child: Stack(
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (canAnswer)
+                  TweenAnimationBuilder(
+                    tween: ColorTween(begin: Colors.green, end: Colors.red),
+                    duration: widget.quiz.timer.seconds,
+                    builder:
+                        (BuildContext context, Color? color, Widget? child) {
+                      _color = color!;
+                      return AnimatedProgressBar(
+                        width: MediaQuery.of(context).size.width,
+                        value: _start / widget.quiz.timer.toDouble(),
+                        duration: 1.seconds,
+                        color: color,
+                        backgroundColor: Colors.grey.withOpacity(0.8),
+                        curve: Curves.linear,
+                      );
+                    },
+                  ),
+                if (!canAnswer)
+                  ProgressBar(
+                    value: (_start / widget.quiz.timer),
+                    width: MediaQuery.of(context).size.width,
+                    color: _color,
+                    backgroundColor: Colors.grey.withOpacity(0.8),
+                  ),
+                buildQuestionText(),
+                ...widget.quiz.questions[currentQuestionIndex].answerOptions
+                    .map((answer) => buildAnswerButton(answer)),
+                const SizedBox(
+                  height: 64,
                 ),
               ],
-            ).callback(
-                duration: 300.ms,
-                callback: (_) {
-                  setState(() {
-                    _shouldAnimateLottie = true;
-                  });
-                }),
-          if (!canAnswer) buildFeedbackWidget(),
-          if (!canAnswer)
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: const AutoSizeText(
-                'press anywhere to continue...',
-                minFontSize: 8,
-              )
-                  .animate(
-                    delay: 1.5.seconds,
-                    effects: [
-                      FadeEffect(begin: 0.0, end: 1.0, duration: 1.seconds),
-                      MoveEffect(
-                          begin: const Offset(0, -15),
-                          end: const Offset(0, -20),
-                          duration: 500.ms),
-                    ],
-                    onPlay: (controller) => controller.repeat(reverse: true),
-                  )
-                  .callback(
-                    callback: (_) => setState(
-                      () {
-                        _animating = false;
-                      },
-                    ),
+            ),
+            if (!canAnswer)
+              Align(
+                alignment: Alignment.center,
+                child: Lottie.asset(
+                  userAnswer.isNotEmpty && userAnswer == 'Time\'s Up!'
+                      ? 'assets/anim/timeout.json'
+                      : widget.quiz.checkAnswer(
+                              widget.quiz.questions[currentQuestionIndex],
+                              userAnswer)
+                          ? 'assets/anim/correct.json'
+                          : 'assets/anim/incorrect.json',
+                  height: userAnswer == 'Time\'s Up!' ? 200 : 125,
+                  width: userAnswer == 'Time\'s Up!' ? 200 : 125,
+                  fit: BoxFit.cover,
+                  repeat: false,
+                  animate: _shouldAnimateLottie,
+                ),
+              ).animate(
+                delay: 750.ms,
+                effects: [
+                  FadeEffect(
+                      begin: 0.0, end: 1.0, duration: 300.ms, delay: 150.ms),
+                  ScaleEffect(
+                      begin: Offset.zero,
+                      end: const Offset(1, 1),
+                      duration: 300.ms,
+                      delay: 200.ms,
+                      curve: Curves.fastEaseInToSlowEaseOut),
+                  MoveEffect(
+                    begin: const Offset(-200, 0),
+                    end: Offset.zero,
+                    duration: 750.ms,
                   ),
-            )
-        ],
+                ],
+              ).callback(
+                  duration: 300.ms,
+                  callback: (_) {
+                    setState(() {
+                      _shouldAnimateLottie = true;
+                    });
+                  }),
+            if (!canAnswer) buildFeedbackWidget(),
+            if (!canAnswer)
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: const AutoSizeText(
+                  'press anywhere to continue...',
+                  minFontSize: 8,
+                )
+                    .animate(
+                      delay: 1.5.seconds,
+                      effects: [
+                        FadeEffect(begin: 0.0, end: 1.0, duration: 1.seconds),
+                        MoveEffect(
+                            begin: const Offset(0, -15),
+                            end: const Offset(0, -20),
+                            duration: 500.ms),
+                      ],
+                      onPlay: (controller) => controller.repeat(reverse: true),
+                    )
+                    .callback(
+                      callback: (_) => setState(
+                        () {
+                          _animating = false;
+                        },
+                      ),
+                    ),
+              )
+          ],
+        ),
       ),
     );
   }

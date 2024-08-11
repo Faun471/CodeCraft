@@ -1,34 +1,72 @@
-import 'package:codecraft/models/question.dart';
-import 'package:yaml/yaml.dart';
-
 class Quiz {
+  String? id;
+  final String title;
   final List<Question> questions;
   final int timer;
-  final int level;
+  String duration;
 
-  Quiz({required this.questions, required this.timer, required this.level});
+  Quiz({
+    required this.id,
+    required this.title,
+    required this.questions,
+    required this.timer,
+    required this.duration,
+  });
 
   bool checkAnswer(Question question, String userAnswer) {
     return question.correctAnswer == userAnswer;
   }
 
-  static Quiz parseQuiz(String yamlString) {
-    var yamlMap = loadYaml(yamlString);
-
-    List<Question> questions = [];
-    for (var questionData in yamlMap['questions']) {
-      var question = questionData['Question'];
-      var questionOptions = List<String>.from(question['options']);
-      questions.add(Question(
-        questionText: question['text'],
-        answerOptions: questionOptions,
-        correctAnswer: question['answer'],
-      ));
-    }
-
+  factory Quiz.fromJson(Map<String, dynamic> json) {
     return Quiz(
-        questions: questions,
-        timer: yamlMap['timer'] as int,
-        level: yamlMap['level'] as int);
+      id: json['id'] as String?, // Handle potential null value
+      title: json['title'] as String? ?? '', // Default to empty string if null
+      questions: (json['questions'] as List<dynamic>? ?? [])
+          .map(
+              (question) => Question.fromJson(question as Map<String, dynamic>))
+          .toList(),
+      timer: json['timer'] as int? ?? 0, // Default to 0 if null
+      duration:
+          json['duration'] as String? ?? '', // Default to empty string if null
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'questions': questions.map((question) => question.toJson()).toList(),
+      'timer': timer,
+      'duration': duration,
+    };
+  }
+}
+
+class Question {
+  final String questionText;
+  final List<String> answerOptions;
+  final String correctAnswer;
+
+  Question({
+    required this.questionText,
+    required this.answerOptions,
+    required this.correctAnswer,
+  });
+
+  factory Question.fromJson(Map<String, dynamic> json) {
+    return Question(
+      questionText: json['questionText'] as String? ?? '',
+      answerOptions:
+          List<String>.from(json['answerOptions'] as List<dynamic>? ?? []),
+      correctAnswer: json['correctAnswer'] as String? ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'questionText': questionText,
+      'answerOptions': answerOptions,
+      'correctAnswer': correctAnswer,
+    };
   }
 }

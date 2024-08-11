@@ -10,6 +10,7 @@ import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/screens/settings/account_edit.dart';
 import 'package:codecraft/screens/account_setup/login.dart';
 import 'package:codecraft/services/auth/auth_provider.dart';
+import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/buttons/colour_scheme_button.dart';
 import 'package:codecraft/widgets/cards/custom_big_user_card.dart';
@@ -74,17 +75,18 @@ class SettingsState extends ConsumerState<Settings> {
     final appUser = ref.watch(appUserNotifierProvider);
 
     return UserCard(
-      userName: "${appUser.value!.displayName} Lvl ${appUser.value!.level}",
+      userName:
+          "${appUser.value!.displayName ?? 'User'} Lvl ${appUser.value!.level}",
       userProfilePic: CachedNetworkImage(
-        height: 150,
-        width: 150,
-        alignment: Alignment.centerLeft,
-        fit: BoxFit.cover,
-        imageUrl: imageUrl,
-        imageBuilder: (context, imageProvider) => CircleAvatar(
-          backgroundImage: imageProvider,
-        ),
-      ),
+          height: 100,
+          width: 100,
+          alignment: Alignment.centerLeft,
+          fit: BoxFit.cover,
+          imageUrl: imageUrl,
+          imageBuilder: (context, imageProvider) => CircleAvatar(
+                backgroundImage: imageProvider,
+              ),
+          errorWidget: (context, url, error) => const Icon(Icons.person_2)),
       userMoreInfo: AutoSizeText(
         email,
         style: AdaptiveTheme.of(context)
@@ -183,15 +185,14 @@ class SettingsState extends ConsumerState<Settings> {
 
                 return ColorSchemeButton(
                   color: colorSchemes[index],
-                  isSelected: ref
-                          .watch(themeNotifierProvider)
-                          .valueOrNull!
-                          .preferredColor ==
+                  isSelected: AdaptiveTheme.of(context).theme.primaryColor ==
                       colorSchemes[index],
                   onSelect: () {
                     ref
                         .read(themeNotifierProvider.notifier)
-                        .updateColor(colorSchemes[index], context);
+                        .updateColor(colorSchemes[index]);
+
+                    ThemeUtils.changeTheme(context, colorSchemes[index]);
                   },
                 );
               },

@@ -1,18 +1,21 @@
-import 'package:codecraft/models/quiz.dart';
+import 'package:codecraft/models/app_user.dart';
+import 'package:codecraft/services/quiz_service.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/viewers/quiz_viewer.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 
-class QuizScreen extends StatelessWidget {
-  final String quizName;
+class QuizScreen extends ConsumerWidget {
+  final String quizId;
 
-  const QuizScreen({super.key, required this.quizName});
+  const QuizScreen({super.key, required this.quizId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appUser = ref.watch(appUserNotifierProvider);
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -27,8 +30,8 @@ class QuizScreen extends StatelessWidget {
           await _onWillPop(context);
         },
         child: FutureBuilder(
-          future: loadQuiz(),
-          builder: (context1, snapshot) {
+          future: QuizService().getQuizFromId(quizId, appUser.value!.orgId!),
+          builder: (context2, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
                 child: LoadingAnimationWidget.staggeredDotsWave(
@@ -39,27 +42,10 @@ class QuizScreen extends StatelessWidget {
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else {
-              return FutureBuilder(
-                future: Future.value(Quiz.parseQuiz(snapshot.data as String)),
-                builder: (context2, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: LoadingAnimationWidget.staggeredDotsWave(
-                        color: Colors.white,
-                        size: 200,
-                      ),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    return QuizViewer(
-                      quiz: snapshot.data!,
-                      onQuizFinished: (passed, quiz) {
-                        Navigator.pop(
-                            context, {'passed': passed, 'quiz': quiz});
-                      },
-                    );
-                  }
+              return QuizViewer(
+                quiz: snapshot.data!,
+                onQuizFinished: (passed, quiz) {
+                  Navigator.pop(context, {'passed': passed, 'quiz': quiz});
                 },
               );
             }
@@ -67,10 +53,6 @@ class QuizScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<String> loadQuiz() async {
-    return await rootBundle.loadString(quizName);
   }
 
   Future<void> _onWillPop(BuildContext context) async {

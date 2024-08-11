@@ -14,7 +14,7 @@ class ModuleCard extends ConsumerStatefulWidget {
   final VoidCallback onTap;
   final double imageWidthPercentage;
   final int unlockLevel;
-  final Color backgroundColor;
+  final Color? backgroundColor;
   final TextStyle titleStyle;
   final TextStyle descriptionStyle;
   final Color iconColor;
@@ -24,11 +24,11 @@ class ModuleCard extends ConsumerStatefulWidget {
     required this.title,
     required this.onTap,
     required this.unlockLevel,
+    this.backgroundColor,
     this.description = '',
     this.imageUrl,
     this.iconData = Icons.remove_circle,
     this.imageWidthPercentage = 20.0,
-    this.backgroundColor = Colors.white,
     this.titleStyle = const TextStyle(fontSize: 24),
     this.descriptionStyle = const TextStyle(fontSize: 18),
     this.iconColor = Colors.red,
@@ -41,7 +41,7 @@ class ModuleCard extends ConsumerStatefulWidget {
 class ModuleCardState extends ConsumerState<ModuleCard> {
   @override
   Widget build(BuildContext context) {
-    final appUser = ref.read(appUserNotifierProvider).value!;
+    final appUser = ref.watch(appUserNotifierProvider).value!;
 
     int currentLevel = appUser.data['level'] ?? 0;
     double screenWidth = MediaQuery.of(context).size.width;
@@ -68,7 +68,7 @@ class ModuleCardState extends ConsumerState<ModuleCard> {
       child: Stack(
         children: [
           Container(
-            color: widget.backgroundColor,
+            color: widget.backgroundColor ?? Theme.of(context).cardColor,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [

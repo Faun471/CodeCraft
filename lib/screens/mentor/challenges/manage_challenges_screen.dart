@@ -2,29 +2,30 @@ import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/challenge.dart';
 import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/screens/loading_screen.dart';
-import 'package:codecraft/screens/mentor/create_challenge_screen.dart';
-import 'package:codecraft/screens/mentor/edit_challenge_screen.dart';
+import 'package:codecraft/screens/mentor/challenges/create_challenge_screen.dart';
+import 'package:codecraft/screens/mentor/challenges/edit_challenge_screen.dart';
 import 'package:codecraft/services/challenge_service.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:smooth_list_view/smooth_list_view.dart';
-import 'package:universal_html/html.dart';
+import 'package:universal_html/html.dart' as web;
 
-class ManageChallengeScreen extends ConsumerStatefulWidget {
-  const ManageChallengeScreen({super.key});
+class ManageChallengesScreen extends ConsumerStatefulWidget {
+  const ManageChallengesScreen({super.key});
 
   @override
   _ManageChallengeScreenState createState() => _ManageChallengeScreenState();
 }
 
-class _ManageChallengeScreenState extends ConsumerState<ManageChallengeScreen> {
+class _ManageChallengeScreenState
+    extends ConsumerState<ManageChallengesScreen> {
   @override
   void initState() {
     super.initState();
 
-    document.onContextMenu.listen((event) => event.preventDefault());
+    web.document.onContextMenu.listen((event) => event.preventDefault());
   }
 
   @override
@@ -51,7 +52,7 @@ class _ManageChallengeScreenState extends ConsumerState<ManageChallengeScreen> {
           ),
           const SizedBox(height: 20),
           FutureBuilder<List<Challenge>>(
-            future: ChallengeService().getChallenges('Weekly'),
+            future: ChallengeService().getChallenges(user!.orgId!),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return LoadingAnimationWidget.flickr(
@@ -62,8 +63,6 @@ class _ManageChallengeScreenState extends ConsumerState<ManageChallengeScreen> {
               }
 
               if (snapshot.hasError) {
-                print(snapshot.error);
-
                 return const Center(
                   child: Text('An error occurred, please try again later!'),
                 );
@@ -88,7 +87,7 @@ class _ManageChallengeScreenState extends ConsumerState<ManageChallengeScreen> {
                 itemBuilder: (context, index) {
                   return ContextMenuRegion(
                     contextMenu: ContextMenu(
-                      orgId: user!.orgId!,
+                      orgId: user.orgId!,
                       challengeId: snapshot.data![index].id,
                       onTap: () {
                         setState(() {});

@@ -1,5 +1,6 @@
 import 'package:codecraft/screens/apprentice/challenge_screen.dart';
 import 'package:codecraft/services/challenge_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -37,7 +38,7 @@ class _WeeklyChallengesState extends ConsumerState<WeeklyChallenges> {
           FutureBuilder(
               future: ChallengeService().getChallenges('Weekly'),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.connectionState != ConnectionState.done) {
                   return LoadingAnimationWidget.flickr(
                     leftDotColor: Theme.of(context).primaryColor,
                     rightDotColor: Theme.of(context).colorScheme.secondary,
@@ -73,7 +74,29 @@ class _WeeklyChallengesState extends ConsumerState<WeeklyChallenges> {
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      leading: const Icon(Icons.code_rounded),
+                      leading: FutureBuilder(
+                        future: ChallengeService().getCompletedChallenges(
+                            FirebaseAuth.instance.currentUser!.uid),
+                        builder: (context, snapshot1) {
+                          if (snapshot1.connectionState !=
+                              ConnectionState.done) {
+                            return const CircularProgressIndicator();
+                          }
+
+                          if (snapshot1.hasError) {
+                            return const Icon(Icons.error);
+                          }
+                          if (snapshot1.data!
+                              .contains(snapshot.data![index].id)) {
+                            return const Icon(
+                              Icons.check_circle_rounded,
+                              color: Colors.green,
+                            );
+                          }
+
+                          return const Icon(Icons.code_rounded);
+                        },
+                      ),
                       trailing: const Icon(Icons.arrow_forward_ios),
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(

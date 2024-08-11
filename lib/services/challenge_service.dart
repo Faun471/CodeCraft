@@ -104,7 +104,9 @@ class ChallengeService {
       Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
       data['id'] = doc.id;
 
-      return Challenge.fromJson(data);
+      final challenge = Challenge.fromJson(data);
+
+      return challenge;
     } catch (e) {
       throw Exception('Error getting challenge: $e');
     }
@@ -114,8 +116,23 @@ class ChallengeService {
     try {
       await DatabaseHelper().currentUser.get().then((doc) {
         if (doc.exists) {
-          var data = doc.data() as Map<String, dynamic>;
-          var completedChallenges = data['completedChallenges'] as List<String>;
+          final data = doc.data() as Map<String, dynamic>;
+
+          if (data['completedChallenges'] == null) {
+            DatabaseHelper().currentUser.set({
+              'completedChallenges': [challengeId],
+            }, SetOptions(merge: true));
+            return;
+          }
+
+          List<String> completedChallenges =
+              (data['completedChallenges'] as List<dynamic>)
+                  .map((e) => e.toString())
+                  .toList();
+
+          if (completedChallenges.contains(challengeId)) {
+            return;
+          }
 
           completedChallenges.add(challengeId);
 
@@ -130,25 +147,21 @@ class ChallengeService {
   }
 
   Future<List<String>> getCompletedChallenges(String userId) async {
-    try {
-      var querySnapshot = await _firestore
-          .collection('completedChallenges')
-          .where('userId', isEqualTo: userId)
-          .get();
+    final doc = await DatabaseHelper().currentUser.get();
 
-      return querySnapshot.docs
-          .map((doc) => doc['challengeId'] as String)
-          .toList();
-    } catch (e) {
-      throw Exception('Error fetching completed challenges: $e');
-    }
+    final data = doc.data() as Map<String, dynamic>;
+
+    final List<dynamic> completedChallengesData =
+        data['completedChallenges'] ?? [];
+
+    return completedChallengesData.map((e) => e.toString()).toList();
   }
 }
 
 extension DateTimeParsing on String {
   DateTime toDateTime() {
     if (isEmpty) {
-      return DateTime.now();
+      return DateTime.now().add(const Duration(days: 1));
     }
 
     return DateTime.parse(this);

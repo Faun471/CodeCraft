@@ -1,4 +1,5 @@
 import 'package:codecraft/screens/apprentice/coding_challenges.dart';
+import 'package:codecraft/screens/apprentice/coding_quizzes.dart';
 import 'package:codecraft/screens/apprentice/modules.dart';
 import 'package:codecraft/screens/apprentice/organisation.dart';
 import 'package:codecraft/screens/apprentice/weekly_challenges.dart';
@@ -32,6 +33,11 @@ class ApprenticeHome extends ConsumerWidget {
         icon: Icons.code_rounded,
         label: 'Weekly Challenges',
         screen: const WeeklyChallenges(),
+      ),
+      SidebarItem(
+        icon: Icons.lightbulb,
+        label: 'Quizzes',
+        screen: const CodingQuizzes(),
       ),
       SidebarItem(
         icon: Icons.settings,

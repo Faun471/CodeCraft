@@ -2,6 +2,7 @@ import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/challenge.dart';
 import 'package:codecraft/providers/code_execution_provider.dart';
 import 'package:codecraft/services/challenge_service.dart';
+import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/codeblocks/code_editor.dart';
 import 'package:codecraft/widgets/screentypes/split_screen.dart';
 import 'package:codecraft/widgets/viewers/markdown_viewer.dart';
@@ -13,8 +14,10 @@ import 'package:re_highlight/languages/python.dart';
 
 class ChallengeScreen extends ConsumerStatefulWidget {
   final Challenge challenge;
+  final bool shouldLevelUp;
 
-  const ChallengeScreen({super.key, required this.challenge});
+  const ChallengeScreen(
+      {super.key, required this.challenge, this.shouldLevelUp = false});
 
   @override
   _ChallengeScreenState createState() => _ChallengeScreenState();
@@ -28,6 +31,7 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
   @override
   void initState() {
     super.initState();
+
     switch (widget.challenge.unitTests[0].expectedOutput.type) {
       case 'String':
         _returnType = 'String';
@@ -47,8 +51,12 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
 
     if (widget.challenge.sampleCode == null ||
         widget.challenge.sampleCode!.isEmpty) {
-      _codeController.text = generateSampleCode(widget.challenge.className,
-          widget.challenge.methodName, _selectedLanguage, _returnType);
+      _codeController.text = generateSampleCode(
+        widget.challenge.className,
+        widget.challenge.methodName,
+        _selectedLanguage,
+        _returnType,
+      );
     } else {
       _codeController.text = widget.challenge.sampleCode!;
     }
@@ -70,15 +78,32 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
         return;
       }
 
-      await ref.read(appUserNotifierProvider.notifier).levelUp();
+      if (widget.shouldLevelUp) {
+        await ref.read(appUserNotifierProvider.notifier).levelUp();
+
+        if (!mounted) {
+          return;
+        }
+
+        Utils.displayDialog(
+          context: context,
+          title: 'Level Up!',
+          content: 'Congratulations! You have leveled up!',
+          lottieAsset: 'assets/anim/level_up.json',
+        );
+      }
     }
   }
 
   void _onLanguageChanged(String? newValue) {
     setState(() {
       _selectedLanguage = newValue!;
-      _codeController.text = generateSampleCode(widget.challenge.className,
-          widget.challenge.methodName, _selectedLanguage, _returnType);
+      _codeController.text = generateSampleCode(
+        widget.challenge.className,
+        widget.challenge.methodName,
+        _selectedLanguage,
+        _returnType,
+      );
     });
   }
 
@@ -197,7 +222,7 @@ class $className {
   } else if (language == 'python') {
     return '''
 class $className:
-  def $methodName(self):
+  def $methodName():
     # Your code here
     pass
 ''';

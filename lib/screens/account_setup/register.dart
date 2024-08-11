@@ -9,7 +9,6 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/account_setup/account_type_selection.dart';
 import 'package:codecraft/screens/account_setup/login.dart';
-import 'package:codecraft/screens/apprentice/apprentice_home.dart';
 import 'package:codecraft/widgets/buttons/custom_text_fields.dart';
 
 class Register extends ConsumerStatefulWidget {
@@ -155,15 +154,30 @@ class _RegisterState extends ConsumerState<Register> {
           Row(
             children: [
               Expanded(
+                flex: 2,
                 child: CustomTextField(
-                  labelText: 'Email',
-                  icon: Icons.email,
-                  mode: ValidationMode.email,
-                  controller: emailController,
+                  labelText: 'Last Name',
+                  icon: Icons.person,
+                  controller: lastNameController,
                 ),
               ),
               const SizedBox(width: 10),
+              Expanded(
+                flex: 1,
+                child: CustomTextField(
+                  labelText: 'Suffix',
+                  controller: suffixController,
+                  isRequired: false,
+                ),
+              ),
             ],
+          ),
+          const SizedBox(height: 10),
+          CustomTextField(
+            labelText: 'Email',
+            icon: Icons.email,
+            mode: ValidationMode.email,
+            controller: emailController,
           ),
           const SizedBox(height: 10),
           _buildPhoneNumberInput(),
@@ -179,7 +193,7 @@ class _RegisterState extends ConsumerState<Register> {
     return Row(
       children: [
         Expanded(
-          flex: 3,
+          flex: 2,
           child: CustomTextField(
             icon: Icons.person,
             labelText: 'First Name',
@@ -188,10 +202,11 @@ class _RegisterState extends ConsumerState<Register> {
         ),
         const SizedBox(width: 10),
         Expanded(
+          flex: 1,
           child: CustomTextField(
-            labelText: 'Last Name',
-            icon: Icons.person,
-            controller: lastNameController,
+            labelText: 'MI',
+            controller: miController,
+            isRequired: false,
           ),
         ),
       ],
@@ -273,16 +288,11 @@ class _RegisterState extends ConsumerState<Register> {
   }
 
   void _signInWithGoogle() async {
-    final error = await ref.watch(authProvider).signInWithGoogle();
-    if (error == null) {
+    final user = await ref.watch(authProvider).signInWithGoogle(context);
+    if (user != null) {
       if (!mounted) {
         return;
       }
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const ApprenticeHome()),
-      );
     }
   }
 

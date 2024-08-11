@@ -3,6 +3,7 @@ import 'package:codecraft/firebase_options.dart';
 import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/providers/theme_provider.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
+import 'package:codecraft/screens/account_setup/additional_info.dart';
 import 'package:codecraft/screens/account_setup/login.dart';
 import 'package:codecraft/screens/apprentice/apprentice_home.dart';
 import 'package:codecraft/screens/account_setup/register.dart';
@@ -10,7 +11,7 @@ import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/screens/mentor/mentor_home.dart';
 import 'package:codecraft/services/auth/auth_provider.dart';
 import 'package:codecraft/services/database_helper.dart';
-import 'package:codecraft/themes/theme.dart';
+import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/widgets/cards/onboarding_card.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -36,19 +37,35 @@ Future<Widget> getLandingPage() async {
   final auth = FirebaseAuth.instance;
   final isLoggedIn = auth.currentUser != null;
 
-  if (!isLoggedIn) {
+  if (!isLoggedIn ||
+      await DatabaseHelper()
+          .users
+          .doc(auth.currentUser!.uid)
+          .snapshots()
+          .first
+          .then((value) {
+        final data = value.data() as Map<String, dynamic>?;
+
+        return data == null ||
+            !data.containsKey('accountType') ||
+            data['accountType'] == null;
+      })) {
     return kIsWeb ? const AccountSetup(Login()) : const OnboardingPage();
   }
 
-  final String accountType =
-      await DatabaseHelper().currentUser.get().then((doc) {
-    if (doc.exists) {
-      final userData = doc.data() as Map<String, dynamic>;
-      return userData['accountType'];
-    } else {
-      return '';
-    }
-  });
+  final user = await DatabaseHelper().currentUser.get();
+
+  final userData = user.data() as Map<String, dynamic>;
+
+  if (!userData.containsKey('accountType') || userData['accountType'] == null) {
+    return AccountSetup(
+        AdditionalInfoScreen(user: FirebaseAuth.instance.currentUser!));
+  }
+
+  String accountType = await DatabaseHelper().currentUser.get().then(
+        (value) =>
+            (value.data() as Map<String, dynamic>)['accountType'] as String,
+      );
 
   if (accountType == 'apprentice') {
     return const ApprenticeHome();
@@ -61,6 +78,7 @@ Future<Widget> getLandingPage() async {
 
 class _EagerInitialization extends ConsumerWidget {
   const _EagerInitialization({required this.child});
+
   final Widget child;
 
   @override
@@ -80,11 +98,29 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentTheme = ref.watch(themeNotifierProvider).when(
+          data: (data) {
+            return data;
+          },
+          loading: () {
+            return ThemeState(
+              preferredColor: Colors.orange,
+              lightTheme: ThemeUtils.createLightTheme(Colors.orange),
+              darkTheme: ThemeUtils.createDarkTheme(Colors.orange),
+            );
+          },
+          error: (error, _) => ThemeState(
+            preferredColor: Colors.orange,
+            lightTheme: ThemeUtils.createLightTheme(Colors.orange),
+            darkTheme: ThemeUtils.createDarkTheme(Colors.orange),
+          ),
+        );
+
     return _EagerInitialization(
       child: ContextMenuOverlay(
         child: AdaptiveTheme(
-          light: AppTheme.lightTheme,
-          dark: AppTheme.darkTheme,
+          light: currentTheme.lightTheme,
+          dark: currentTheme.darkTheme,
           initial: savedThemeMode ?? AdaptiveThemeMode.light,
           debugShowFloatingThemeButton: true,
           builder: (theme, darkTheme) {
@@ -101,27 +137,20 @@ class MyApp extends ConsumerWidget {
                   getLandingPage(),
                 ],
                 onDone: (context, snapshot) async {
-                  await ref.refresh(themeNotifierProvider.future).then(
-                    (themeState) async {
-                      if (context.mounted) {
-                        await ref
-                            .watch(themeNotifierProvider.notifier)
-                            .updateColor(
-                              themeState.preferredColor,
-                              context,
-                            );
-                      }
-                    },
-                  );
-
-                  if (context.mounted) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => snapshot.data[0],
-                      ),
-                    );
+                  if (snapshot.data.isEmpty) {
+                    return;
                   }
+
+                  if (!context.mounted) return;
+
+                  ThemeUtils.changeTheme(context, currentTheme.preferredColor);
+
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => snapshot.data[0],
+                    ),
+                  );
                 },
               ),
             );

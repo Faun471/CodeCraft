@@ -25,6 +25,9 @@ class CodeExecutionNotifier extends StateNotifier<CodeExecutionState> {
     final headers = {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+      "Access-Control-Allow-Headers":
+          "Origin, Content-Type, Accept, Authorization, X-Request-With",
     };
 
     final fullScript =
@@ -93,11 +96,9 @@ class CodeExecutionNotifier extends StateNotifier<CodeExecutionState> {
       for (int i = 0; i < unitTests.length; i++) {
         UnitTest test = unitTests[i];
         buffer.writeln(
-            '    if (instance.$methodName(${test.input}) == ${_expectedOutputToString(test.expectedOutput, language)}) {');
-        buffer.writeln('      System.out.println("Test ${i + 1} passed");');
-        buffer.writeln('    } else {');
-        buffer.writeln('      System.out.println("Test ${i + 1} failed");');
-        buffer.writeln('    }');
+            '    boolean result${i + 1} = instance.$methodName(${test.input}) == ${_expectedOutputToString(test.expectedOutput, language)};');
+        buffer.writeln(
+            '    System.out.println("TEST_${i + 1}: " + result${i + 1});');
       }
 
       buffer.writeln('  }');
@@ -108,21 +109,17 @@ class CodeExecutionNotifier extends StateNotifier<CodeExecutionState> {
       final buffer = StringBuffer();
 
       buffer.writeln(userScript); // User's code
-      buffer.writeln('class Main:');
-      buffer.writeln('    def __init__(self):');
-      buffer.writeln('        self.instance = $className()');
+
+      buffer.writeln('if __name__ == "__main__":');
+      buffer.writeln('    instance = $className()');
 
       for (int i = 0; i < unitTests.length; i++) {
         UnitTest test = unitTests[i];
         buffer.writeln(
-            '        if self.instance.$methodName(${test.input}) == ${_expectedOutputToString(test.expectedOutput, language)}:');
-        buffer.writeln('            print("Test ${i + 1} passed")');
-        buffer.writeln('        else:');
-        buffer.writeln('            print("Test ${i + 1} failed")');
+            '    result${i + 1} = instance.$methodName(${test.input}) == ${_expectedOutputToString(test.expectedOutput, language)}');
+        buffer.writeln(
+            '    print("TEST_${i + 1}: " + str(result${i + 1}).lower())');
       }
-
-      buffer.writeln('if __name__ == "__main__":');
-      buffer.writeln('    Main()');
 
       return buffer.toString();
     }
@@ -133,7 +130,13 @@ class CodeExecutionNotifier extends StateNotifier<CodeExecutionState> {
       String className, String language, String methodName) async {
     await executeCode(script, unitTests, className, language, methodName);
 
-    return !state.output.contains('failed');
+    for (int i = 0; i < unitTests.length; i++) {
+      if (!state.output.contains('TEST_${i + 1}: true')) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }
 

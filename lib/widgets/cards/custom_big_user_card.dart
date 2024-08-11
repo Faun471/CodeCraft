@@ -28,8 +28,12 @@ class UserCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isVertical = MediaQuery.of(context).size.aspectRatio < 1;
     return Container(
-      height: height ?? MediaQuery.of(context).size.height / 3,
+      height: height ??
+          (isVertical
+              ? MediaQuery.of(context).size.height / 3.5
+              : MediaQuery.of(context).size.height / 2),
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
         color: backgroundColor ?? Theme.of(context).cardColor,

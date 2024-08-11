@@ -7,7 +7,7 @@ class AppTheme {
   static const double titleFontSize = 20.0;
   static const double borderRadius = 8.0;
 
-  static TextStyle _baseTextStyle({
+  static TextStyle baseTextStyle({
     double fontSize = defaultFontSize,
     FontWeight fontWeight = FontWeight.normal,
     Color color = Colors.black,
@@ -20,7 +20,7 @@ class AppTheme {
     );
   }
 
-  static AppBarTheme _baseAppBarTheme({
+  static AppBarTheme baseAppBarTheme({
     Color backgroundColor = Colors.orange,
     Color iconColor = Colors.white,
     Color titleColor = Colors.white,
@@ -29,7 +29,7 @@ class AppTheme {
     return AppBarTheme(
       backgroundColor: backgroundColor,
       iconTheme: IconThemeData(color: iconColor),
-      titleTextStyle: _baseTextStyle(
+      titleTextStyle: baseTextStyle(
         color: titleColor,
         fontSize: titleFontSize,
         fontWeight: FontWeight.bold,
@@ -38,7 +38,7 @@ class AppTheme {
     );
   }
 
-  static ElevatedButtonThemeData _baseElevatedButtonTheme({
+  static ElevatedButtonThemeData baseElevatedButtonTheme({
     Color backgroundColor = Colors.orange,
     double borderRadius = AppTheme.borderRadius,
   }) {
@@ -63,7 +63,7 @@ class AppTheme {
     );
   }
 
-  static OutlinedButtonThemeData _baseOutlinedButtonTheme({
+  static OutlinedButtonThemeData baseOutlinedButtonTheme({
     Color sideColor = Colors.white,
     double borderRadius = AppTheme.borderRadius,
   }) {
@@ -90,7 +90,7 @@ class AppTheme {
     );
   }
 
-  static InputDecorationTheme _baseInputDecorationTheme(
+  static InputDecorationTheme baseInputDecorationTheme(
     Color color, {
     Color borderColor = Colors.black,
     Color focusedBorderColor = Colors.orange,
@@ -112,71 +112,71 @@ class AppTheme {
         borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide(color: focusedBorderColor),
       ),
-      labelStyle: _baseTextStyle(color: color),
-      hintStyle: _baseTextStyle(color: Colors.blueGrey),
+      labelStyle: baseTextStyle(color: color),
+      hintStyle: baseTextStyle(color: Colors.blueGrey),
     );
   }
 
-  static TextTheme _baseTextTheme(Color color) {
+  static TextTheme baseTextTheme(Color color) {
     return TextTheme(
-      displayLarge: _baseTextStyle(
+      displayLarge: baseTextStyle(
           fontSize: 34, fontWeight: FontWeight.bold, color: color),
-      displayMedium: _baseTextStyle(
+      displayMedium: baseTextStyle(
           fontSize: 28, fontWeight: FontWeight.bold, color: color),
-      displaySmall: _baseTextStyle(
+      displaySmall: baseTextStyle(
           fontSize: 24, fontWeight: FontWeight.bold, color: color),
-      headlineLarge: _baseTextStyle(
+      headlineLarge: baseTextStyle(
           fontSize: 32, fontWeight: FontWeight.bold, color: color),
-      headlineMedium: _baseTextStyle(
+      headlineMedium: baseTextStyle(
           fontSize: 28, fontWeight: FontWeight.bold, color: color),
-      headlineSmall: _baseTextStyle(
+      headlineSmall: baseTextStyle(
           fontSize: 24, fontWeight: FontWeight.bold, color: color),
-      titleLarge: _baseTextStyle(
+      titleLarge: baseTextStyle(
           fontSize: 22, fontWeight: FontWeight.bold, color: color),
-      titleMedium: _baseTextStyle(
+      titleMedium: baseTextStyle(
           fontSize: 20, fontWeight: FontWeight.bold, color: color),
-      titleSmall: _baseTextStyle(
+      titleSmall: baseTextStyle(
           fontSize: 18, fontWeight: FontWeight.bold, color: color),
-      bodyLarge: _baseTextStyle(fontSize: 16, color: color),
-      bodyMedium: _baseTextStyle(fontSize: 14, color: color),
-      bodySmall: _baseTextStyle(fontSize: 12, color: color),
-      labelLarge: _baseTextStyle(
+      bodyLarge: baseTextStyle(fontSize: 16, color: color),
+      bodyMedium: baseTextStyle(fontSize: 14, color: color),
+      bodySmall: baseTextStyle(fontSize: 12, color: color),
+      labelLarge: baseTextStyle(
           fontSize: 14, fontWeight: FontWeight.bold, color: color),
-      labelMedium: _baseTextStyle(
+      labelMedium: baseTextStyle(
           fontSize: 12, fontWeight: FontWeight.bold, color: color),
-      labelSmall: _baseTextStyle(
+      labelSmall: baseTextStyle(
           fontSize: 10, fontWeight: FontWeight.bold, color: color),
     );
   }
 
-  static ThemeData lightTheme = ThemeData(
-    primaryColor: Colors.amber,
-    appBarTheme: _baseAppBarTheme(),
-    colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber).copyWith(
-      primary: Colors.amber,
-      secondary: Colors.deepOrange,
+  static ThemeData lightTheme = ThemeData.light().copyWith(
+    primaryColor: Colors.orange,
+    appBarTheme: baseAppBarTheme(),
+    colorScheme: const ColorScheme.light(
+      primary: Colors.orange,
+      secondary: Colors.orange,
     ),
-    inputDecorationTheme: _baseInputDecorationTheme(
+    inputDecorationTheme: baseInputDecorationTheme(
         const Color.fromARGB(255, 21, 21, 21),
         focusedBorderColor: Colors.orange,
         borderColor: Colors.black),
-    elevatedButtonTheme: _baseElevatedButtonTheme(),
-    outlinedButtonTheme: _baseOutlinedButtonTheme(),
-    textTheme: _baseTextTheme(const Color.fromARGB(255, 21, 21, 21)),
+    elevatedButtonTheme: baseElevatedButtonTheme(),
+    outlinedButtonTheme: baseOutlinedButtonTheme(),
+    textTheme: baseTextTheme(const Color.fromARGB(255, 21, 21, 21)),
   );
 
   static ThemeData darkTheme = ThemeData.dark().copyWith(
-    primaryColor: Colors.amber,
+    primaryColor: Colors.orange,
     colorScheme: const ColorScheme.dark(
-      primary: Colors.amber,
-      secondary: Colors.amber,
+      primary: Colors.orange,
+      secondary: Colors.orange,
     ),
-    appBarTheme: _baseAppBarTheme(),
-    inputDecorationTheme: _baseInputDecorationTheme(Colors.white,
-        focusedBorderColor: Colors.amber, borderColor: Colors.white),
-    elevatedButtonTheme: _baseElevatedButtonTheme(),
-    outlinedButtonTheme: _baseOutlinedButtonTheme(),
-    textTheme: _baseTextTheme(Colors.white),
+    appBarTheme: baseAppBarTheme(),
+    inputDecorationTheme: baseInputDecorationTheme(Colors.white,
+        focusedBorderColor: Colors.orange, borderColor: Colors.white),
+    elevatedButtonTheme: baseElevatedButtonTheme(),
+    outlinedButtonTheme: baseOutlinedButtonTheme(),
+    textTheme: baseTextTheme(Colors.white),
   );
 
   static Map<String, TextStyle> getSyntaxHighlighterTheme(SyntaxTheme theme) {

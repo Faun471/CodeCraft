@@ -28,7 +28,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             Future.delayed(
-              20.milliseconds,
+              50.milliseconds,
               () {
                 if (widget.onDone != null && context.mounted) {
                   widget.onDone!(context, snapshot);

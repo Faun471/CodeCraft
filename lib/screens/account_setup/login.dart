@@ -70,24 +70,8 @@ class _LoginState extends ConsumerState<Login> {
         Padding(
           padding: const EdgeInsets.all(20),
           child: FilledButton(
-            onPressed: () {
-              ref.watch(authProvider).signInWithGoogle().then(
-                (error) {
-                  // If the error message is null, then the registration is successful.
-                  if (error == null && context.mounted) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return const ApprenticeHome();
-                        },
-                      ),
-                    );
-                  } else {
-                    // _showErrorDialog(context, error);
-                  }
-                },
-              );
+            onPressed: () async {
+              await ref.read(authProvider).signInWithGoogle(context);
             },
             style: ButtonStyle(
                 shape: WidgetStateProperty.all<RoundedRectangleBorder>(
@@ -201,7 +185,6 @@ class _LoginState extends ConsumerState<Login> {
                               .watch(themeNotifierProvider.notifier)
                               .updateColor(
                                 themeState.preferredColor,
-                                context,
                               );
                         }
                       },

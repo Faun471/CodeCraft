@@ -109,7 +109,7 @@ class ManageRequestsScreenState extends ConsumerState<ManageRequestsScreen> {
               const SizedBox(width: 4),
               FutureBuilder(
                 future: ref
-                    .watch(invitationServiceProvider)
+                    .watch(invitationServiceProvider.notifier)
                     .getCurrentCode(FirebaseAuth.instance.currentUser!.uid),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done) {

@@ -3,6 +3,8 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/providers/screen_provider.dart';
+import 'package:codecraft/services/auth/auth_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sidebarx/sidebarx.dart';
@@ -52,7 +54,17 @@ class BodyState extends ConsumerState<Body> {
       ref
           .watch(screenProvider.notifier)
           .replaceScreen(widget.sidebarItems.first.screen);
+      ref.invalidate(appUserNotifierProvider);
     });
+  }
+
+  Future<void> _refreshCurrentScreen() async {
+    await Future.delayed(const Duration(seconds: 2));
+
+    ref.invalidate(authProvider);
+    ref.invalidate(appUserNotifierProvider);
+
+    setState(() {});
   }
 
   @override
@@ -76,42 +88,32 @@ class BodyState extends ConsumerState<Body> {
           title: Row(
             children: [
               if (ref.watch(screenProvider).screenStack.length > 1)
-                // if (!isVertical)
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    ref.read(screenProvider.notifier).popScreen();
-                    selectedIndex = widget.sidebarItems
-                        .indexOf(widget.sidebarItems.firstWhere((element) {
-                      return element.screen.runtimeType ==
-                          ref.read(screenProvider).screenStack.last.runtimeType;
-                    }));
-                  },
-                ),
-              const SizedBox(
-                width: 10,
-              ),
-              ImageFiltered(
-                imageFilter: ColorFilter.mode(
-                  Theme.of(context).primaryColor,
-                  BlendMode.srcIn,
-                ),
-                child: Image.asset(
-                  'assets/images/logo.png',
-                  height: 30,
-                ),
-              ),
-              const SizedBox(width: 10),
+                if (!isVertical)
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      ref.read(screenProvider.notifier).popScreen();
+                      selectedIndex = widget.sidebarItems
+                          .indexOf(widget.sidebarItems.firstWhere((element) {
+                        return element.screen.runtimeType ==
+                            ref
+                                .read(screenProvider)
+                                .screenStack
+                                .last
+                                .runtimeType;
+                      }));
+                    },
+                  ),
               const AutoSizeText(
                 'CODECRAFT',
-                minFontSize: 36,
+                minFontSize: 24,
               ),
               const Expanded(
                 child: SizedBox(),
               ),
               AutoSizeText(
                 '${ref.watch(appUserNotifierProvider).value!.displayName ?? 'User'} ',
-                presetFontSizes: const [12, 16, 18, 24],
+                minFontSize: 24,
                 textAlign: TextAlign.end,
               ),
               const SizedBox(width: 10),
@@ -121,6 +123,7 @@ class BodyState extends ConsumerState<Body> {
                           .watch(appUserNotifierProvider)
                           .value!
                           .data['photoURL'] ??
+                      FirebaseAuth.instance.currentUser!.photoURL ??
                       'https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png',
                   height: 30,
                   width: 30,
@@ -136,7 +139,12 @@ class BodyState extends ConsumerState<Body> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (!isVertical) _buildSidebar(context),
-            Expanded(child: ref.watch(screenProvider).screenStack.last),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: _refreshCurrentScreen,
+                child: ref.watch(screenProvider).screenStack.last,
+              ),
+            ),
           ],
         ),
       ),

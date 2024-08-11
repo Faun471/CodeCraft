@@ -3,14 +3,34 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codecraft/models/invitation.dart';
 import 'package:codecraft/services/database_helper.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final invitationServiceProvider = Provider<InvitationService>((ref) {
-  return InvitationService();
-});
+part 'invitation_service.g.dart';
 
-class InvitationService {
+@riverpod
+class InvitationService extends _$InvitationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  FutureOr<List<Invitation>> build() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return [];
+    }
+    return _fetchUserInvitations(user.uid);
+  }
+
+  Future<List<Invitation>> _fetchUserInvitations(String userId) async {
+    var invitationsSnapshot = await _firestore
+        .collection('invitations')
+        .where('mentorId', isEqualTo: userId)
+        .get();
+
+    return invitationsSnapshot.docs
+        .map((doc) => Invitation.fromMap(doc.data()))
+        .toList();
+  }
 
   Future<String> createInvitation(String mentorId, String orgId) async {
     String code = '';
@@ -45,21 +65,18 @@ class InvitationService {
       'code': code,
     }, SetOptions(merge: true));
 
+    state = AsyncValue.data([...state.value ?? [], invitation]);
+
     return code;
   }
 
   Future<String?> getCurrentCode(String mentorId) async {
-    var existingInvitations = await _firestore
-        .collection('invitations')
-        .where('mentorId', isEqualTo: mentorId)
-        .get();
-
-    if (existingInvitations.docs.isNotEmpty) {
-      return existingInvitations.docs.first.data()['code'];
+    var existingInvitations = state.value ?? [];
+    if (existingInvitations.isNotEmpty) {
+      return existingInvitations.first.code;
     }
 
     final user = await DatabaseHelper().getUserData(mentorId);
-
     return await createInvitation(mentorId, user['orgId']);
   }
 

@@ -23,7 +23,7 @@ class InvitationNotifier extends _$InvitationNotifier {
   }
 
   Future<void> joinOrgWithCode(String code) async {
-    final invitationService = ref.watch(invitationServiceProvider);
+    final invitationService = ref.watch(invitationServiceProvider.notifier);
 
     String apprenticeId = ref.watch(authProvider).auth.currentUser!.uid;
     Invitation? invitation = await invitationService.getInvitation(code);
@@ -43,7 +43,7 @@ class InvitationNotifier extends _$InvitationNotifier {
   Future<List<Map<String, dynamic>>> _fetchJoinRequests() async {
     List<Map<String, dynamic>> requests = [];
 
-    final invitationService = ref.watch(invitationServiceProvider);
+    final invitationService = ref.watch(invitationServiceProvider.notifier);
     String mentorId = ref.watch(authProvider).auth.currentUser!.uid;
     requests = await invitationService.getJoinRequests(mentorId);
 
@@ -51,13 +51,13 @@ class InvitationNotifier extends _$InvitationNotifier {
   }
 
   Future<void> updateRequestStatus(String requestId, String status) async {
-    final invitationService = ref.watch(invitationServiceProvider);
+    final invitationService = ref.watch(invitationServiceProvider.notifier);
     await invitationService.updateJoinRequestStatus(requestId, status);
     _fetchJoinRequests();
   }
 
   Future<void> createNewInvitation(String mentorId, String orgId) async {
-    final invitationService = ref.watch(invitationServiceProvider);
+    final invitationService = ref.watch(invitationServiceProvider.notifier);
     await invitationService.createInvitation(mentorId, orgId);
     _fetchJoinRequests();
   }

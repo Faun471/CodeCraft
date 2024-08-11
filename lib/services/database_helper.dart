@@ -44,9 +44,9 @@ class DatabaseHelper {
       String accountType, String orgId) async {
     await users.doc(userId).set({
       'firstName': userData['firstName']!,
-      'mi': userData['mi']!,
+      'mi': userData['mi'] ?? '',
       'lastName': userData['lastName']!,
-      'suffix': userData['suffix']!,
+      'suffix': userData['suffix'] ?? '',
       'email': userData['email']!,
       'phoneNumber': userData['phoneNumber']!,
       'accountType': accountType,

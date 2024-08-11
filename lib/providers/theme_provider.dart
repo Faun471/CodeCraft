@@ -1,19 +1,33 @@
 import 'package:codecraft/services/database_helper.dart';
-import 'package:codecraft/themes/theme.dart';
+import 'package:codecraft/utils/theme_utils.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'theme_provider.g.dart';
 
 class ThemeState {
   final Color preferredColor;
+  final ThemeData lightTheme;
+  final ThemeData darkTheme;
 
-  ThemeState({required this.preferredColor});
+  ThemeState({
+    required this.preferredColor,
+    required this.lightTheme,
+    required this.darkTheme,
+  });
 
-  ThemeState copyWith({Color? preferredColor}) {
-    return ThemeState(preferredColor: preferredColor ?? this.preferredColor);
+  ThemeState copyWith({
+    Color? preferredColor,
+    ThemeData? lightTheme,
+    ThemeData? darkTheme,
+  }) {
+    return ThemeState(
+      preferredColor: preferredColor ?? this.preferredColor,
+      lightTheme: lightTheme ?? this.lightTheme,
+      darkTheme: darkTheme ?? this.darkTheme,
+    );
   }
 }
 
@@ -21,135 +35,50 @@ class ThemeState {
 class ThemeNotifier extends _$ThemeNotifier {
   @override
   FutureOr<ThemeState> build() async {
-    return ThemeState(preferredColor: await _fetchPreferredColor());
+    final color = await _fetchPreferredColor();
+    final newState = _createThemeState(color);
+    return newState;
+  }
+
+  ThemeState _createThemeState(Color color) {
+    return ThemeState(
+      preferredColor: color,
+      lightTheme: ThemeUtils.createLightTheme(color),
+      darkTheme: ThemeUtils.createDarkTheme(color),
+    );
   }
 
   Future<Color> _fetchPreferredColor() async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      return Colors.orange;
+    }
+
     final user = await DatabaseHelper().currentUser.get();
+
+    if (!user.exists) {
+      return Colors.orange;
+    }
+
     final userData = user.data() as Map<String, dynamic>;
 
-    final String preferredColor =
-        userData['preferredColor'] ?? Colors.orange.value.toRadixString(16);
+    if (!userData.containsKey('preferredColor')) {
+      return Colors.orange;
+    }
 
-    return Color(int.parse(preferredColor, radix: 16));
+    Color userDataColor =
+        Color(int.parse(userData['preferredColor'], radix: 16));
+        
+    return userDataColor;
   }
 
-  Future<void> updateColor(Color newColor, BuildContext context) async {
+  Future<void> updateColor(Color newColor) async {
     state = const AsyncValue.loading();
 
     await DatabaseHelper().currentUser.set({
       'preferredColor': newColor.value.toRadixString(16),
     }, SetOptions(merge: true));
 
-    state = AsyncValue.data(ThemeState(preferredColor: newColor));
-
-    if (!context.mounted) {
-      return;
-    }
-
-    _updateTheme(context);
-  }
-
-  void _updateTheme(BuildContext context) {
-    state.when(
-      data: (themeState) {
-        final lightTheme =
-            _createLightTheme(context, themeState.preferredColor);
-        final darkTheme = _createDarkTheme(context, themeState.preferredColor);
-
-        AdaptiveTheme.of(context).setTheme(
-          light: lightTheme,
-          dark: darkTheme,
-        );
-      },
-      loading: () {},
-      error: (error, stack) {},
-    );
-  }
-
-  ThemeData _createLightTheme(BuildContext context, Color color) {
-    return AppTheme.lightTheme.copyWith(
-      primaryColor: color,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: color,
-        brightness: Brightness.light,
-      ),
-      brightness: Brightness.light,
-      appBarTheme: Theme.of(context).appBarTheme.copyWith(
-            backgroundColor: color,
-          ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
-              backgroundColor: WidgetStateProperty.all(color),
-            ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: Theme.of(context).outlinedButtonTheme.style!.copyWith(
-              side: WidgetStateProperty.all(
-                BorderSide(color: color),
-              ),
-            ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: color),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: color),
-        ),
-        border: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.black),
-        ),
-        hintStyle: Theme.of(context).inputDecorationTheme.hintStyle!.copyWith(
-              color: color,
-            ),
-        labelStyle: Theme.of(context).inputDecorationTheme.labelStyle!.copyWith(
-              color: Colors.blueGrey,
-            ),
-      ),
-    );
-  }
-
-  ThemeData _createDarkTheme(BuildContext context, Color color) {
-    return AppTheme.darkTheme.copyWith(
-      primaryColor: color,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: color,
-        brightness: Brightness.dark,
-      ),
-      brightness: Brightness.dark,
-      appBarTheme: Theme.of(context).appBarTheme.copyWith(
-            backgroundColor: color,
-          ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
-              backgroundColor: WidgetStateProperty.all(color),
-            ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: Theme.of(context).outlinedButtonTheme.style!.copyWith(
-              side: WidgetStateProperty.all(
-                BorderSide(color: color),
-              ),
-            ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: color),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: color),
-        ),
-        border: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.white),
-        ),
-        hintStyle: Theme.of(context).inputDecorationTheme.hintStyle!.copyWith(
-              color: color,
-            ),
-        labelStyle: Theme.of(context).inputDecorationTheme.labelStyle!.copyWith(
-              color: Colors.blueGrey,
-            ),
-      ),
-    );
+    final newState = _createThemeState(newColor);
+    state = AsyncValue.data(newState);
   }
 }

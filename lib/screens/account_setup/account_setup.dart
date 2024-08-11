@@ -2,9 +2,9 @@ import 'package:codecraft/widgets/screentypes/logo_with_background.dart';
 import 'package:flutter/material.dart';
 
 class AccountSetup extends StatefulWidget {
-  final Widget widget;
+  final Widget child;
 
-  const AccountSetup(this.widget, {super.key});
+  const AccountSetup(this.child, {super.key});
 
   @override
   _AccountSetupState createState() => _AccountSetupState();
@@ -28,7 +28,7 @@ class _AccountSetupState extends State<AccountSetup> {
               shrinkWrap: false,
               children: [
                 if (isVertical) LogoWithBackground(isVertical: isVertical),
-                widget.widget,
+                widget.child,
               ],
             ),
           ),

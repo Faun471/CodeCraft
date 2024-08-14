@@ -5,80 +5,36 @@ import 'package:codecraft/themes/theme.dart';
 class ThemeUtils {
   static ThemeData createLightTheme(Color color) {
     return AppTheme.lightTheme.copyWith(
-      primaryColor: color,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: color,
+        primaryColor: color,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: color,
+          brightness: Brightness.light,
+        ),
         brightness: Brightness.light,
-      ),
-      brightness: Brightness.light,
-      appBarTheme: AppBarTheme(
-        backgroundColor: color,
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.all(color),
+        appBarTheme: AppBarTheme(
+          backgroundColor: color,
         ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: ButtonStyle(
-          side: WidgetStateProperty.all(
-            BorderSide(color: color),
-          ),
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: color),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: color),
-        ),
-        border: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.black),
-        ),
-        hintStyle: TextStyle(color: color),
-        labelStyle: const TextStyle(color: Colors.blueGrey),
-      ),
-    );
+        elevatedButtonTheme:
+            AppTheme.baseElevatedButtonTheme(backgroundColor: color),
+        outlinedButtonTheme: AppTheme.baseOutlinedButtonTheme(sideColor: color),
+        inputDecorationTheme: AppTheme.baseInputDecorationTheme(color));
   }
 
   static ThemeData createDarkTheme(Color color) {
     return AppTheme.darkTheme.copyWith(
-      primaryColor: color,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: color,
+        primaryColor: color,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: color,
+          brightness: Brightness.dark,
+        ),
         brightness: Brightness.dark,
-      ),
-      brightness: Brightness.dark,
-      appBarTheme: AppBarTheme(
-        backgroundColor: color,
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.all(color),
+        appBarTheme: AppBarTheme(
+          backgroundColor: color,
         ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: ButtonStyle(
-          side: WidgetStateProperty.all(
-            BorderSide(color: color),
-          ),
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: color),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: color),
-        ),
-        border: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.white),
-        ),
-        hintStyle: TextStyle(color: color),
-        labelStyle: const TextStyle(color: Colors.blueGrey),
-      ),
-    );
+        elevatedButtonTheme:
+            AppTheme.baseElevatedButtonTheme(backgroundColor: color),
+        outlinedButtonTheme: AppTheme.baseOutlinedButtonTheme(sideColor: color),
+        inputDecorationTheme: AppTheme.baseInputDecorationTheme(color));
   }
 
   static void changeTheme(BuildContext context, Color color) {

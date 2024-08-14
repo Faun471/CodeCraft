@@ -63,7 +63,6 @@ class _ManageChallengeScreenState extends ConsumerState<ManageQuizzesScreen> {
               }
 
               if (snapshot.hasError) {
-                print(snapshot.error);
                 return const Center(
                   child: Text('An error occurred, please try again later!'),
                 );

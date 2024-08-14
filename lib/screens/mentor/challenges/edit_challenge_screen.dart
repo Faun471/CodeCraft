@@ -7,7 +7,6 @@ import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/codeblocks/code_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logging/logging.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 import 'package:re_editor/re_editor.dart';
 
@@ -402,8 +401,6 @@ class _EditChallengeScreenState extends ConsumerState<EditChallengeScreen> {
       duration: _duration,
       unitTests: _unitTests,
     );
-
-    Logger('Create Challenge').info(challenge.toJson());
 
     await ChallengeService().createChallenge(challenge,
         ref.read(appUserNotifierProvider).value!.data['orgId'] ?? '');

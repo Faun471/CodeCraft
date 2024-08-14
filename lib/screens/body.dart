@@ -191,7 +191,6 @@ class BodyState extends ConsumerState<Body> {
             color: AdaptiveTheme.of(context).brightness == Brightness.light
                 ? Colors.white
                 : const Color.fromARGB(255, 21, 21, 21)),
-        margin: const EdgeInsets.only(right: 10),
       ),
       headerBuilder: (context, extended) {
         return SizedBox(

@@ -95,10 +95,15 @@ class CodeExecutionNotifier extends StateNotifier<CodeExecutionState> {
 
       for (int i = 0; i < unitTests.length; i++) {
         UnitTest test = unitTests[i];
-        buffer.writeln(
-            '    boolean result${i + 1} = instance.$methodName(${test.input}) == ${_expectedOutputToString(test.expectedOutput, language)};');
+        bool isString = test.expectedOutput.type == 'String';
+        String comparison = isString
+            ? 'instance.$methodName(${test.input}).equals(${_expectedOutputToString(test.expectedOutput, language)})'
+            : 'instance.$methodName(${test.input}) == ${_expectedOutputToString(test.expectedOutput, language)}';
+        buffer.writeln('    boolean result${i + 1} = $comparison;');
         buffer.writeln(
             '    System.out.println("TEST_${i + 1}: " + result${i + 1});');
+        buffer.writeln(
+            '    System.out.println("Output: ${_expectedOutputToString(test.expectedOutput, language).replaceAll("\"", "\\\"")} Expected Output: ${test.expectedOutput.value.replaceAll("\"", "\\\"")}");');
       }
 
       buffer.writeln('  }');

@@ -1,4 +1,6 @@
 import 'package:codecraft/screens/body.dart';
+import 'package:codecraft/screens/generic/about_us.dart';
+import 'package:codecraft/screens/generic/pricing_screen.dart';
 import 'package:codecraft/screens/mentor/manage_requests.dart';
 import 'package:codecraft/screens/mentor/quizzes/manage_quizzes_screen.dart';
 import 'package:codecraft/screens/settings/settings.dart';
@@ -34,6 +36,16 @@ class MentorHome extends ConsumerWidget {
             icon: Icons.lightbulb,
             label: 'Manage Quizzes',
             screen: const ManageQuizzesScreen(),
+          ),
+          SidebarItem(
+            icon: Icons.people,
+            label: 'About Us',
+            screen: const AboutUs(),
+          ),
+          SidebarItem(
+            icon: Icons.monetization_on,
+            label: 'Pricing',
+            screen: const PricingScreen(),
           ),
           SidebarItem(
             icon: Icons.settings,

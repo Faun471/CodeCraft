@@ -4,6 +4,7 @@ import 'package:codecraft/screens/apprentice/modules.dart';
 import 'package:codecraft/screens/apprentice/organisation.dart';
 import 'package:codecraft/screens/apprentice/weekly_challenges.dart';
 import 'package:codecraft/screens/body.dart';
+import 'package:codecraft/screens/generic/about_us.dart';
 import 'package:codecraft/screens/settings/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,6 +39,11 @@ class ApprenticeHome extends ConsumerWidget {
         icon: Icons.lightbulb,
         label: 'Quizzes',
         screen: const CodingQuizzes(),
+      ),
+      SidebarItem(
+        icon: Icons.people,
+        label: 'About Us',
+        screen: const AboutUs(),
       ),
       SidebarItem(
         icon: Icons.settings,

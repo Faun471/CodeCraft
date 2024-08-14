@@ -2,6 +2,7 @@ import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/quiz.dart';
 import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/screens/apprentice/organisation.dart';
+import 'package:codecraft/screens/mentor/quizzes/completed_quiz_screen.dart';
 import 'package:codecraft/services/quiz_service.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/widgets/viewers/quiz_viewer.dart';
@@ -58,6 +59,7 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
 
     return SingleChildScrollView(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 20),
           const Text(
@@ -222,7 +224,6 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
                                 leading: const Icon(Icons.check_circle),
                                 trailing: const Icon(Icons.arrow_forward_ios),
                                 onTap: () {
-                                  // TODO - create the completed quiz screen
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(

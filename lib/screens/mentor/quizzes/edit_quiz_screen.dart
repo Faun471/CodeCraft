@@ -39,54 +39,51 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Edit Quiz: ${widget.quiz.title}')),
-      body: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Stepper(
-            currentStep: _currentStep,
-            onStepContinue: () {
-              if (_currentStep < 3) {
-                setState(() {
-                  _currentStep += 1;
-                });
-              } else {
-                _submitQuiz();
-              }
-            },
-            onStepCancel: () {
-              if (_currentStep > 0) {
-                setState(() {
-                  _currentStep -= 1;
-                });
-              } else {
-                Navigator.of(context).pop();
-              }
-            },
-            steps: [
-              Step(
-                title: const Text('Quiz Details'),
-                content: _buildQuizDetailsStep(),
-                isActive: _currentStep >= 0,
-              ),
-              Step(
-                title: const Text('Timer'),
-                content: _buildTimerStep(),
-                isActive: _currentStep >= 1,
-              ),
-              Step(
-                title: const Text('Questions'),
-                content: _buildQuestionsStep(),
-                isActive: _currentStep >= 2,
-              ),
-              Step(
-                title: const Text('Duration'),
-                content: _buildDurationStep(),
-                isActive: _currentStep >= 3,
-              ),
-            ],
-          ),
+    return SingleChildScrollView(
+      child: Form(
+        key: _formKey,
+        child: Stepper(
+          currentStep: _currentStep,
+          onStepContinue: () {
+            if (_currentStep < 3) {
+              setState(() {
+                _currentStep += 1;
+              });
+            } else {
+              _submitQuiz();
+            }
+          },
+          onStepCancel: () {
+            if (_currentStep > 0) {
+              setState(() {
+                _currentStep -= 1;
+              });
+            } else {
+              ref.read(screenProvider.notifier).popScreen();
+            }
+          },
+          steps: [
+            Step(
+              title: const Text('Quiz Details'),
+              content: _buildQuizDetailsStep(),
+              isActive: _currentStep >= 0,
+            ),
+            Step(
+              title: const Text('Timer'),
+              content: _buildTimerStep(),
+              isActive: _currentStep >= 1,
+            ),
+            Step(
+              title: const Text('Questions'),
+              content: _buildQuestionsStep(),
+              isActive: _currentStep >= 2,
+            ),
+            Step(
+              title: const Text('Duration'),
+              content: _buildDurationStep(),
+              isActive: _currentStep >= 3,
+            ),
+          ],
         ),
       ),
     );
@@ -202,7 +199,7 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
                 TextButton(
                   child: const Text('Cancel'),
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    ref.read(screenProvider.notifier).popScreen();
                   },
                 ),
                 TextButton(
@@ -295,7 +292,7 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
                 TextButton(
                   child: const Text('Cancel'),
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    ref.read(screenProvider.notifier).popScreen();
                   },
                 ),
                 TextButton(
@@ -397,8 +394,10 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
       );
 
       try {
-        await QuizService().updateQuiz(
-            updatedQuiz, ref.read(appUserNotifierProvider).value!.orgId!);
+        await QuizService().createQuiz(
+          updatedQuiz,
+          ref.read(appUserNotifierProvider).value!.orgId!,
+        );
 
         if (mounted) {
           Utils.displayDialog(

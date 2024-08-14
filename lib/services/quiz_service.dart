@@ -30,19 +30,6 @@ class QuizService {
     }
   }
 
-  Future<void> updateQuiz(Quiz quiz, String organizationId) async {
-    try {
-      await _firestore
-          .collection('organizations')
-          .doc(organizationId)
-          .collection('quizzes')
-          .doc(quiz.id)
-          .update(quiz.toJson());
-    } catch (e) {
-      throw Exception('Error updating quiz: $e');
-    }
-  }
-
   Future<Quiz> getQuizFromId(String quizId, String organizationId) async {
     try {
       final doc = await _firestore
@@ -127,6 +114,7 @@ class QuizService {
       }
 
       Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      data['id'] = doc.id;
 
       final quiz = Quiz.fromJson(data);
 

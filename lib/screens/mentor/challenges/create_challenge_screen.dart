@@ -57,6 +57,11 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                       });
                     }
                   },
+                  onStepTapped: (int index) {
+                    setState(() {
+                      _currentStep = index;
+                    });
+                  },
                   onStepContinue: () {
                     if (_currentStep < 5 && _formKey.currentState != null) {
                       setState(() {

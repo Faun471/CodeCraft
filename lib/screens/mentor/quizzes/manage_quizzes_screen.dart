@@ -139,18 +139,18 @@ class _ManageChallengeScreenState extends ConsumerState<ManageQuizzesScreen> {
             },
           ),
           const SizedBox(height: 20),
-          _createChallengeButton()
+          _createQuizButton()
         ],
       ),
     );
   }
 
-  Widget _createChallengeButton() {
+  Widget _createQuizButton() {
     return ElevatedButton(
       onPressed: () {
         ref.watch(screenProvider.notifier).pushScreen(const CreateQuizScreen());
       },
-      child: const Text('Create Challenge'),
+      child: const Text('Create Quiz'),
     );
   }
 }

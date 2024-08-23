@@ -97,11 +97,12 @@ class _ManageChallengeScreenState
                       title: Text(
                         "${snapshot.data![index].duration.toDateTime().isBefore(DateTime.now()) ? '(Expired)' : ''} ${snapshot.data![index].id}",
                         style: TextStyle(
-                            color: snapshot.data![index].duration
-                                    .toDateTime()
-                                    .isBefore(DateTime.now())
-                                ? Colors.red
-                                : null),
+                          color: snapshot.data![index].duration
+                                  .toDateTime()
+                                  .isBefore(DateTime.now())
+                              ? Colors.red
+                              : null,
+                        ),
                       ),
                       subtitle: Text(
                         snapshot.data![index].instructions,
@@ -111,7 +112,9 @@ class _ManageChallengeScreenState
                       tileColor: snapshot.data![index].duration
                               .toDateTime()
                               .isBefore(DateTime.now())
-                          ? Colors.grey[100]
+                          ? Theme.of(context).brightness == Brightness.light
+                              ? Colors.grey[100]
+                              : Colors.grey[800]
                           : null,
                       leading: const Icon(Icons.code_rounded),
                       trailing: const Icon(Icons.arrow_forward_ios),

@@ -9,7 +9,6 @@ class ModulePage {
   final int level;
   final String image;
   final String markdownName;
-  final String quizName;
 
   ModulePage({
     required this.title,
@@ -17,7 +16,6 @@ class ModulePage {
     required this.level,
     required this.markdownName, 
     required this.image,
-    required this.quizName,
   });
 
   static Future<List<ModulePage>> loadPagesFromYamlDirectory() async {
@@ -42,7 +40,6 @@ class ModulePage {
         level: yamlMap['level'],
         markdownName: yamlMap['markdownName'],
         image: yamlMap['image'],
-        quizName: yamlMap['quizName'],
       ));
     }
 

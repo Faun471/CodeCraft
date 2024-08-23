@@ -35,6 +35,12 @@ class ModulesState extends State<Modules> {
           );
         }
 
+        // if (snapshot.hasError) {
+        //   return Center(
+        //     child: Text('Error loading modules, ${snapshot.error}'),
+        //   );
+        // }
+
         return ListView.builder(
           itemCount: snapshot.data!.length,
           itemBuilder: (context, index) {
@@ -91,7 +97,6 @@ class ModulesState extends State<Modules> {
       level: yamlMap['level'],
       markdownName: yamlMap['markdownName'],
       image: yamlMap['image'],
-      quizName: yamlMap['quizName'],
     );
   }
 }

@@ -90,7 +90,7 @@ class BodyState extends ConsumerState<Body> {
               if (ref.watch(screenProvider).screenStack.length > 1)
                 if (!isVertical)
                   IconButton(
-                    icon: const Icon(Icons.arrow_back),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
                     onPressed: () {
                       ref.read(screenProvider.notifier).popScreen();
                       selectedIndex = widget.sidebarItems
@@ -107,6 +107,10 @@ class BodyState extends ConsumerState<Body> {
               const AutoSizeText(
                 'CODECRAFT',
                 minFontSize: 24,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               const Expanded(
                 child: SizedBox(),
@@ -115,6 +119,9 @@ class BodyState extends ConsumerState<Body> {
                 '${ref.watch(appUserNotifierProvider).value!.displayName ?? 'User'} ',
                 minFontSize: 24,
                 textAlign: TextAlign.end,
+                style: const TextStyle(
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(width: 10),
               ClipOval(

@@ -82,4 +82,16 @@ class DatabaseHelper {
         .map((doc) => doc.data() as Map<String, dynamic>)
         .toList();
   }
+
+  getCurrentUserOrgId() => currentUser.get().then((doc) {
+        if (doc.exists) {
+          final user = doc.data() as Map<String, dynamic>;
+
+          if (user['orgId'] == null) {
+            return defaultOrgId;
+          }
+
+          return user['orgId'];
+        }
+      });
 }

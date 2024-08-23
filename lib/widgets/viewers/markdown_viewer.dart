@@ -287,9 +287,9 @@ class _ChallengeButtonState extends State<ChallengeButton> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => ChallengeScreen(
-                      challenge: snapshot.data[0] as Challenge,
+                      challenge: challenge,
                       shouldLevelUp: (!(snapshot.data[1]! as List<String>)
-                          .contains((snapshot.data[0] as Challenge).id)),
+                          .contains(challenge.id)),
                     ),
                   ),
                 );

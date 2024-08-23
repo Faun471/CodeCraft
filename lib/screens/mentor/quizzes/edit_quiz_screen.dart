@@ -62,6 +62,11 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
               ref.read(screenProvider.notifier).popScreen();
             }
           },
+          onStepTapped: (int index) {
+            setState(() {
+              _currentStep = index;
+            });
+          },
           steps: [
             Step(
               title: const Text('Quiz Details'),
@@ -90,74 +95,85 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
   }
 
   Widget _buildQuizDetailsStep() {
-    return TextFormField(
-      initialValue: _quizTitle,
-      decoration: const InputDecoration(labelText: 'Quiz Title'),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter a quiz title';
-        }
-        return null;
-      },
-      onSaved: (value) {
-        _quizTitle = value!;
-      },
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: TextFormField(
+          initialValue: _quizTitle,
+          decoration: const InputDecoration(labelText: 'Quiz Title'),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter a quiz title';
+            }
+            return null;
+          },
+          onSaved: (value) {
+            _quizTitle = value!;
+          },
+        ),
+      ),
     );
   }
 
   Widget _buildTimerStep() {
-    return TextFormField(
-      initialValue: _timer.toString(),
-      decoration: const InputDecoration(labelText: 'Timer (in seconds)'),
-      keyboardType: TextInputType.number,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter a timer value';
-        }
-        if (int.tryParse(value) == null) {
-          return 'Please enter a valid number';
-        }
-        return null;
-      },
-      onSaved: (value) {
-        _timer = int.parse(value!);
-      },
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: TextFormField(
+          initialValue: _timer.toString(),
+          decoration: const InputDecoration(labelText: 'Timer (in minutes)'),
+          keyboardType: TextInputType.number,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter a timer';
+            }
+            return null;
+          },
+          onSaved: (value) {
+            _timer = int.parse(value!);
+          },
+        ),
+      ),
     );
   }
 
   Widget _buildQuestionsStep() {
-    return Column(
-      children: [
-        ..._questions.asMap().entries.map((entry) {
-          int idx = entry.key;
-          Question question = entry.value;
-          return ListTile(
-            title: Text('Question ${idx + 1}'),
-            subtitle: Text(question.questionText),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () => _editQuestion(idx),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            ..._questions.asMap().entries.map((entry) {
+              int index = entry.key;
+              Question question = entry.value;
+
+              return Card(
+                child: ListTile(
+                  title: Text(question.questionText),
+                  subtitle: Text('Correct Answer: ${question.correctAnswer}'),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () {
+                      _editQuestion(index);
+                    },
+                  ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    setState(() {
-                      _questions.removeAt(idx);
-                    });
-                  },
-                ),
-              ],
+              );
+            }),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: ElevatedButton(
+                onPressed: _addQuestion,
+                child: const Text('Add Question'),
+              ),
             ),
-          );
-        }),
-        ElevatedButton(
-          onPressed: _addQuestion,
-          child: const Text('Add Question'),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -188,31 +204,52 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
       context: context,
       builder: (BuildContext context) {
         String questionText = '';
-        List<String> options = [];
-        String correctAnswer = '';
+        List<String> options = ['', '', '', ''];
+        String? correctAnswer;
 
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
+            // Create a map of unique, non-empty options with their indices
+            Map<String, int> uniqueOptions = {};
+            for (int i = 0; i < options.length; i++) {
+              if (options[i].isNotEmpty &&
+                  !uniqueOptions.containsKey(options[i])) {
+                uniqueOptions[options[i]] = i;
+              }
+            }
+
+            List<DropdownMenuItem<String>> dropdownItems =
+                uniqueOptions.entries.map((entry) {
+              return DropdownMenuItem(
+                value: entry.value.toString(),
+                child: Text(entry.key),
+              );
+            }).toList();
+
             return AlertDialog(
               title: const Text('Add Question'),
               actions: [
                 TextButton(
                   child: const Text('Cancel'),
                   onPressed: () {
-                    ref.read(screenProvider.notifier).popScreen();
+                    Navigator.of(context).pop();
                   },
                 ),
                 TextButton(
                   child: const Text('Add'),
                   onPressed: () {
-                    this.setState(() {
-                      _questions.add(Question(
-                        questionText: questionText,
-                        answerOptions: options,
-                        correctAnswer: correctAnswer,
-                      ));
-                    });
-                    Navigator.of(context).pop();
+                    if (questionText.isNotEmpty && correctAnswer != null) {
+                      this.setState(() {
+                        _questions.add(Question(
+                          questionText: questionText,
+                          answerOptions: options
+                              .where((option) => option.isNotEmpty)
+                              .toList(),
+                          correctAnswer: options[int.parse(correctAnswer!)],
+                        ));
+                      });
+                      Navigator.of(context).pop();
+                    }
                   },
                 ),
               ],
@@ -237,10 +274,10 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
                                   labelText: 'Option ${index + 1}'),
                               onChanged: (value) {
                                 setState(() {
-                                  if (options.length <= index) {
-                                    options.add(value);
-                                  } else {
-                                    options[index] = value;
+                                  options[index] = value;
+                                  if (correctAnswer == index.toString() &&
+                                      value.isEmpty) {
+                                    correctAnswer = null;
                                   }
                                 });
                               },
@@ -253,16 +290,12 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
                       DropdownButtonFormField<String>(
                         decoration:
                             const InputDecoration(labelText: 'Correct Answer'),
-                        items: options.asMap().entries.map((entry) {
-                          int idx = entry.key;
-                          String option = entry.value;
-                          return DropdownMenuItem(
-                            value: option,
-                            child: Text('Option ${idx + 1}'),
-                          );
-                        }).toList(),
+                        value: correctAnswer,
+                        items: dropdownItems,
                         onChanged: (value) {
-                          correctAnswer = value!;
+                          setState(() {
+                            correctAnswer = value;
+                          });
                         },
                       ),
                     ],
@@ -280,98 +313,95 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        String questionText = _questions[index].questionText;
+        List<String> options = List.from(_questions[index].answerOptions);
+        String correctAnswer = _questions[index].correctAnswer;
+
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            String questionText = _questions[index].questionText;
-            List<String> options = List.from(_questions[index].answerOptions);
-            String correctAnswer = _questions[index].correctAnswer;
-
             return AlertDialog(
-              title: const Text('Edit Question'),
+              title: const Text('Add Question'),
               actions: [
                 TextButton(
                   child: const Text('Cancel'),
                   onPressed: () {
-                    ref.read(screenProvider.notifier).popScreen();
+                    Navigator.of(context).pop();
                   },
                 ),
                 TextButton(
-                  child: const Text('Save'),
+                  child: const Text('Add'),
                   onPressed: () {
-                    if (questionText.isNotEmpty && correctAnswer.isNotEmpty) {
-                      setState(() {
-                        _questions[index] = Question(
-                          questionText: questionText,
-                          answerOptions: options
-                              .where((option) => option.isNotEmpty)
-                              .toList(),
-                          correctAnswer: correctAnswer,
-                        );
-                      });
-                      Navigator.of(context).pop();
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please fill all fields')),
-                      );
-                    }
+                    this.setState(() {
+                      _questions.add(Question(
+                        questionText: questionText,
+                        answerOptions: options,
+                        correctAnswer: correctAnswer,
+                      ));
+                    });
+                    Navigator.of(context).pop();
                   },
                 ),
               ],
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      initialValue: questionText,
-                      decoration:
-                          const InputDecoration(labelText: 'Question Text'),
-                      onChanged: (value) {
-                        questionText = value;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    ...List.generate(4, (index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: TextFormField(
-                          initialValue:
-                              index < options.length ? options[index] : '',
-                          decoration:
-                              InputDecoration(labelText: 'Option ${index + 1}'),
-                          onChanged: (value) {
-                            setState(() {
-                              if (index < options.length) {
-                                options[index] = value;
-                              } else {
-                                options.add(value);
-                              }
-                            });
-                          },
-                        ),
-                      );
-                    }),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      decoration:
-                          const InputDecoration(labelText: 'Correct Answer'),
-                      value: correctAnswer,
-                      items: [
-                        ...options
+              content: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        initialValue: questionText,
+                        decoration:
+                            const InputDecoration(labelText: 'Question Text'),
+                        onChanged: (value) {
+                          questionText = value;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      ...List.generate(options.length, (index) {
+                        return Column(
+                          children: [
+                            TextFormField(
+                              decoration: InputDecoration(
+                                  labelText: 'Option ${index + 1}'),
+                              initialValue: options[index],
+                              onChanged: (value) {
+                                setState(() {
+                                  // check if the value is already in the list
+                                  if (options.contains(value)) {
+                                    return;
+                                  }
+
+                                  options[index] = value;
+                                });
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        );
+                      }),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        decoration:
+                            const InputDecoration(labelText: 'Correct Answer'),
+                        value: correctAnswer.isNotEmpty &&
+                                options.contains(correctAnswer)
+                            ? correctAnswer
+                            : null,
+                        items: options
                             .where((option) => option.isNotEmpty)
                             .map((option) {
                           return DropdownMenuItem(
                             value: option,
                             child: Text(option),
                           );
-                        }),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          correctAnswer = value!;
-                        });
-                      },
-                    ),
-                  ],
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            correctAnswer = value!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

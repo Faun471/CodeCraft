@@ -121,7 +121,6 @@ class SettingsState extends ConsumerState<Settings> {
         ],
       ),
       child: SettingsItem(
-        backgroundColor: Colors.black,
         icons: Icons.edit_rounded,
         title: 'Edit Profile',
         titleStyle: const TextStyle(

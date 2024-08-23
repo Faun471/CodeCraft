@@ -68,9 +68,7 @@ class _AboutUsState extends State<AboutUs> {
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.4,
                         child: const Text(
-                          'Incididunt commodo quis esse fugiat est enim irure duis duis.'
-                          'Enim ipsum cillum nisi tempor minim velit.'
-                          'Officia dolor Lorem id ullamco deserunt incididunt velit.',
+                          'To assist future developers by offering an interactive, cross-platform web application with dynamic animations and engaging unit tests that makes learning Python and Java easier. With the help of dynamic animations, we hope to make coding more approachable and entertaining for novices, facilitating their retention of newly acquired knowledge and addressing the lack of variety in the field.',
                           textAlign: TextAlign.center,
                         ),
                       )
@@ -175,9 +173,7 @@ class _AboutUsState extends State<AboutUs> {
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.4,
                         child: const Text(
-                          'Incididunt commodo quis esse fugiat est enim irure duis duis.'
-                          'Enim ipsum cillum nisi tempor minim velit.'
-                          'Officia dolor Lorem id ullamco deserunt incididunt velit.',
+                          'To be a beneficial supplementary learning tool for novice programmers, providing a fun and dynamic approach to deepen their grasp of Python and Java. Our goal is to enhance the current educational materials by offering interactive visual aids and practical testing opportunities, assisting users in bridging the knowledge gap between theory and implementation as they advance their coding abilities.',
                           textAlign: TextAlign.center,
                         ),
                       )
@@ -207,9 +203,7 @@ class _AboutUsState extends State<AboutUs> {
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.4,
                     child: const Text(
-                      'Incididunt commodo quis esse fugiat est enim irure duis duis.'
-                      'Enim ipsum cillum nisi tempor minim velit.'
-                      'Officia dolor Lorem id ullamco deserunt incididunt velit.',
+                      'Our team is composed of highly skilled individuals who are passionate about programming and education. We are dedicated to providing a platform that will help aspiring developers improve their coding skills and knowledge.',
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -221,16 +215,19 @@ class _AboutUsState extends State<AboutUs> {
                           child: Member(
                         name: "Glenn Genre I. Mamanao",
                         position: "Lead Developer",
+                        email: "mamanaoglenngenre@gmail.com",
                       )),
                       Expanded(
                           child: Member(
                         name: "Francheska Ella S. Horlador",
                         position: "Project Manager & Quality Assurance",
+                        email: "",
                       )),
                       Expanded(
                           child: Member(
                         name: "Justin Rei R. Pahayac",
                         position: "System Analyst",
+                        email: "",
                       )),
                     ],
                   ),
@@ -247,11 +244,13 @@ class _AboutUsState extends State<AboutUs> {
 class Member extends StatefulWidget {
   final String name;
   final String position;
+  final String email;
 
   const Member({
     super.key,
     this.name = 'Member Name',
     this.position = 'Member Position',
+    this.email = 'Member Email',
   });
 
   @override
@@ -280,6 +279,13 @@ class _MemberState extends State<Member> {
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              widget.email,
+              style: const TextStyle(
+                fontSize: 10,
+                color: Colors.grey,
               ),
             ),
             const SizedBox(height: 5),

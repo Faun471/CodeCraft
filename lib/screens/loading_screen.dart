@@ -28,7 +28,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             Future.delayed(
-              50.milliseconds,
+              0.5.seconds,
               () {
                 if (widget.onDone != null && context.mounted) {
                   widget.onDone!(context, snapshot);
@@ -47,7 +47,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
                 const SizedBox(height: 20),
                 _buildLoadingText(context),
               ]
-                  .animate(delay: const Duration(seconds: 1))
+                  .animate(delay: const Duration(milliseconds: 250))
                   .scaleXY(
                       curve: Curves.easeInOutCubicEmphasized,
                       duration: const Duration(seconds: 1))

@@ -1,5 +1,5 @@
 import 'package:board_datetime_picker/board_datetime_picker.dart';
-import 'package:codecraft/models/app_user.dart';
+import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/quiz.dart';
 import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/services/challenge_service.dart';
@@ -24,7 +24,6 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
   int _currentStep = 0;
 
   late String _quizTitle;
-  late int _timer;
   late List<Question> _questions;
   late String _duration;
 
@@ -32,7 +31,6 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
   void initState() {
     super.initState();
     _quizTitle = widget.quiz.title;
-    _timer = widget.quiz.timer;
     _questions = List.from(widget.quiz.questions);
     _duration = widget.quiz.duration;
   }
@@ -45,7 +43,7 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
         child: Stepper(
           currentStep: _currentStep,
           onStepContinue: () {
-            if (_currentStep < 3) {
+            if (_currentStep < 2) {
               setState(() {
                 _currentStep += 1;
               });
@@ -74,19 +72,14 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
               isActive: _currentStep >= 0,
             ),
             Step(
-              title: const Text('Timer'),
-              content: _buildTimerStep(),
-              isActive: _currentStep >= 1,
-            ),
-            Step(
               title: const Text('Questions'),
               content: _buildQuestionsStep(),
-              isActive: _currentStep >= 2,
+              isActive: _currentStep >= 1,
             ),
             Step(
               title: const Text('Duration'),
               content: _buildDurationStep(),
-              isActive: _currentStep >= 3,
+              isActive: _currentStep >= 2,
             ),
           ],
         ),
@@ -97,41 +90,29 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
   Widget _buildQuizDetailsStep() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: TextFormField(
-          initialValue: _quizTitle,
-          decoration: const InputDecoration(labelText: 'Quiz Title'),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter a quiz title';
-            }
-            return null;
-          },
-          onSaved: (value) {
-            _quizTitle = value!;
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimerStep() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: TextFormField(
-          initialValue: _timer.toString(),
-          decoration: const InputDecoration(labelText: 'Timer (in minutes)'),
-          keyboardType: TextInputType.number,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter a timer';
-            }
-            return null;
-          },
-          onSaved: (value) {
-            _timer = int.parse(value!);
-          },
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextFormField(
+              initialValue: _quizTitle,
+              decoration: const InputDecoration(
+                labelText: 'Quiz Title',
+                hintText: 'Enter a descriptive title for your quiz',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.title),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Quiz title is required';
+                }
+                return null;
+              },
+              onSaved: (value) {
+                _quizTitle = value!;
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -140,35 +121,83 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
   Widget _buildQuestionsStep() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ..._questions.asMap().entries.map((entry) {
-              int index = entry.key;
-              Question question = entry.value;
-
-              return Card(
-                child: ListTile(
-                  title: Text(question.questionText),
-                  subtitle: Text('Correct Answer: ${question.correctAnswer}'),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () {
-                      _editQuestion(index);
-                    },
-                  ),
-                ),
-              );
-            }),
+            Text(
+              'Add Questions',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
             const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: ElevatedButton(
-                onPressed: _addQuestion,
-                child: const Text('Add Question'),
+            ReorderableListView(
+              shrinkWrap: true,
+              onReorder: (int oldIndex, int newIndex) {
+                setState(() {
+                  if (newIndex > oldIndex) {
+                    newIndex -= 1;
+                  }
+                  final question = _questions.removeAt(oldIndex);
+                  _questions.insert(newIndex, question);
+                });
+              },
+              children: _questions.asMap().entries.map((entry) {
+                int index = entry.key;
+                Question question = entry.value;
+                return ListTile(
+                  key: ValueKey(index),
+                  title: Text(question.questionText),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Options: ${question.answerOptions.join(', ')}'),
+                      const SizedBox(height: 8),
+                      Text('Timer: ${question.initialTimer} seconds'),
+                      Slider(
+                        value: question.initialTimer!.toDouble(),
+                        min: 10,
+                        max: 600,
+                        divisions: 60,
+                        label: '${question.initialTimer} seconds',
+                        onChanged: (double value) {
+                          setState(() {
+                            question.initialTimer = value.toInt();
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          _editQuestion(index);
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          setState(() {
+                            _questions.removeAt(index);
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _addQuestion,
+              icon: const Icon(Icons.add),
+              label: const Text('Add New Question'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                    vertical: 12.0, horizontal: 24.0),
+                textStyle: const TextStyle(fontSize: 16.0),
               ),
             ),
           ],
@@ -180,20 +209,37 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
   Widget _buildDurationStep() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: BoardDateTimeInputField(
-          controller: dateTimeController,
-          pickerType: DateTimePickerType.datetime,
-          initialDate: _duration.toDateTime(),
-          minimumDate: DateTime.now(),
-          maximumDate: DateTime.now().add(const Duration(days: 365)),
-          options: const BoardDateTimeOptions(
-            languages: BoardPickerLanguages.en(),
-          ),
-          textStyle: Theme.of(context).textTheme.bodyMedium,
-          onChanged: (date) {
-            _duration = date.toIso8601String();
-          },
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Set Quiz Duration',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 16),
+            BoardDateTimeInputField(
+              controller: dateTimeController,
+              pickerType: DateTimePickerType.date,
+              initialDate: _duration.toDateTime(),
+              minimumDate: DateTime.now(),
+              maximumDate: DateTime.now().add(const Duration(days: 365)),
+              options: const BoardDateTimeOptions(
+                languages: BoardPickerLanguages.en(),
+              ),
+              onChanged: (date) {
+                setState(() {
+                  _duration = date.toIso8601String();
+                });
+              },
+              textStyle: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Select the quiz end date. You can set the quiz to be available for a specific duration.',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ],
         ),
       ),
     );
@@ -206,6 +252,9 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
         String questionText = '';
         List<String> options = ['', '', '', ''];
         String? correctAnswer;
+        int initialTimer = 30;
+        int penaltySeconds = 5;
+        int maxAttempts = 3; // Default value for max attempts
 
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -239,16 +288,20 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
                   child: const Text('Add'),
                   onPressed: () {
                     if (questionText.isNotEmpty && correctAnswer != null) {
-                      this.setState(() {
+                      setState(() {
                         _questions.add(Question(
                           questionText: questionText,
                           answerOptions: options
                               .where((option) => option.isNotEmpty)
                               .toList(),
                           correctAnswer: options[int.parse(correctAnswer!)],
+                          initialTimer: initialTimer,
+                          penaltySeconds: penaltySeconds,
+                          maxAttempts: maxAttempts, // Set max attempts
                         ));
                       });
                       Navigator.of(context).pop();
+                      setState(() {}); // Update the parent widget
                     }
                   },
                 ),
@@ -298,6 +351,45 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
                           });
                         },
                       ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Initial Timer (seconds)',
+                        ),
+                        keyboardType: TextInputType.number,
+                        initialValue: initialTimer.toString(),
+                        onChanged: (value) {
+                          setState(() {
+                            initialTimer = int.tryParse(value) ?? 30;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Penalty (seconds)',
+                        ),
+                        keyboardType: TextInputType.number,
+                        initialValue: penaltySeconds.toString(),
+                        onChanged: (value) {
+                          setState(() {
+                            penaltySeconds = int.tryParse(value) ?? 5;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Max Attempts',
+                        ),
+                        keyboardType: TextInputType.number,
+                        initialValue: maxAttempts.toString(),
+                        onChanged: (value) {
+                          setState(() {
+                            maxAttempts = int.tryParse(value) ?? 3;
+                          });
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -316,11 +408,14 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
         String questionText = _questions[index].questionText;
         List<String> options = List.from(_questions[index].answerOptions);
         String correctAnswer = _questions[index].correctAnswer;
+        int initialTimer = _questions[index].initialTimer!;
+        int penaltySeconds = _questions[index].penaltySeconds;
+        int maxAttempts = _questions[index].maxAttempts;
 
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
-              title: const Text('Add Question'),
+              title: const Text('Edit Question'),
               actions: [
                 TextButton(
                   child: const Text('Cancel'),
@@ -329,16 +424,20 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
                   },
                 ),
                 TextButton(
-                  child: const Text('Add'),
+                  child: const Text('Save'),
                   onPressed: () {
-                    this.setState(() {
-                      _questions.add(Question(
+                    setState(() {
+                      _questions[index] = Question(
                         questionText: questionText,
                         answerOptions: options,
                         correctAnswer: correctAnswer,
-                      ));
+                        initialTimer: initialTimer,
+                        penaltySeconds: penaltySeconds,
+                        maxAttempts: maxAttempts, // Set max attempts
+                      );
                     });
                     Navigator.of(context).pop();
+                    setState(() {}); // Update the parent widget
                   },
                 ),
               ],
@@ -365,12 +464,10 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
                               initialValue: options[index],
                               onChanged: (value) {
                                 setState(() {
-                                  // check if the value is already in the list
-                                  if (options.contains(value)) {
-                                    return;
+                                  // Ensure unique options
+                                  if (!options.contains(value)) {
+                                    options[index] = value;
                                   }
-
-                                  options[index] = value;
                                 });
                               },
                             ),
@@ -400,6 +497,45 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
                           });
                         },
                       ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Initial Timer (seconds)',
+                        ),
+                        keyboardType: TextInputType.number,
+                        initialValue: initialTimer.toString(),
+                        onChanged: (value) {
+                          setState(() {
+                            initialTimer = int.tryParse(value) ?? 30;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Penalty (seconds)',
+                        ),
+                        keyboardType: TextInputType.number,
+                        initialValue: penaltySeconds.toString(),
+                        onChanged: (value) {
+                          setState(() {
+                            penaltySeconds = int.tryParse(value) ?? 5;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Max Attempts',
+                        ),
+                        keyboardType: TextInputType.number,
+                        initialValue: maxAttempts.toString(),
+                        onChanged: (value) {
+                          setState(() {
+                            maxAttempts = int.tryParse(value) ?? 3;
+                          });
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -411,48 +547,72 @@ class _EditQuizScreenState extends ConsumerState<EditQuizScreen> {
     );
   }
 
-  void _submitQuiz() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+  void _submitQuiz() {
+    Utils.displayDialog(
+      context: context,
+      title: 'Are you sure?',
+      content: 'Once submitted, these changes cannot be undone.',
+      lottieAsset: 'assets/anim/question.json',
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () async {
+            if (_formKey.currentState!.validate()) {
+              _formKey.currentState!.save();
 
-      Quiz updatedQuiz = Quiz(
-        id: widget.quiz.id,
-        title: _quizTitle,
-        questions: _questions,
-        timer: _timer,
-        duration: _duration,
-      );
+              Quiz quiz = Quiz(
+                id: _quizTitle.toSnakeCase(),
+                title: _quizTitle,
+                questions: _questions,
+                duration: _duration,
+                experienceToEarn: 0,
+              );
 
-      try {
-        await QuizService().createQuiz(
-          updatedQuiz,
-          ref.read(appUserNotifierProvider).value!.orgId!,
-        );
+              try {
+                await QuizService().createQuiz(
+                  quiz,
+                  ref.read(appUserNotifierProvider).value!.orgId!,
+                );
 
-        if (mounted) {
-          Utils.displayDialog(
-            context: context,
-            title: 'Success!',
-            content: 'Quiz updated successfully',
-            lottieAsset: 'assets/anim/congrats.json',
-            onDismiss: () {
+                if (!mounted) return;
+
+                Navigator.of(context).pop();
+
+                Utils.displayDialog(
+                  context: context,
+                  title: 'Success',
+                  content: 'Quiz submitted successfully.',
+                  lottieAsset: 'assets/anim/congrats.json',
+                );
+              } catch (e) {
+                if (!mounted) return;
+
+                Utils.displayDialog(
+                  context: context,
+                  title: 'Error',
+                  content: 'An error occurred while submitting the quiz.',
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('OK'),
+                    ),
+                  ],
+                );
+              }
+
               ref.read(screenProvider.notifier).popScreen();
-            },
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          Utils.displayDialog(
-            context: context,
-            title: 'Error',
-            content: 'An error occurred while updating the quiz',
-            lottieAsset: 'assets/anim/error.json',
-            onDismiss: () {
-              ref.read(screenProvider.notifier).popScreen();
-            },
-          );
-        }
-      }
-    }
+            }
+          },
+          child: const Text('Submit'),
+        ),
+      ],
+    );
   }
 }

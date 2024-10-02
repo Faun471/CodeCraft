@@ -6,8 +6,8 @@ import 'package:codecraft/io/web_io.dart';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:codecraft/models/app_user.dart';
-import 'package:codecraft/services/auth/auth_provider.dart';
+import 'package:codecraft/models/app_user_notifier.dart';
+import 'package:codecraft/services/auth/auth_helper.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -52,8 +52,8 @@ class AccountEditState extends ConsumerState<AccountEdit> {
   @override
   Widget build(BuildContext context) {
     user = FirebaseAuth.instance.currentUser;
-    imageUrl = ref.read(authProvider).auth.currentUser!.photoURL ?? '';
-    final userData = ref.watch(appUserNotifierProvider).value!.data;
+    imageUrl = ref.read(authProvider).value!.user!.photoURL ?? '';
+    final userData = ref.watch(appUserNotifierProvider).value!;
 
     return Scaffold(
       body: Padding(
@@ -115,7 +115,7 @@ class AccountEditState extends ConsumerState<AccountEdit> {
                   border: const OutlineInputBorder(),
                   labelText: 'Display Name',
                   prefixIcon: const Icon(Icons.person),
-                  hintText: userData['displayName'] ?? 'Enter your name',
+                  hintText: userData.displayName ?? 'Enter your name',
                   helperText: 'Leave blank to keep the same name'),
               controller: displayNameController,
             ),
@@ -156,7 +156,7 @@ class AccountEditState extends ConsumerState<AccountEdit> {
 
                 return null;
               },
-              hintText: userData['phoneNumber'] ?? 'Enter your phone number',
+              hintText: userData.phoneNumber ?? 'Enter your phone number',
             ),
             const SizedBox(height: 10),
             Row(
@@ -169,7 +169,7 @@ class AccountEditState extends ConsumerState<AccountEdit> {
                         labelText: "First Name",
                         prefixIcon: const Icon(Icons.person),
                         hintText:
-                            userData['firstName'] ?? 'Enter your first name',
+                            userData.firstName ?? 'Enter your first name',
                         helperText: 'Leave blank to keep the same first name'),
                     controller: firstNameController,
                   ),
@@ -181,7 +181,7 @@ class AccountEditState extends ConsumerState<AccountEdit> {
                     decoration: InputDecoration(
                         border: const OutlineInputBorder(),
                         labelText: "MI",
-                        hintText: userData['mi'] ?? 'Enter your middle initial',
+                        hintText: userData.mi ?? 'Enter your middle initial',
                         helperText: ''),
                     controller: miController,
                   ),
@@ -198,7 +198,7 @@ class AccountEditState extends ConsumerState<AccountEdit> {
                       border: const OutlineInputBorder(),
                       labelText: "Last Name",
                       prefixIcon: const Icon(Icons.person),
-                      hintText: userData['lastName'] ?? 'Enter your last name',
+                      hintText: userData.lastName ?? 'Enter your last name',
                       helperText: 'Leave blank to keep the same last name',
                     ),
                     controller: lastNameController,
@@ -211,7 +211,7 @@ class AccountEditState extends ConsumerState<AccountEdit> {
                     decoration: InputDecoration(
                         border: const OutlineInputBorder(),
                         labelText: "Suffix",
-                        hintText: userData['suffix'] ?? 'Enter your suffix',
+                        hintText: userData.suffix ?? 'Enter your suffix',
                         helperText: 'Leave blank to keep the same suffix'),
                     controller: suffixController,
                   ),
@@ -234,7 +234,7 @@ class AccountEditState extends ConsumerState<AccountEdit> {
                   await updateProfilePicture(user, imageFile);
                 }
 
-                await ref.read(authProvider).updateUser(
+                await ref.read(authProvider.notifier).updateUser(
                       ref,
                       displayName: displayNameController.text,
                       phoneNumber: phoneNumberController.text,
@@ -294,7 +294,7 @@ class AccountEditState extends ConsumerState<AccountEdit> {
 
   Future<String> getDownloadLink(String imageFile) async {
     String url = await io.getDownloadUrl(imageFile);
-    await ref.watch(authProvider).auth.currentUser!.updatePhotoURL(url);
+    await ref.watch(authProvider).value!.user!.updatePhotoURL(url);
     ref.watch(appUserNotifierProvider.notifier).updateData({'photoURL': url});
 
     return url;

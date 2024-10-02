@@ -1,6 +1,9 @@
 import 'package:board_datetime_picker/board_datetime_picker.dart';
-import 'package:codecraft/models/app_user.dart';
+import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/challenge.dart';
+import 'package:codecraft/models/expected_output.dart';
+import 'package:codecraft/models/input.dart';
+import 'package:codecraft/models/unit_test.dart';
 import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/utils/utils.dart';
@@ -267,6 +270,7 @@ class _EditChallengeScreenState extends ConsumerState<EditChallengeScreen> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          initialValue: _methodName,
           decoration: const InputDecoration(labelText: 'Method Name'),
           autovalidateMode: AutovalidateMode.onUserInteraction,
           validator: (value) {
@@ -348,13 +352,41 @@ class _EditChallengeScreenState extends ConsumerState<EditChallengeScreen> {
                 ),
               ],
             ),
-            TextFormField(
-              decoration: const InputDecoration(labelText: 'Input'),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              initialValue: _unitTests[index].input,
-              onSaved: (value) {
-                _unitTests[index].input = value!;
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: _unitTests[index].input.length,
+              itemBuilder: (context, inputIndex) {
+                return Column(
+                  children: [
+                    TextFormField(
+                      decoration: InputDecoration(
+                          labelText: 'Input ${inputIndex + 1} Value'),
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      initialValue: _unitTests[index].input[inputIndex].value,
+                      onSaved: (value) {
+                        _unitTests[index].input[inputIndex].value = value ?? '';
+                      },
+                    ),
+                    TextFormField(
+                      decoration: InputDecoration(
+                          labelText: 'Input ${inputIndex + 1} Type'),
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      initialValue: _unitTests[index].input[inputIndex].type,
+                      onSaved: (value) {
+                        _unitTests[index].input[inputIndex].type = value ?? '';
+                      },
+                    ),
+                  ],
+                );
               },
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _unitTests[index].input.add(Input(value: '', type: ''));
+                });
+              },
+              child: const Text('Add Input'),
             ),
             const SizedBox(height: 10),
             TextFormField(
@@ -363,7 +395,7 @@ class _EditChallengeScreenState extends ConsumerState<EditChallengeScreen> {
               autovalidateMode: AutovalidateMode.onUserInteraction,
               initialValue: _unitTests[index].expectedOutput.value,
               onSaved: (value) {
-                _unitTests[index].expectedOutput.value = value!;
+                _unitTests[index].expectedOutput.value = value ?? '';
               },
             ),
             const SizedBox(height: 10),
@@ -373,7 +405,7 @@ class _EditChallengeScreenState extends ConsumerState<EditChallengeScreen> {
               autovalidateMode: AutovalidateMode.onUserInteraction,
               initialValue: _unitTests[index].expectedOutput.type,
               onSaved: (value) {
-                _unitTests[index].expectedOutput.type = value!;
+                _unitTests[index].expectedOutput.type = value ?? '';
               },
             ),
           ],
@@ -386,7 +418,7 @@ class _EditChallengeScreenState extends ConsumerState<EditChallengeScreen> {
     setState(() {
       _unitTests.add(
         UnitTest(
-          input: '',
+          input: [Input(value: '', type: '')],
           expectedOutput: ExpectedOutput(
             value: '',
             type: '',
@@ -407,11 +439,15 @@ class _EditChallengeScreenState extends ConsumerState<EditChallengeScreen> {
       unitTests: _unitTests,
     );
 
-    await ChallengeService().createChallenge(challenge,
-        ref.read(appUserNotifierProvider).value!.data['orgId'] ?? '');
+    await ChallengeService().createChallenge(
+      challenge,
+      ref.read(appUserNotifierProvider).value!.orgId!,
+    );
 
     if (!mounted) {
       return;
     }
+
+    ref.read(screenProvider.notifier).popScreen();
   }
 }

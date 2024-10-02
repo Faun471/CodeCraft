@@ -59,7 +59,7 @@ class OnboardingCard extends StatelessWidget {
                         .textTheme
                         .displayLarge!
                         .copyWith(
-                          color: Colors.orange,
+                          color: Theme.of(context).primaryColor,
                         ),
                   )
                 ],

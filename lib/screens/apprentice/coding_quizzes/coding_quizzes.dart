@@ -1,16 +1,17 @@
-import 'package:codecraft/models/app_user.dart';
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/quiz.dart';
 import 'package:codecraft/providers/screen_provider.dart';
-import 'package:codecraft/screens/apprentice/organisation.dart';
-import 'package:codecraft/screens/mentor/quizzes/completed_quiz_screen.dart';
+import 'package:codecraft/screens/apprentice/coding_quizzes/coding_quiz_screen.dart';
+import 'package:codecraft/screens/apprentice/organisation/organisation_screen.dart';
+import 'package:codecraft/screens/apprentice/coding_quizzes/completed_quiz_screen.dart';
+import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/services/quiz_service.dart';
 import 'package:codecraft/services/database_helper.dart';
-import 'package:codecraft/widgets/viewers/quiz_viewer.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:codecraft/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:smooth_list_view/smooth_list_view.dart';
 
 class CodingQuizzes extends ConsumerStatefulWidget {
   const CodingQuizzes({super.key});
@@ -26,33 +27,42 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
 
     if (!isInOrganisation()) {
       return SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            const Text(
-              'Organisation',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 20),
+              const Text(
+                'Coding Quizzes',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'You are not part of any organisation.',
-              style: TextStyle(
-                fontSize: 16,
+              const SizedBox(height: 20),
+              const Text(
+                'You are not part of any organisation.',
+                style: TextStyle(
+                  fontSize: 16,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                ref
-                    .watch(screenProvider.notifier)
-                    .replaceScreen(const Organisation());
-              },
-              child: const Text('Join an Organization'),
-            ),
-          ],
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  ref
+                      .watch(screenProvider.notifier)
+                      .replaceScreen(const OrganisationScreen());
+                },
+                child: Text(
+                  'Join an Organization',
+                  style: TextStyle(
+                    color:
+                        ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -89,14 +99,20 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
               onPressed: () {
                 ref
                     .watch(screenProvider.notifier)
-                    .pushScreen(const Organisation());
+                    .pushScreen(const OrganisationScreen());
               },
-              child: const Text('Join an Organization'),
+              child: Text(
+                'Join an Organization',
+                style: TextStyle(
+                  color:
+                      ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                ),
+              ),
             ),
           ],
           if (appUser.orgId != 'default')
-            FutureBuilder<List<Quiz>>(
-              future: QuizService().getQuizzes(appUser.orgId ?? ''),
+            StreamBuilder<List<Quiz>>(
+              stream: QuizService().getQuizzesStream(appUser.orgId!),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return LoadingAnimationWidget.flickr(
@@ -118,9 +134,8 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
                   );
                 }
 
-                return FutureBuilder<List<String>>(
-                  future: QuizService().getCompletedQuizzes(
-                      FirebaseAuth.instance.currentUser!.uid),
+                return StreamBuilder<List<QuizResult>>(
+                  stream: QuizService().streamCompletedQuizzes(),
                   builder: (context, completedSnapshot) {
                     if (completedSnapshot.connectionState ==
                         ConnectionState.waiting) {
@@ -138,15 +153,17 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
                       );
                     }
 
-                    final List<String> completedQuizzes =
+                    final List<QuizResult> completedQuizzes =
                         completedSnapshot.data!;
 
                     final availableQuizzes = snapshot.data!
-                        .where((quiz) => !completedQuizzes.contains(quiz.id))
+                        .where((quiz) => !completedQuizzes.any(
+                            (completedQuiz) => completedQuiz.id == quiz.id))
                         .toList();
 
                     final completedQuizzesList = snapshot.data!
-                        .where((quiz) => completedQuizzes.contains(quiz.id))
+                        .where((quiz) => completedQuizzes.any(
+                            (completedQuiz) => completedQuiz.id == quiz.id))
                         .toList();
 
                     return Column(
@@ -160,8 +177,7 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          SmoothListView.builder(
-                            duration: const Duration(milliseconds: 300),
+                          ListView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: availableQuizzes.length,
@@ -174,22 +190,24 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 leading: const Icon(Icons.quiz),
-                                trailing: const Icon(Icons.arrow_forward_ios),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    AutoSizeText(
+                                      availableQuizzes[index]
+                                          .duration
+                                          .toDateTime()
+                                          .toString(),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    const Icon(Icons.arrow_forward_ios),
+                                  ],
+                                ),
                                 onTap: () {
                                   Navigator.push(context, MaterialPageRoute(
                                     builder: (context) {
-                                      return QuizViewer(
-                                        quiz: availableQuizzes[index],
-                                        onQuizFinished: (isCompleted, quiz) {
-                                          if (isCompleted) {
-                                            QuizService()
-                                                .markQuizAsCompleted(quiz.id!);
-                                          }
-
-                                          Navigator.pop(context);
-
-                                          setState(() {});
-                                        },
+                                      return QuizScreen(
+                                        quizId: availableQuizzes[index].id!,
                                       );
                                     },
                                   ));
@@ -208,8 +226,7 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          SmoothListView.builder(
-                            duration: const Duration(milliseconds: 300),
+                          ListView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: completedQuizzesList.length,
@@ -227,8 +244,13 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => CompletedQuizScreen(
-                                          quiz: completedQuizzesList[index]),
+                                      builder: (context) => QuizResultsScreen(
+                                        quiz: completedQuizzesList[index],
+                                        quizResult: completedQuizzes.firstWhere(
+                                            (quizResult) =>
+                                                quizResult.id ==
+                                                completedQuizzesList[index].id),
+                                      ),
                                     ),
                                   );
                                 },

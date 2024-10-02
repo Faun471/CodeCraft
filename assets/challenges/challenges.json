@@ -45,7 +45,8 @@
                 },
                 "methodName": "isPalindrome"
             }
-        ]
+        ],
+        "experienceToEarn": 100
     },
     {
         "id": "fibonacci",
@@ -93,7 +94,8 @@
                 },
                 "methodName": "fibonacci"
             }
-        ]
+        ],
+        "experienceToEarn": 100
     },
     {
         "id": "gcd",
@@ -141,7 +143,8 @@
                 },
                 "methodName": "gcd"
             }
-        ]
+        ],
+        "experienceToEarn": 100
     },
     {
         "id": "prime",
@@ -189,7 +192,8 @@
                 },
                 "methodName": "isPrime"
             }
-        ]
+        ],
+        "experienceToEarn": 100
     },
     {
         "id": "anagram",
@@ -237,7 +241,8 @@
                 },
                 "methodName": "isAnagram"
             }
-        ]
+        ],
+        "experienceToEarn": 100
     },
     {
         "id": "hello-world",
@@ -253,6 +258,7 @@
                     "value": "Hello, World!"
                 }
             }
-        ]
+        ],
+        "experienceToEarn": 100
     }
 ]

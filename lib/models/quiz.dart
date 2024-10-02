@@ -1,43 +1,43 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Quiz {
   String? id;
   final String title;
   final List<Question> questions;
-  final int timer;
-  String duration;
+  final String duration;
+  int experienceToEarn;
 
   Quiz({
     required this.id,
     required this.title,
     required this.questions,
-    required this.timer,
     required this.duration,
+    this.experienceToEarn = 0,
   });
-
-  bool checkAnswer(Question question, String userAnswer) {
-    return question.correctAnswer == userAnswer;
-  }
 
   factory Quiz.fromJson(Map<String, dynamic> json) {
     return Quiz(
-      id: json['id'] as String?, // Handle potential null value
-      title: json['title'] as String? ?? '', // Default to empty string if null
+      id: json['id'] as String?,
+      title: json['title'] as String? ?? '',
       questions: (json['questions'] as List<dynamic>? ?? [])
           .map(
               (question) => Question.fromJson(question as Map<String, dynamic>))
           .toList(),
-      timer: json['timer'] as int? ?? 0, // Default to 0 if null
-      duration:
-          json['duration'] as String? ?? '', // Default to empty string if null
+      duration: json['duration'] as String? ?? '',
+      experienceToEarn: json['experienceToEarn'] as int? ?? 0,
     );
   }
+
+  bool get isPerfect => questions
+      .every((question) => question.userAnswer == question.correctAnswer);
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,
       'questions': questions.map((question) => question.toJson()).toList(),
-      'timer': timer,
       'duration': duration,
+      'experienceToEarn': experienceToEarn,
     };
   }
 }
@@ -46,12 +46,34 @@ class Question {
   final String questionText;
   final List<String> answerOptions;
   final String correctAnswer;
+  String? userAnswer;
+  int? initialTimer;
+  int remainingTimer;
+  final int penaltySeconds;
+  int maxAttempts;
+  int attempts;
 
   Question({
     required this.questionText,
     required this.answerOptions,
     required this.correctAnswer,
-  });
+    required this.initialTimer,
+    required this.penaltySeconds,
+    this.userAnswer,
+    this.maxAttempts = 3,
+    this.attempts = 0,
+  }) : remainingTimer = initialTimer ?? 15;
+
+  bool checkAnswer(String answer) {
+    if (answer == correctAnswer) {
+      userAnswer = answer;
+      return true;
+    } else {
+      remainingTimer =
+          (remainingTimer - penaltySeconds).clamp(0, initialTimer ?? 15);
+      return false;
+    }
+  }
 
   factory Question.fromJson(Map<String, dynamic> json) {
     return Question(
@@ -59,6 +81,11 @@ class Question {
       answerOptions:
           List<String>.from(json['answerOptions'] as List<dynamic>? ?? []),
       correctAnswer: json['correctAnswer'] as String? ?? '',
+      initialTimer: json['initialTimer'] as int? ?? 30,
+      penaltySeconds: json['penaltySeconds'] as int? ?? 5,
+      userAnswer: json['userAnswer'],
+      maxAttempts: json['maxAttempts'] as int? ?? 0,
+      attempts: json['attempts'] as int? ?? 0,
     );
   }
 
@@ -67,6 +94,48 @@ class Question {
       'questionText': questionText,
       'answerOptions': answerOptions,
       'correctAnswer': correctAnswer,
+      'userAnswer': userAnswer,
+      'initialTimer': initialTimer,
+      'remainingTimer': remainingTimer,
+      'penaltySeconds': penaltySeconds,
+      'maxAttempts': maxAttempts,
+      'attempts': attempts,
+    };
+  }
+}
+
+class QuizResult {
+  String id;
+  final int score;
+  final Map<String, String?> answers;
+  final DateTime completedAt;
+  final List<int> attempts;
+
+  QuizResult({
+    required this.id,
+    required this.score,
+    required this.answers,
+    required this.completedAt,
+    required this.attempts,
+  });
+
+  factory QuizResult.fromJson(Map<String, dynamic> json) {
+    return QuizResult(
+      id: json['id'] ?? '',
+      score: json['score'],
+      answers: Map<String, String?>.from(json['answers']),
+      completedAt: (json['completedAt'] as Timestamp).toDate(),
+      attempts: List<int>.from(json['attempts']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'score': score,
+      'answers': answers,
+      'completedAt': completedAt,
+      'attempts': attempts,
     };
   }
 }

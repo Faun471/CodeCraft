@@ -1,4 +1,5 @@
-import 'package:codecraft/models/app_user.dart';
+import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/quiz.dart';
 import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/screens/loading_screen.dart';
@@ -6,11 +7,11 @@ import 'package:codecraft/screens/mentor/quizzes/create_quiz_screen.dart';
 import 'package:codecraft/screens/mentor/quizzes/edit_quiz_screen.dart';
 import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/services/quiz_service.dart';
+import 'package:codecraft/utils/theme_utils.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:smooth_list_view/smooth_list_view.dart';
 import 'package:universal_html/html.dart' as web;
 
 class ManageQuizzesScreen extends ConsumerStatefulWidget {
@@ -51,8 +52,8 @@ class _ManageChallengeScreenState extends ConsumerState<ManageQuizzesScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          FutureBuilder<List<Quiz>>(
-            future: QuizService().getQuizzes(user!.orgId!),
+          StreamBuilder<List<Quiz>>(
+            stream: QuizService().getQuizzesStream(user!.orgId!),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return LoadingAnimationWidget.flickr(
@@ -79,8 +80,7 @@ class _ManageChallengeScreenState extends ConsumerState<ManageQuizzesScreen> {
                 );
               }
 
-              return SmoothListView.builder(
-                duration: const Duration(milliseconds: 300),
+              return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: snapshot.data!.length,
@@ -106,7 +106,9 @@ class _ManageChallengeScreenState extends ConsumerState<ManageQuizzesScreen> {
                       tileColor: snapshot.data![index].duration
                               .toDateTime()
                               .isBefore(DateTime.now())
-                          ? Colors.grey[100]
+                          ? AdaptiveTheme.of(context).mode.isDark
+                              ? const Color.fromARGB(255, 21, 21, 21)
+                              : Colors.white
                           : null,
                       leading: const Icon(Icons.code_rounded),
                       trailing: const Icon(Icons.arrow_forward_ios),
@@ -150,7 +152,12 @@ class _ManageChallengeScreenState extends ConsumerState<ManageQuizzesScreen> {
       onPressed: () {
         ref.watch(screenProvider.notifier).pushScreen(const CreateQuizScreen());
       },
-      child: const Text('Create Quiz'),
+      child: Text(
+        'Create Quiz',
+        style: TextStyle(
+          color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+        ),
+      ),
     );
   }
 }

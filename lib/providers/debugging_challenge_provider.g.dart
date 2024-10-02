@@ -7,7 +7,7 @@ part of 'debugging_challenge_provider.dart';
 // **************************************************************************
 
 String _$debuggingChallengeNotifierHash() =>
-    r'bc6172454d5c705e9475b1e9a9b2b7df6744c49e';
+    r'9ff060797248d2361d6a3d835946270960a9007d';
 
 /// Copied from Dart SDK
 class _SystemHash {

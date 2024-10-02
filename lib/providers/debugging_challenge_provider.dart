@@ -1,15 +1,21 @@
 import 'package:codecraft/services/debugging_challenge_service.dart';
 import 'package:codecraft/models/debugging_challenge.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 part 'debugging_challenge_provider.g.dart';
+
+enum ChallengeStage { findingFaultyLine, editingLine }
 
 class DebuggingChallengeState {
   final DebuggingChallenge challenge;
   final int attemptsLeft;
   final bool isCompleted;
-  final String? selectedLine;
+  final int? selectedLine;
   final String? proposedFix;
+  final ChallengeStage currentStage;
+  final String currentOutput;
 
   DebuggingChallengeState({
     required this.challenge,
@@ -17,14 +23,18 @@ class DebuggingChallengeState {
     this.isCompleted = false,
     this.selectedLine,
     this.proposedFix,
+    this.currentStage = ChallengeStage.findingFaultyLine,
+    this.currentOutput = '',
   });
 
   DebuggingChallengeState copyWith({
     DebuggingChallenge? challenge,
     int? attemptsLeft,
     bool? isCompleted,
-    String? selectedLine,
+    int? selectedLine,
     String? proposedFix,
+    ChallengeStage? currentStage,
+    String? currentOutput,
   }) {
     return DebuggingChallengeState(
       challenge: challenge ?? this.challenge,
@@ -32,6 +42,8 @@ class DebuggingChallengeState {
       isCompleted: isCompleted ?? this.isCompleted,
       selectedLine: selectedLine ?? this.selectedLine,
       proposedFix: proposedFix ?? this.proposedFix,
+      currentStage: currentStage ?? this.currentStage,
+      currentOutput: currentOutput ?? this.currentOutput,
     );
   }
 }
@@ -51,36 +63,62 @@ class DebuggingChallengeNotifier extends _$DebuggingChallengeNotifier {
     );
   }
 
-  Future<void> selectLine(String line) async {
+  Future<bool> selectLine(int line) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
+
+    final result = await AsyncValue.guard(() async {
       final currentState = state.value!;
-      if (line == currentState.challenge.correctLine.toString()) {
-        return currentState.copyWith(selectedLine: line);
-      } else {
-        return currentState.copyWith(
-            attemptsLeft: currentState.attemptsLeft - 1);
+      if (currentState.currentStage == ChallengeStage.findingFaultyLine) {
+        if (line == currentState.challenge.correctLine) {
+          return currentState.copyWith(
+            selectedLine: line,
+            currentStage: ChallengeStage.editingLine,
+          );
+        } else {
+          return currentState.copyWith(
+            attemptsLeft: currentState.attemptsLeft - 1,
+          );
+        }
       }
+      return currentState;
     });
+
+    state = result;
+    return result.value?.selectedLine == line;
   }
 
-  Future<void> proposeFix(String fix) async {
+  void updateProposedFix(String fix) {
+    state.value!.copyWith(
+      proposedFix: fix,
+    );
+
+    print('Proposed fix: $fix');
+  }
+
+  Future<void> proposeFix() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final currentState = state.value!;
-      return currentState.copyWith(proposedFix: fix);
+
+      print('Running code: ${currentState.proposedFix}');
+
+      String newOutput = await _executeCode(currentState.proposedFix ?? '');
+
+      return currentState.copyWith(currentOutput: newOutput);
     });
   }
 
   Future<bool> submitFix() async {
     state = const AsyncValue.loading();
+
     final result = await AsyncValue.guard(() async {
       final currentState = state.value!;
-      if (currentState.proposedFix == currentState.challenge.solution) {
+
+      if (currentState.currentOutput == currentState.challenge.expectedOutput) {
         final newState = currentState.copyWith(isCompleted: true);
         state = AsyncValue.data(newState);
-        // Call service to mark challenge as completed
         await markChallengeAsCompleted(currentState.challenge.id);
+        reset();
         return true;
       } else {
         final newState =
@@ -92,5 +130,40 @@ class DebuggingChallengeNotifier extends _$DebuggingChallengeNotifier {
     return result.value ?? false;
   }
 
-  Future<void> markChallengeAsCompleted(String challengeId) async {}
+  Future<void> markChallengeAsCompleted(String challengeId) async {
+    await _service.markDebuggingChallengeAsCompleted(challengeId);
+  }
+
+  void reset() {
+    state = const AsyncValue.loading();
+    state = AsyncValue.data(state.value!.copyWith(
+      selectedLine: null,
+      proposedFix: null,
+      currentStage: ChallengeStage.findingFaultyLine,
+      currentOutput: '',
+    ));
+  }
+
+  Future<String> _executeCode(String script) async {
+    final url = Uri.parse(
+        'https://us-central1-code-craft-bb5b1.cloudfunctions.net/executeSimpleCode');
+
+    final headers = {
+      "Content-Type": "application/json",
+    };
+
+    final body = jsonEncode({
+      "script": script,
+      "language": 'java',
+    });
+
+    final response = await http.post(url, headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      final responseJson = jsonDecode(response.body);
+      return responseJson['output'] ?? '';
+    } else {
+      return 'Error: ${response.statusCode}, ${response.body}';
+    }
+  }
 }

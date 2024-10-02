@@ -1,4 +1,4 @@
-import 'package:codecraft/models/app_user.dart';
+import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
@@ -41,9 +41,9 @@ class ModuleCard extends ConsumerStatefulWidget {
 class ModuleCardState extends ConsumerState<ModuleCard> {
   @override
   Widget build(BuildContext context) {
-    final appUser = ref.watch(appUserNotifierProvider).value!;
+    final appUser = ref.watch(appUserNotifierProvider).value;
 
-    int currentLevel = appUser.data['level'] ?? 0;
+    int currentLevel = appUser!.level ?? 0;
     double screenWidth = MediaQuery.of(context).size.width;
     double imageWidth = screenWidth * (widget.imageWidthPercentage / 100);
     bool isLocked = currentLevel < widget.unlockLevel;

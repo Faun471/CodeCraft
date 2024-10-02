@@ -1,4 +1,6 @@
-import 'package:codecraft/models/app_user.dart';
+import 'package:codecraft/models/app_user_notifier.dart';
+import 'package:codecraft/models/quiz.dart';
+import 'package:codecraft/providers/quiz_provider.dart';
 import 'package:codecraft/services/quiz_service.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/viewers/quiz_viewer.dart';
@@ -15,19 +17,26 @@ class QuizScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appUser = ref.watch(appUserNotifierProvider);
+    final theme = Theme.of(context);
+    Quiz? quiz;
 
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => _onWillPop(context),
+          icon: Icon(
+            Icons.arrow_back,
+            color: theme.colorScheme.onPrimary.computeLuminance() > 0.5
+                ? theme.colorScheme.onPrimary
+                : Colors.white,
+          ),
+          onPressed: () => _onWillPop(context, ref, quiz),
         ),
       ),
       body: PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, _) async {
           if (didPop) return;
-          await _onWillPop(context);
+          await _onWillPop(context, ref, quiz);
         },
         child: FutureBuilder(
           future: QuizService().getQuizFromId(quizId, appUser.value!.orgId!),
@@ -42,10 +51,12 @@ class QuizScreen extends ConsumerWidget {
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else {
+              quiz = snapshot.data as Quiz;
               return QuizViewer(
-                quiz: snapshot.data!,
-                onQuizFinished: (passed, quiz) {
-                  Navigator.pop(context, {'passed': passed, 'quiz': quiz});
+                quiz: quiz!,
+                onQuizFinished: (quiz) {
+                  Navigator.pop(context);
+                  QuizService().saveQuizResultsWithAnswers(quiz);
                 },
               );
             }
@@ -55,7 +66,22 @@ class QuizScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _onWillPop(BuildContext context) async {
+  int getQuizScore(Quiz quiz) {
+    int score = 0;
+    for (final question in quiz.questions) {
+      if (question.userAnswer == null || question.userAnswer == '') {
+        continue;
+      }
+
+      if (question.userAnswer == question.correctAnswer) {
+        score++;
+      }
+    }
+    return score;
+  }
+
+  Future<void> _onWillPop(
+      BuildContext context, WidgetRef ref, Quiz? quiz) async {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) {
         Utils.displayDialog(
@@ -83,6 +109,10 @@ class QuizScreen extends ConsumerWidget {
                 onPressed: () {
                   Navigator.pop(dialogContext);
                   Navigator.pop(context);
+
+                  if (quiz != null) {
+                    ref.read(quizProvider(quiz).notifier).resetQuiz();
+                  }
                 },
                 text: 'Quit.',
                 iconData: Icons.check_circle,

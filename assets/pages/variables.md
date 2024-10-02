@@ -2,7 +2,6 @@
 
 In Java and Python, Variables are the data containers that save the data values during program execution. Every variable is assigned a data type that designates the type and quantity of value it can hold. A variable is a memory location name for the data.
 
-
 ## How to Declare Variables
 
 ### Declaring Variables in Java
@@ -13,6 +12,8 @@ In Java, declaring a variable involves specifying the type of the variable and g
 **Variable Name:** Follow the data type with a valid variable name that follows Java naming conventions (e.g., starting with a letter, no spaces, no special characters except `_` and `$`).
 
  **Semicolon:** End the declaration statement with a semicolon (`;`). In this way, a name can only be given to a memory location. It can be assigned values in two ways:
+
+ <quiz quiz-id="java-basics">
 
 ### Declaring Variables in Python
 

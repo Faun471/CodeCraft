@@ -1,4 +1,5 @@
 import 'package:codecraft/firebase_options.dart';
+import 'package:codecraft/models/app_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -37,7 +38,27 @@ class DatabaseHelper {
 
   Future<Map<String, dynamic>> getUserData(String userId) async {
     DocumentSnapshot doc = await users.doc(userId).get();
-    return doc.data() as Map<String, dynamic>;
+
+    if (doc.exists) {
+      print('User found with id: $userId');
+
+      return doc.data() as Map<String, dynamic>;
+    }
+
+    print('User not found');
+
+    if (FirebaseAuth.instance.currentUser != null &&
+        FirebaseAuth.instance.currentUser!.uid == userId) {
+      return {
+        'id': FirebaseAuth.instance.currentUser!.uid,
+        'displayName': FirebaseAuth.instance.currentUser!.displayName,
+        'email': FirebaseAuth.instance.currentUser!.email,
+        'phoneNumber': FirebaseAuth.instance.currentUser!.phoneNumber,
+        'photoUrl': FirebaseAuth.instance.currentUser!.photoURL,
+      };
+    }
+
+    return {};
   }
 
   Future<void> createUser(String userId, Map<String, String> userData,
@@ -52,7 +73,10 @@ class DatabaseHelper {
       'accountType': accountType,
       'preferredColor': 'ff9c27b0',
       'level': 1,
+      'experience': 0,
       'orgId': orgId,
+      'photoUrl': userData['photoUrl'] ?? '',
+      'id': userId,
     }, SetOptions(merge: true));
   }
 
@@ -74,7 +98,7 @@ class DatabaseHelper {
         .toList();
   }
 
-  Future<List<Map<String, dynamic>>> getOrganizationMembers(
+  Future<List<Map<String, dynamic>>> getOrganisationMembers(
       String orgId) async {
     QuerySnapshot querySnapshot =
         await users.where('orgId', isEqualTo: orgId).get();
@@ -83,15 +107,128 @@ class DatabaseHelper {
         .toList();
   }
 
-  getCurrentUserOrgId() => currentUser.get().then((doc) {
-        if (doc.exists) {
-          final user = doc.data() as Map<String, dynamic>;
+  Stream<QuerySnapshot> getOrganisationStreamForMentor(String mentorId) {
+    return organisations.where('mentorId', isEqualTo: mentorId).snapshots();
+  }
 
-          if (user['orgId'] == null) {
-            return defaultOrgId;
-          }
+  Stream<DocumentSnapshot> getUserStream(String userId) {
+    return users.doc(userId).snapshots();
+  }
 
-          return user['orgId'];
-        }
-      });
+  Future<String> getCurrentUserOrgId() async {
+    DocumentSnapshot doc = await currentUser.get();
+    if (doc.exists) {
+      final user = doc.data() as Map<String, dynamic>?;
+
+      if (user?['orgId'] == null) {
+        return defaultOrgId;
+      }
+
+      return user!['orgId'] as String;
+    }
+    return defaultOrgId;
+  }
+
+  Future<List<Map<String, dynamic>>> getQuizLeaderboard(String orgId) async {
+    QuerySnapshot querySnapshot = await users
+        .where('orgId', isEqualTo: orgId)
+        .orderBy('completedQuizzes', descending: true)
+        .limit(10)
+        .get();
+
+    return querySnapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      return {
+        'displayName':
+            '${data['firstName'] ?? ''} ${data['lastName'] ?? ''}'.trim(),
+        'score': (data['completedQuizzes'] as List?)?.length ?? 0,
+      };
+    }).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getChallengesLeaderboard(
+      String orgId) async {
+    QuerySnapshot querySnapshot = await users
+        .where('orgId', isEqualTo: orgId)
+        .orderBy('completedChallenges', descending: true)
+        .limit(10)
+        .get();
+
+    return querySnapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      return {
+        'displayName':
+            '${data['firstName'] ?? ''} ${data['lastName'] ?? ''}'.trim(),
+        'completed': (data['completedChallenges'] as List?)?.length ?? 0,
+      };
+    }).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getLevelsLeaderboard(String orgId) async {
+    QuerySnapshot querySnapshot = await users
+        .where('orgId', isEqualTo: orgId)
+        .orderBy('level', descending: true)
+        .limit(10)
+        .get();
+
+    return querySnapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      return {
+        'displayName':
+            '${data['firstName'] ?? ''} ${data['lastName'] ?? ''}'.trim(),
+        'level': (data['level'] as num?)?.toDouble() ?? 1.0,
+      };
+    }).toList();
+  }
+
+  Stream<List<Map<String, dynamic>>> getOrganizationMembersStream(
+      String orgId) {
+    return users.where('orgId', isEqualTo: orgId).snapshots().map((snapshot) =>
+        snapshot.docs
+            .map((doc) => doc.data() as Map<String, dynamic>)
+            .toList());
+  }
+
+  Stream<List<AppUser>> getQuizLeaderboardStream(String orgId) {
+    return users
+        .where('orgId', isEqualTo: orgId)
+        .orderBy('quizResults', descending: true)
+        .limit(10)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map(
+              (doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                return AppUser.fromMap(data);
+              },
+            ).toList());
+  }
+
+  Stream<List<AppUser>> getChallengesLeaderboardStream(String orgId) {
+    return users
+        .where('orgId', isEqualTo: orgId)
+        .orderBy('completedChallenges', descending: true)
+        .limit(10)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              return AppUser.fromMap(data);
+            }).toList());
+  }
+
+  Stream<List<AppUser>> getLevelsLeaderboardStream(String orgId) {
+    return users
+        .where('orgId', isEqualTo: orgId)
+        .orderBy('level', descending: true)
+        .limit(10)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              return AppUser.fromMap(data);
+            }).toList());
+  }
+
+  Future<Map<String, dynamic>> getOrganisation(String orgId) async {
+    DocumentSnapshot doc = await organisations.doc(orgId).get();
+    return doc.data() as Map<String, dynamic>;
+  }
 }

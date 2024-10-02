@@ -1,3 +1,4 @@
+import 'package:codecraft/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 
 class PricingScreen extends StatefulWidget {
@@ -244,16 +245,26 @@ class PricingCardState extends State<PricingCard>
                 children: [
                   Text(
                     widget.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
+                      color: ThemeUtils.getTextColor(
+                        widget.isActive
+                            ? Theme.of(context).primaryColor
+                            : Theme.of(context).cardColor,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     widget.price,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 28,
+                      color: ThemeUtils.getTextColor(
+                        widget.isActive
+                            ? Theme.of(context).primaryColor
+                            : Theme.of(context).cardColor,
+                      ),
                     ),
                   ),
                   Divider(color: widget.isActive ? Colors.white : Colors.grey),
@@ -262,18 +273,36 @@ class PricingCardState extends State<PricingCard>
                       padding: const EdgeInsets.symmetric(vertical: 5),
                       child: Text(
                         feature,
+                        style: TextStyle(
+                          color: ThemeUtils.getTextColor(
+                            widget.isActive
+                                ? Theme.of(context).primaryColor
+                                : Theme.of(context).cardColor,
+                          ),
+                        ),
                       ),
                     ),
                   const Expanded(child: SizedBox(height: 10)),
                   ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          Theme.of(context).primaryColor.withOpacity(0.8),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
-                    ),
+                    style:
+                        Theme.of(context).elevatedButtonTheme.style!.copyWith(
+                              backgroundColor: WidgetStateProperty.all(
+                                widget.isActive
+                                    ? Colors.white
+                                    : Theme.of(context).primaryColor,
+                              ),
+                            ),
                     onPressed: () {},
-                    child: const Text('Learn More'),
+                    child: Text(
+                      'Learn More',
+                      style: TextStyle(
+                        color: ThemeUtils.getTextColor(
+                          !widget.isActive
+                              ? Theme.of(context).primaryColor
+                              : Colors.white,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

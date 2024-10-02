@@ -1,15 +1,16 @@
-import 'package:codecraft/models/app_user.dart';
+import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/challenge.dart';
 import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/screens/mentor/challenges/create_challenge_screen.dart';
 import 'package:codecraft/screens/mentor/challenges/edit_challenge_screen.dart';
 import 'package:codecraft/services/challenge_service.dart';
+import 'package:codecraft/utils/theme_utils.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:smooth_list_view/smooth_list_view.dart';
 import 'package:universal_html/html.dart' as web;
 
 class ManageChallengesScreen extends ConsumerStatefulWidget {
@@ -51,8 +52,8 @@ class _ManageChallengeScreenState
             ),
           ),
           const SizedBox(height: 20),
-          FutureBuilder<List<Challenge>>(
-            future: ChallengeService().getChallenges(user!.orgId!),
+          StreamBuilder<List<Challenge>>(
+            stream: ChallengeService().getChallengesStream(user!.orgId!),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return LoadingAnimationWidget.flickr(
@@ -79,8 +80,7 @@ class _ManageChallengeScreenState
                 );
               }
 
-              return SmoothListView.builder(
-                duration: const Duration(milliseconds: 300),
+              return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: snapshot.data!.length,
@@ -112,9 +112,9 @@ class _ManageChallengeScreenState
                       tileColor: snapshot.data![index].duration
                               .toDateTime()
                               .isBefore(DateTime.now())
-                          ? Theme.of(context).brightness == Brightness.light
-                              ? Colors.grey[100]
-                              : Colors.grey[800]
+                          ? AdaptiveTheme.of(context).mode.isDark
+                              ? const Color.fromARGB(255, 21, 21, 21)
+                              : Colors.white
                           : null,
                       leading: const Icon(Icons.code_rounded),
                       trailing: const Icon(Icons.arrow_forward_ios),
@@ -132,7 +132,8 @@ class _ManageChallengeScreenState
                                   Navigator.pop(context);
                                   ref.watch(screenProvider.notifier).pushScreen(
                                         EditChallengeScreen(
-                                            challenge: snapshot1.data[0]!),
+                                          challenge: snapshot1.data[0]!,
+                                        ),
                                       );
                                 },
                               );
@@ -160,7 +161,12 @@ class _ManageChallengeScreenState
             .watch(screenProvider.notifier)
             .pushScreen(const CreateChallengeScreen());
       },
-      child: const Text('Create Challenge'),
+      child: Text(
+        'Create Challenge',
+        style: TextStyle(
+          color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+        ),
+      ),
     );
   }
 }

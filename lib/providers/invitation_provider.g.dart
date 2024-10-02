@@ -7,11 +7,11 @@ part of 'invitation_provider.dart';
 // **************************************************************************
 
 String _$invitationNotifierHash() =>
-    r'c909c73f3effa537cb1328b4e287d81c8c5c0c5e';
+    r'30c4f5626ed5718993fd01e724d42d65a79a79d5';
 
 /// See also [InvitationNotifier].
 @ProviderFor(InvitationNotifier)
-final invitationNotifierProvider = AutoDisposeAsyncNotifierProvider<
+final invitationNotifierProvider = AutoDisposeStreamNotifierProvider<
     InvitationNotifier, InvitationState>.internal(
   InvitationNotifier.new,
   name: r'invitationNotifierProvider',
@@ -22,6 +22,6 @@ final invitationNotifierProvider = AutoDisposeAsyncNotifierProvider<
   allTransitiveDependencies: null,
 );
 
-typedef _$InvitationNotifier = AutoDisposeAsyncNotifier<InvitationState>;
+typedef _$InvitationNotifier = AutoDisposeStreamNotifier<InvitationState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

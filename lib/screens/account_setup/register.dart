@@ -2,7 +2,7 @@
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:codecraft/services/auth/auth_provider.dart';
+import 'package:codecraft/services/auth/auth_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
@@ -118,7 +118,8 @@ class _RegisterState extends ConsumerState<Register> {
 
   Widget _buildGoogleSignInButton(BuildContext context) {
     return FilledButton(
-      onPressed: _signInWithGoogle,
+      onPressed: () async =>
+          await ref.watch(authProvider.notifier).signInWithGoogle(),
       style: ButtonStyle(
         shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           const RoundedRectangleBorder(
@@ -285,15 +286,6 @@ class _RegisterState extends ConsumerState<Register> {
         child: const Text('Create Account'),
       ),
     );
-  }
-
-  void _signInWithGoogle() async {
-    final user = await ref.watch(authProvider).signInWithGoogle(context);
-    if (user != null) {
-      if (!mounted) {
-        return;
-      }
-    }
   }
 
   void _createAccount() {

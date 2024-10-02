@@ -13,6 +13,7 @@ class _AboutUsState extends State<AboutUs> {
     double minHeight = MediaQuery.of(context).size.height * 0.3 < 500
         ? 500
         : MediaQuery.of(context).size.height * 0.3;
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -186,7 +187,7 @@ class _AboutUsState extends State<AboutUs> {
           Container(
             padding: const EdgeInsets.all(10.0),
             width: double.infinity,
-            height: minHeight,
+            height: minHeight * 1.5,
             child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
@@ -216,18 +217,24 @@ class _AboutUsState extends State<AboutUs> {
                         name: "Glenn Genre I. Mamanao",
                         position: "Lead Developer",
                         email: "mamanaoglenngenre@gmail.com",
+                        imageUrl:
+                            "https://scontent.fcrk1-1.fna.fbcdn.net/v/t39.30808-6/378125430_1510004556478969_7834789049005275261_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=a5f93a&_nc_eui2=AeELD-gn8j_0TlFBqaRCacRpSGINP_Tpw39IYg0_9OnDfyhtAucLRFEyJ9HLQIxB7T2bZ5kH3KQ_G4K_yx2aAYZb&_nc_ohc=0AsA9rcQPK8Q7kNvgHDeeEk&_nc_ht=scontent.fcrk1-1.fna&_nc_gid=ALdk_CfNOmYn1OptpTiDcA7&oh=00_AYD4Zt3Xd9EY21jC24Z7MDSVtgAM7t-VRWOs4pzBZbZCbg&oe=6703315A",
                       )),
                       Expanded(
                           child: Member(
                         name: "Francheska Ella S. Horlador",
                         position: "Project Manager & Quality Assurance",
-                        email: "",
+                        email: "francheskahrldr@gmail.com",
+                        imageUrl:
+                            'https://scontent.fcrk1-3.fna.fbcdn.net/v/t1.6435-9/83547343_2706498506137842_6817607193320226816_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeFfjtpcljM4tsm6Al-StfGjg9OwauQQu-eD07Bq5BC751WdiEn6k_MkOf5rV1EkOZatVYD8koJ_evhXdBqo8ohq&_nc_ohc=Zi6NhQqNPB4Q7kNvgEXSt-s&_nc_ht=scontent.fcrk1-3.fna&oh=00_AYATdwAZwlQ9pi-eZnWI-A05ttQpWjflfMD2IIhaqRD-bg&oe=6724D9B6',
                       )),
                       Expanded(
                           child: Member(
                         name: "Justin Rei R. Pahayac",
                         position: "System Analyst",
-                        email: "",
+                        email: "justinpahayac@gmail.com",
+                        imageUrl:
+                            'https://scontent.fmnl4-4.fna.fbcdn.net/v/t1.6435-9/133601686_10159364694899947_4811827179496767424_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=dd6889&_nc_eui2=AeGZsI1YzyeJjMyS5R6TysNnu4zb81jly-C7jNvzWOXL4OKrbUO1__P_NOznJV78XUx52m60_FM3ZEGpuueAACdu&_nc_ohc=QGK3YsqrpcEQ7kNvgEfSlsf&_nc_ht=scontent.fmnl4-4.fna&_nc_gid=At1qZWt41VPSxZbB6lCJIp5&oh=00_AYAKFvH1uvbqC86Kf7MuwZwiel16xSAHx-e6pZi-RywolA&oe=6724CB8A',
                       )),
                     ],
                   ),
@@ -245,12 +252,14 @@ class Member extends StatefulWidget {
   final String name;
   final String position;
   final String email;
+  final String imageUrl;
 
   const Member({
     super.key,
     this.name = 'Member Name',
     this.position = 'Member Position',
     this.email = 'Member Email',
+    this.imageUrl = 'assets/member_picture.png',
   });
 
   @override
@@ -267,19 +276,18 @@ class _MemberState extends State<Member> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 40,
-              backgroundImage: AssetImage(
-                'assets/member_picture.png',
-              ),
+              backgroundImage: NetworkImage(widget.imageUrl),
             ),
             const SizedBox(height: 10),
             Text(
               widget.name,
-              style: const TextStyle(
-                fontSize: 18,
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: MediaQuery.of(context).size.width < 800 ? 14 : 16,
               ),
+              textAlign: TextAlign.center,
             ),
             Text(
               widget.email,
@@ -295,6 +303,7 @@ class _MemberState extends State<Member> {
                 fontSize: 16,
                 color: Colors.grey,
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

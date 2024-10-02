@@ -23,7 +23,12 @@ class ChallengeService {
         'duration': challenge.duration,
         'unitTests': challenge.unitTests
             .map((test) => {
-                  'input': test.input,
+                  'input': test.input
+                      .map((input) => {
+                            'value': input.value,
+                            'type': input.type,
+                          })
+                      .toList(),
                   'expectedOutput': {
                     'value': test.expectedOutput.value,
                     'type': test.expectedOutput.type,
@@ -64,31 +69,18 @@ class ChallengeService {
     }
   }
 
-  Future<List<Challenge>> getChallenges(String organizationId) async {
-    try {
-      final snapshot = await _firestore
-          .collection('organizations')
-          .doc(organizationId)
-          .collection('challenges')
-          .get();
+  Stream<List<Challenge>> getChallengesStream(String organizationId) {
+    return _firestore
+        .collection('organizations')
+        .doc(organizationId)
+        .collection('challenges')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              Map<String, dynamic> data = doc.data();
+              data['id'] = doc.id;
 
-      List<Challenge> challenges = [];
-
-      if (snapshot.docs.isEmpty) {
-        return challenges;
-      }
-
-      for (var doc in snapshot.docs) {
-        Map<String, dynamic> data = doc.data();
-        data['id'] = doc.id;
-
-        challenges.add(Challenge.fromJson(data));
-      }
-
-      return challenges;
-    } catch (e) {
-      throw Exception('Error getting challenges: $e');
-    }
+              return Challenge.fromJson(data);
+            }).toList());
   }
 
   Future<Challenge> getChallenge(
@@ -143,6 +135,7 @@ class ChallengeService {
           DatabaseHelper().currentUser.set({
             'completedChallenges': completedChallenges,
           }, SetOptions(merge: true));
+
         }
       });
     } catch (e) {

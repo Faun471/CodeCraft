@@ -1,14 +1,11 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:codecraft/models/app_user.dart';
-import 'package:codecraft/providers/theme_provider.dart';
+import 'package:codecraft/main.dart';
+import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/account_setup/forgot_password.dart';
-import 'package:codecraft/screens/apprentice/apprentice_home.dart';
 import 'package:codecraft/screens/account_setup/register.dart';
-import 'package:codecraft/screens/loading_screen.dart';
-import 'package:codecraft/screens/mentor/mentor_home.dart';
-import 'package:codecraft/services/auth/auth_provider.dart';
+import 'package:codecraft/services/auth/auth_helper.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/buttons/custom_text_fields.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +22,7 @@ class _LoginState extends ConsumerState<Login> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final FocusNode focusNode = FocusNode();
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +69,7 @@ class _LoginState extends ConsumerState<Login> {
           padding: const EdgeInsets.all(20),
           child: FilledButton(
             onPressed: () async {
-              await ref.read(authProvider).signInWithGoogle(context);
+              await ref.read(authProvider.notifier).signInWithGoogle();
             },
             style: ButtonStyle(
                 shape: WidgetStateProperty.all<RoundedRectangleBorder>(
@@ -153,73 +151,63 @@ class _LoginState extends ConsumerState<Login> {
           ),
           const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                ref
-                    .watch(authProvider)
-                    .loginUser(emailController.text, passwordController.text)
-                    .then(
-                  (error) async {
-                    if (error != null && mounted) {
-                      Utils.displayDialog(
-                        context: context,
-                        title: 'Error',
-                        content: error,
-                        buttonText: 'Close',
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        lottieAsset: 'assets/anim/error.json',
-                      );
+            onPressed: _isLoading
+                ? null
+                : () async {
+                    if (formKey.currentState!.validate()) {
+                      setState(() {
+                        _isLoading = true;
+                      });
 
-                      return;
-                    }
-
-                    final accountType =
-                        await ref.refresh(appUserNotifierProvider.future);
-
-                    await ref.refresh(themeNotifierProvider.future).then(
-                      (themeState) async {
-                        if (mounted) {
-                          await ref
-                              .watch(themeNotifierProvider.notifier)
-                              .updateColor(
-                                themeState.preferredColor,
-                              );
-                        }
-                      },
-                    );
-
-                    if (mounted) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return LoadingScreen(
-                              futures: [
-                                Future.delayed(const Duration(seconds: 1)),
-                              ],
-                              onDone: (context, _) {
-                                Navigator.pushReplacement(context,
-                                    MaterialPageRoute(builder: (context) {
-                                  return accountType.accountType! ==
-                                          'apprentice'
-                                      ? const ApprenticeHome()
-                                      : const MentorHome();
-                                }));
+                      await ref
+                          .watch(authProvider.notifier)
+                          .loginUser(
+                            emailController.text,
+                            passwordController.text,
+                          )
+                          .then(
+                        (error) async {
+                          if (error != null && mounted) {
+                            Utils.displayDialog(
+                              context: context,
+                              title: 'Error',
+                              content: error,
+                              buttonText: 'Close',
+                              onPressed: () {
+                                Navigator.pop(context);
                               },
+                              lottieAsset: 'assets/anim/error.json',
                             );
-                          },
-                        ),
+
+                            setState(() {
+                              _isLoading = false;
+                            });
+
+                            return;
+                          }
+
+                          final appUser =
+                              await ref.refresh(appUserNotifierProvider.future);
+
+                          print('App User is : $appUser');
+
+                          final landingPage = await getLandingPage(appUser);
+
+                          navigatorKey.currentState!
+                              .pushReplacement((MaterialPageRoute(
+                            builder: (context) => landingPage,
+                          )));
+                        },
                       );
                     }
                   },
-                );
-              }
-            },
             style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(60)),
-            child: const Text('Log In'),
+            child: _isLoading
+                ? const CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  )
+                : const Text('Log In'),
           ),
           const SizedBox(height: 10),
           OutlinedButton(

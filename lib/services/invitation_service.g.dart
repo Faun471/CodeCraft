@@ -6,7 +6,7 @@ part of 'invitation_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$invitationServiceHash() => r'02ff0e3d950186ad5c6393c97f43e4a41716aef5';
+String _$invitationServiceHash() => r'450fce5f8a1ad2ff046f12aa35a260eb468e9983';
 
 /// See also [InvitationService].
 @ProviderFor(InvitationService)

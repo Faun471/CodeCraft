@@ -1,4 +1,3 @@
-import 'package:codecraft/services/auth/auth_provider.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/buttons/custom_text_fields.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,9 +22,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 
   Future<void> passwordReset() async {
     try {
-      await ref
-          .watch(authProvider)
-          .auth
+      await FirebaseAuth.instance
           .sendPasswordResetEmail(email: _emailController.text.trim());
 
       if (!mounted) {

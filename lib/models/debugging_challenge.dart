@@ -1,49 +1,47 @@
 class DebuggingChallenge {
   final String id;
+  final String title;
   final String instructions;
   final String initialCode;
   final int correctLine;
-  final String solution;
+  final String expectedOutput;
   int attemptsLeft;
-  final int timeLimit;
+  final String duration;
 
   DebuggingChallenge({
     required this.id,
+    required this.title,
     required this.instructions,
     required this.initialCode,
     required this.correctLine,
-    required this.solution,
+    required this.expectedOutput,
     required this.attemptsLeft,
-    required this.timeLimit,
+    required this.duration,
   });
 
   factory DebuggingChallenge.fromJson(Map<String, dynamic> data) {
     return DebuggingChallenge(
       id: data['id'],
-      instructions: data['instructions'],
-      initialCode: data['initialCode'],
-      correctLine: data['correctLine'],
-      solution: data['solution'],
-      attemptsLeft: data['attemptsLeft'],
-      timeLimit: data['timeLimit'],
+      title: data['title'] ?? '',
+      instructions: data['instructions'] ?? '',
+      initialCode: data['initialCode'] ?? '',
+      correctLine: data['correctLine'] ?? 0,
+      expectedOutput: data['expectedOutput'] ?? '',
+      attemptsLeft: data['attemptsLeft'] ?? 0,
+      duration: data['duration'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'title': title,
       'instructions': instructions,
       'initialCode': initialCode,
       'correctLine': correctLine,
-      'solution': solution,
+      'expectedOutput': expectedOutput,
       'attemptsLeft': attemptsLeft,
-      'timeLimit': timeLimit,
+      'duration': duration,
     };
-  }
-
-  void decrementAttempts() {
-    if (attemptsLeft > 0) {
-      attemptsLeft--;
-    }
   }
 }

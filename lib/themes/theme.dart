@@ -79,7 +79,7 @@ class AppTheme {
             return states.contains(WidgetState.disabled)
                 ? Colors.grey
                 : states.contains(WidgetState.pressed)
-                    ? Colors.orange
+                    ? sideColor
                     : Colors.white;
           }),
           textStyle: WidgetStateProperty.all<TextStyle>(

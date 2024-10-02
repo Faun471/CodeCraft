@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:codecraft/models/app_user.dart';
+import 'package:codecraft/main.dart';
+import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/account_setup/additional_info.dart';
 import 'package:codecraft/screens/apprentice/apprentice_home.dart';
@@ -9,29 +10,24 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-class Auth {
-  final FirebaseAuth _auth;
-  User? _user;
+part 'auth_helper.g.dart';
 
-  Auth(this._auth) {
-    _user = _auth.currentUser;
+class AuthState {
+  User? user;
+
+  AuthState({required this.user});
+}
+
+@riverpod
+class Auth extends _$Auth {
+  @override
+  FutureOr<AuthState> build() {
+    return AuthState(user: FirebaseAuth.instance.currentUser);
   }
 
-  User? get user => _user;
-
-  FirebaseAuth get auth => _auth;
-
-  bool isLoggedIn() {
-    _user = _auth.currentUser;
-
-    if (_user == null) {
-      return false;
-    }
-    return true;
-  }
-
-  Future<String?> signInWithGoogle(BuildContext context) async {
+  Future<String?> signInWithGoogle() async {
     final GoogleSignIn googleSignIn = GoogleSignIn(
       clientId:
           "831166027593-53rh04dgchjmgj0348m05pl6g6tru9c2.apps.googleusercontent.com",
@@ -64,31 +60,30 @@ class Auth {
 
       final userData = userDoc.data() as Map<String, dynamic>?;
 
+      final appUser = await ref.refresh(appUserNotifierProvider.future);
+
       if (userData == null ||
           !userDoc.exists ||
           !userData.containsKey('accountType')) {
-        if (!context.mounted) return null;
-        Navigator.pushReplacement(
-          context,
+        navigatorKey.currentState!.pushReplacement(
           MaterialPageRoute(
-            builder: (context) =>
-                AccountSetup(AdditionalInfoScreen(user: userCredential.user!)),
+            builder: (context) => AccountSetup(
+              AdditionalInfoScreen(user: userCredential.user!),
+            ),
           ),
         );
       } else {
-        if (!context.mounted) {
-          return null;
-        }
-
-        if (userData['accountType'] == 'mentor') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const MentorHome()),
+        if (appUser.accountType == 'mentor') {
+          navigatorKey.currentState!.pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const MentorHome(),
+            ),
           );
         } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const ApprenticeHome()),
+          navigatorKey.currentState!.pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const ApprenticeHome(),
+            ),
           );
         }
       }
@@ -119,10 +114,12 @@ class Auth {
   }
 
   Future<String?> registerUser(
-      Map<String, String> userData, String accountType) async {
+    Map<String, String> userData,
+    String accountType,
+  ) async {
     try {
       UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: userData['email']!,
         password: userData['password']!,
       );
@@ -154,7 +151,7 @@ class Auth {
 
   Future<String?> loginUser(String email, String password) async {
     try {
-      await _auth.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -187,7 +184,7 @@ class Auth {
     String? phoneNumber,
   }) async {
     if (displayName != null && displayName.isNotEmpty) {
-      _user!.updateDisplayName(displayName);
+      state.value!.user!.updateDisplayName(displayName);
     }
 
     Map<String, String?> updates = {

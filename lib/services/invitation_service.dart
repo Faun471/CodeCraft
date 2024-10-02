@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -37,7 +38,7 @@ class InvitationService extends _$InvitationService {
     bool codeExists = true;
 
     while (codeExists) {
-      code = _generateRandomCode(8);
+      code = _generateRandomCode(6);
       var existingCode =
           await _firestore.collection('invitations').doc(code).get();
       if (!existingCode.exists) {
@@ -54,8 +55,12 @@ class InvitationService extends _$InvitationService {
       await _firestore.collection('invitations').doc(doc.id).delete();
     }
 
-    Invitation invitation =
-        Invitation(code: code, mentorId: mentorId, orgId: orgId);
+    Invitation invitation = Invitation(
+      code: code,
+      mentorId: mentorId,
+      orgId: orgId,
+      joinRequests: [],
+    );
     await _firestore
         .collection('invitations')
         .doc(code)
@@ -81,7 +86,8 @@ class InvitationService extends _$InvitationService {
   }
 
   String _generateRandomCode(int length) {
-    const allowedChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const allowedChars =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     final random = Random();
 
     return List.generate(length, (index) {
@@ -99,86 +105,103 @@ class InvitationService extends _$InvitationService {
   }
 
   Future<void> createJoinRequest(String code, String apprenticeId) async {
-    DocumentReference docRef = _firestore.collection('joinRequests').doc();
+    final timestamp = DateTime.now();
 
-    await docRef.set({
-      'id': docRef.id,
-      'code': code,
-      'apprenticeId': apprenticeId,
-      'status': 'pending',
+    await _firestore.collection('invitations').doc(code).update({
+      'joinRequests': FieldValue.arrayUnion([
+        {
+          'apprenticeId': apprenticeId,
+          'status': 'pending',
+          'timestamp': timestamp.toIso8601String(),
+        }
+      ])
     });
   }
 
-  Future<void> updateJoinRequestStatus(String requestId, String status) async {
-    await _firestore
-        .collection('joinRequests')
-        .doc(requestId)
-        .update({'status': status});
+  Future<void> updateJoinRequestStatus(
+    String code,
+    String apprenticeId,
+    String status,
+  ) async {
+    var invitationDoc =
+        await _firestore.collection('invitations').doc(code).get();
+    var invitation =
+        Invitation.fromMap(invitationDoc.data() as Map<String, dynamic>);
+
+    var updatedRequests = invitation.joinRequests.map((request) {
+      if (request['apprenticeId'] == apprenticeId) {
+        return {...request, 'status': status};
+      }
+      return request;
+    }).toList();
+
+    await _firestore.collection('invitations').doc(code).update({
+      'joinRequests': updatedRequests,
+    });
 
     if (status == 'accepted') {
-      var requestSnapshot =
-          await _firestore.collection('joinRequests').doc(requestId).get();
-
-      var code = requestSnapshot['code'];
-      var apprenticeId = requestSnapshot['apprenticeId'];
-
-      var invitationSnapshot =
-          await _firestore.collection('invitations').doc(code).get();
-
-      await DatabaseHelper()
-          .organisations
-          .doc(invitationSnapshot['orgId'])
-          .set({
-        'apprentices': FieldValue.arrayUnion(
-          [apprenticeId],
-        )
+      await DatabaseHelper().organisations.doc(invitation.orgId).set({
+        'apprentices': FieldValue.arrayUnion([apprenticeId]),
       }, SetOptions(merge: true));
 
       await DatabaseHelper().users.doc(apprenticeId).set({
-        'orgId': invitationSnapshot['orgId'],
+        'orgId': invitation.orgId,
       }, SetOptions(merge: true));
     }
-
-    await _firestore.collection('joinRequests').doc(requestId).delete();
   }
 
-  Future<List<Map<String, dynamic>>> getJoinRequests(String mentorId) async {
-    var invitationSnapshot = await _firestore
+  Stream<List<Map<String, dynamic>>> getJoinRequestsStream(String userId) {
+    return _firestore
         .collection('invitations')
-        .where('mentorId', isEqualTo: mentorId)
-        .get();
+        .where('mentorId', isEqualTo: userId)
+        .snapshots()
+        .map((snapshot) {
+      if (snapshot.docs.isEmpty) {
+        return [];
+      }
 
-    if (invitationSnapshot.docs.isEmpty) {
-      return [];
-    }
-
-    String code = invitationSnapshot.docs.first.id;
-
-    var joinRequestsSnapshot = await _firestore
-        .collection('joinRequests')
-        .where('code', isEqualTo: code)
-        .where('status', isEqualTo: 'pending')
-        .get();
-
-    List<Map<String, dynamic>> joinRequests =
-        joinRequestsSnapshot.docs.map((doc) {
-      return {
-        'id': doc.id,
-        'code': doc['code'],
-        'apprenticeId': doc['apprenticeId'],
-        'status': doc['status'],
-      };
-    }).toList();
-
-    return joinRequests;
+      var invitation = Invitation.fromMap(snapshot.docs.first.data());
+      return invitation.joinRequests
+          .where((request) => request['status'] == 'pending')
+          .map((request) => {
+                ...request,
+                'code': invitation.code,
+                'timestamp': request['timestamp']
+              })
+          .toList();
+    });
   }
 
-  Future<bool> hasJoinRequest(String apprenticeId, String orgId) async {
-    return await _firestore
-        .collection('joinRequests')
-        .where('apprenticeId', isEqualTo: apprenticeId)
-        .where('status', isEqualTo: 'pending')
-        .get()
-        .then((value) => value.docs.isNotEmpty);
+  Stream<String> getCurrentCodeStream(String userId) {
+    return _firestore
+        .collection('invitations')
+        .where('mentorId', isEqualTo: userId)
+        .snapshots()
+        .map((snapshot) {
+      if (snapshot.docs.isEmpty) {
+        return '';
+      }
+      return snapshot.docs.first.id;
+    });
+  }
+
+  Future<void> leaveOrganisation(String userId) async {
+    var user = await DatabaseHelper().getUserData(userId);
+    var orgId = user['orgId'];
+
+    await DatabaseHelper().organisations.doc(orgId).update({
+      'apprentices': FieldValue.arrayRemove([userId]),
+    });
+
+    await DatabaseHelper().users.doc(userId).update({
+      'orgId': 'Default',
+    });
+
+    state = AsyncValue.data(
+        state.value!.where((invitation) => invitation.orgId != orgId).toList());
+  }
+
+  Future<void> cancelJoinRequest(String code, String apprenticeId) {
+    return updateJoinRequestStatus(code, apprenticeId, 'cancelled');
   }
 }

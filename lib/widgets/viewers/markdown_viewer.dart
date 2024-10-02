@@ -1,11 +1,17 @@
+import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/challenge.dart';
+import 'package:codecraft/models/quiz.dart';
 import 'package:codecraft/parser/html_parser.dart';
-import 'package:codecraft/screens/apprentice/challenge_screen.dart';
+import 'package:codecraft/screens/apprentice/coding_challenges/coding_challenge_screen.dart';
+import 'package:codecraft/screens/apprentice/coding_quizzes/completed_quiz_screen.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/services/challenge_service.dart';
+import 'package:codecraft/services/quiz_service.dart';
 import 'package:codecraft/themes/theme.dart';
 import 'package:codecraft/widgets/codeblocks/code_wrapper.dart';
+import 'package:codecraft/widgets/viewers/quiz_viewer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:highlight/highlight.dart' show Node, highlight;
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:flutter/material.dart';
@@ -53,12 +59,6 @@ class MarkdownViewerState extends State<MarkdownViewer> {
     PreConfig(
       builder: (code, language) {
         return CodeWrapperWidget(
-          RichText(
-            text: _SyntaxHighlighter(
-              theme: SyntaxTheme.dracula,
-              language: language,
-            ).format(code),
-          ),
           code,
           language,
           theme: SyntaxTheme.dracula,
@@ -103,11 +103,13 @@ class MarkdownViewerState extends State<MarkdownViewer> {
           : null,
       body: Row(
         children: [
-          if (!isVertical && widget.displayToc == true)
+          if (!isVertical && widget.displayToc == true) ...[
             Expanded(
               flex: 1,
               child: buildTocWidget(),
             ),
+            const VerticalDivider(),
+          ],
           Expanded(
             flex: 3,
             child: buildMarkdown(
@@ -137,6 +139,7 @@ class MarkdownViewerState extends State<MarkdownViewer> {
             markdownGenerator: MarkdownGenerator(
               generators: [
                 challengeGeneratorWithTag,
+                quizGeneratorWithTag,
               ],
               textGenerator: (node, config, visitor) =>
                   CustomTextNode(node.textContent, config, visitor),
@@ -155,11 +158,11 @@ class MarkdownViewerState extends State<MarkdownViewer> {
   }
 }
 
-class _SyntaxHighlighter {
+class SyntaxHighlighter {
   final SyntaxTheme theme;
   final String? language;
 
-  _SyntaxHighlighter({required this.theme, required this.language});
+  SyntaxHighlighter({required this.theme, required this.language});
 
   TextSpan format(String source) {
     return TextSpan(
@@ -286,11 +289,7 @@ class _ChallengeButtonState extends State<ChallengeButton> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChallengeScreen(
-                      challenge: challenge,
-                      shouldLevelUp: (!(snapshot.data[1]! as List<String>)
-                          .contains(challenge.id)),
-                    ),
+                    builder: (context) => ChallengeScreen(challenge: challenge),
                   ),
                 );
               },
@@ -299,6 +298,120 @@ class _ChallengeButtonState extends State<ChallengeButton> {
         );
       },
       child: const Text('Proceed to challenge'),
+    );
+  }
+}
+
+SpanNodeGeneratorWithTag quizGeneratorWithTag = SpanNodeGeneratorWithTag(
+    tag: _quizTag,
+    generator: (e, config, visitor) => QuizButtonNode(e.attributes));
+
+const _quizTag = 'quiz';
+
+class QuizButtonNode extends ElementNode {
+  final Map<String, String> attributes;
+
+  QuizButtonNode(this.attributes);
+
+  @override
+  InlineSpan build() {
+    String? quizId;
+
+    if (attributes.containsKey('quiz-id')) {
+      quizId = attributes['quiz-id'];
+    }
+
+    return WidgetSpan(child: QuizButton(quizId: quizId));
+  }
+}
+
+class QuizButton extends ConsumerStatefulWidget {
+  final String? orgId;
+  final String? quizId;
+
+  const QuizButton({super.key, this.quizId, this.orgId});
+
+  @override
+  _QuizButtonState createState() => _QuizButtonState();
+}
+
+class _QuizButtonState extends ConsumerState<QuizButton> {
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.all(Colors.blue),
+        fixedSize: WidgetStateProperty.all(const Size(200, 50)),
+      ),
+      onPressed: () async {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LoadingScreen(
+              futures: [
+                QuizService().getQuiz('Default', widget.quizId!),
+                QuizService().getCompletedQuizzes(
+                  FirebaseAuth.instance.currentUser!.uid,
+                ),
+                QuizService().getQuizResult(
+                  widget.quizId!,
+                ),
+              ],
+              onDone: (context, snapshot) {
+                if (snapshot.data[0] == null) {
+                  return;
+                }
+
+                if (snapshot.error != null) {
+                  return;
+                }
+
+                final quiz = snapshot.data[0] as Quiz;
+
+                final QuizResult? quizResult = snapshot.data[2] as QuizResult?;
+                if (quizResult != null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => QuizResultsScreen(
+                        quiz: quiz,
+                        quizResult: quizResult,
+                        showSolutions: false,
+                        canRetake: true,
+                      ),
+                    ),
+                  );
+                  return;
+                }
+
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => QuizViewer(
+                      quiz: quiz,
+                      onQuizFinished: (quiz) {
+                        QuizService().saveQuizResultsWithAnswers(quiz);
+
+                        //if quiz is perfect, add experience
+                        if (quiz.isPerfect) {
+                          final appUserNotifier =
+                              ref.watch(appUserNotifierProvider.notifier);
+                          appUserNotifier.addExperience(
+                            quiz.experienceToEarn,
+                          );
+                        }
+
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
+      child: const Text('Proceed to Quiz'),
     );
   }
 }

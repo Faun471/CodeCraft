@@ -1,13 +1,18 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:codecraft/main.dart';
+import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/account_setup/account_type_selection.dart';
+import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/widgets/buttons/custom_text_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:codecraft/models/app_user_notifier.dart';
 
-class AdditionalInfoScreen extends StatefulWidget {
+class AdditionalInfoScreen extends ConsumerStatefulWidget {
   final User user;
 
   const AdditionalInfoScreen({super.key, required this.user});
@@ -16,12 +21,83 @@ class AdditionalInfoScreen extends StatefulWidget {
   _AdditionalInfoScreenState createState() => _AdditionalInfoScreenState();
 }
 
-class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
+class _AdditionalInfoScreenState extends ConsumerState<AdditionalInfoScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
   final FocusNode phoneNumberFocusNode = FocusNode();
+  Map<String, String> userData = {};
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final appUser = ref.read(appUserNotifierProvider).value;
+      if (appUser != null) {
+        _fillUserData(appUser);
+
+        firstNameController.text = appUser.firstName ?? '';
+        lastNameController.text = appUser.lastName ?? '';
+        phoneNumberController.text = appUser.phoneNumber ?? '';
+
+        if (!mounted) return;
+
+        if (_userHasCompleteData(appUser) &&
+            (userData['accountType'] != 'apprentice' ||
+                userData['accountType'] != 'mentor')) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AccountSetup(
+                AccountTypeSelection(userData: userData),
+              ),
+            ),
+          );
+        }
+
+        String? firstName = userData['firstName'];
+        String? lastName = userData['lastName'];
+        String? phoneNumber = userData['phoneNumber'];
+
+        if (firstName != null &&
+            lastName != null &&
+            phoneNumber != null &&
+            firstName.isNotEmpty &&
+            lastName.isNotEmpty &&
+            phoneNumber.isNotEmpty) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return LoadingScreen(
+                  futures: [getLandingPage(appUser)],
+                  onDone: (context, snapshot) async {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => snapshot.data[0]!,
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          );
+        }
+      }
+    });
+  }
+
+  bool _userHasCompleteData(AppUser appUser) {
+    return appUser.firstName != null &&
+        appUser.firstName!.isNotEmpty &&
+        appUser.lastName != null &&
+        appUser.lastName!.isNotEmpty &&
+        appUser.phoneNumber != null &&
+        appUser.phoneNumber!.isNotEmpty;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,17 +114,31 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
     );
   }
 
+  void _fillUserData(AppUser appUser) {
+    userData = {
+      'firstName': appUser.firstName ?? '',
+      'lastName': appUser.lastName ?? '',
+      'phoneNumber': appUser.phoneNumber ?? '',
+      'email': widget.user.email ?? '',
+      'mi': appUser.mi ?? '',
+      'suffix': appUser.suffix ?? '',
+      'displayName': appUser.displayName ?? '',
+      'uid': widget.user.uid,
+      'accountType': appUser.accountType ?? '',
+    };
+
+    firstNameController.text = appUser.firstName ?? '';
+    lastNameController.text = appUser.lastName ?? '';
+    phoneNumberController.text = appUser.phoneNumber ?? '';
+  }
+
   Widget _buildHeader(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
-          child: AutoSizeText(
-            'Complete your account setup',
-            style: AdaptiveTheme.of(context).theme.textTheme.displayLarge!,
-          ),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+      child: AutoSizeText(
+        'Complete your account setup',
+        style: AdaptiveTheme.of(context).theme.textTheme.displayLarge!,
+      ),
     );
   }
 
@@ -121,7 +211,9 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: ElevatedButton(
-        onPressed: _proceedToAccountTypeSelection,
+        onPressed: () async {
+          await _proceedToAccountTypeSelection();
+        },
         style: ElevatedButton.styleFrom(
           minimumSize: const Size.fromHeight(60),
         ),
@@ -130,27 +222,54 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
     );
   }
 
-  void _proceedToAccountTypeSelection() async {
+  Future<void> _proceedToAccountTypeSelection() async {
     if (_formKey.currentState!.validate()) {
-      Map<String, String> userData = {
+      userData = {
+        ...userData,
         'firstName': firstNameController.text,
         'lastName': lastNameController.text,
         'phoneNumber': phoneNumberController.text,
         'email': widget.user.email ?? '',
-        'mi': '',
-        'suffix': '',
-        'displayName': '${firstNameController.text} $lastNameController.text}',
-        'googleSignIn': 'true',
         'uid': widget.user.uid,
+        'googleSignIn': 'true',
       };
 
       if (!mounted) return;
 
-      Navigator.push(
+      String accountType = userData['accountType'] ?? '';
+      if (accountType.isEmpty) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AccountSetup(
+              AccountTypeSelection(userData: userData),
+            ),
+          ),
+        );
+        return;
+      }
+
+      final appUserNotifer = ref.read(appUserNotifierProvider.notifier);
+      appUserNotifer.updateData(userData);
+
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              AccountSetup(AccountTypeSelection(userData: userData)),
+          builder: (context) => LoadingScreen(
+            futures: [getLandingPage(ref.read(appUserNotifierProvider).value!)],
+            onDone: (context, snapshot) async {
+              if (snapshot.data[0] == null) {
+                return;
+              }
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => snapshot.data[0]!,
+                ),
+              );
+            },
+          ),
         ),
       );
     }

@@ -1,3 +1,5 @@
+import 'package:codecraft/models/unit_test.dart';
+
 class Challenge {
   String id;
   String instructions;
@@ -6,6 +8,7 @@ class Challenge {
   String methodName;
   String duration;
   List<UnitTest> unitTests;
+  int experienceToEarn;
 
   Challenge({
     required this.id,
@@ -15,6 +18,7 @@ class Challenge {
     required this.methodName,
     required this.duration,
     required this.unitTests,
+    this.experienceToEarn = 0,
   });
 
   factory Challenge.fromJson(Map<String, dynamic> json) {
@@ -28,6 +32,7 @@ class Challenge {
       unitTests: (json['unitTests'] as List<dynamic>)
           .map((e) => UnitTest.fromJson(e as Map<String, dynamic>))
           .toList(),
+      experienceToEarn: json['experienceToEarn'] ?? 0,
     );
   }
 
@@ -37,57 +42,10 @@ class Challenge {
       'instructions': instructions,
       'sampleCode': sampleCode,
       'className': className,
+      'methodName': methodName,
       'duration': duration,
       'unitTests': unitTests.map((e) => e.toJson()).toList(),
-    };
-  }
-}
-
-class UnitTest {
-  String input;
-  ExpectedOutput expectedOutput;
-
-  UnitTest({
-    required this.input,
-    required this.expectedOutput,
-  });
-
-  factory UnitTest.fromJson(Map<String, dynamic> json) {
-    return UnitTest(
-      input: json['input'] ?? '',
-      expectedOutput: ExpectedOutput.fromJson(
-          json['expectedOutput'] as Map<String, dynamic>),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'input': input,
-      'expectedOutput': expectedOutput.toJson(),
-    };
-  }
-}
-
-class ExpectedOutput {
-  String value;
-  String type;
-
-  ExpectedOutput({
-    required this.value,
-    required this.type,
-  });
-
-  factory ExpectedOutput.fromJson(Map<String, dynamic> json) {
-    return ExpectedOutput(
-      value: json['value'] ?? '',
-      type: json['type'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'value': value,
-      'type': type,
+      'experienceToEarn': experienceToEarn,
     };
   }
 }

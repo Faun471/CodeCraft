@@ -1,3 +1,4 @@
+import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/widgets/screentypes/logo_with_background.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +19,13 @@ class _AccountSetupState extends State<AccountSetup> {
     isVertical = MediaQuery.sizeOf(context).aspectRatio < 1.0;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Account Setup'),
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Account Setup',
+          style: TextStyle(
+            color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+          ),
+        ),
       ),
       body: Row(
         children: [

@@ -14,17 +14,7 @@ class QuizService {
           .doc(organizationId)
           .collection('quizzes')
           .doc(quiz.id)
-          .set({
-        'title': quiz.title,
-        'timer': quiz.timer,
-        'questions': quiz.questions
-            .map((question) => {
-                  'questionText': question.questionText,
-                  'answerOptions': question.answerOptions,
-                  'correctAnswer': question.correctAnswer,
-                })
-            .toList(),
-      }, SetOptions(merge: true));
+          .set(quiz.toJson(), SetOptions(merge: true));
     } catch (e) {
       throw Exception('Error creating quiz: $e');
     }
@@ -124,55 +114,99 @@ class QuizService {
     }
   }
 
-  Future<void> markQuizAsCompleted(String quizId) async {
+  Future<List<QuizResult>> getCompletedQuizzes(String userId) async {
+    final doc = await DatabaseHelper().currentUser.get();
+
+    final data = doc.data() as Map<String, dynamic>;
+
+    final Map<String, dynamic> quizResults = data['quizResults'] ?? {};
+
+    return quizResults.values
+        .map((e) => QuizResult.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Stream<List<QuizResult>> streamCompletedQuizzes() {
+    return DatabaseHelper().currentUser.snapshots().map((snapshot) {
+      final data = snapshot.data() as Map<String, dynamic>;
+
+      final Map<String, dynamic> quizResults = data['quizResults'] ?? {};
+
+      return quizResults.values
+          .map((e) => QuizResult.fromJson(e as Map<String, dynamic>))
+          .toList();
+    });
+  }
+
+  Future<void> saveQuizResultsWithAnswers(Quiz quiz) async {
     try {
       await DatabaseHelper().currentUser.get().then((doc) {
         if (doc.exists) {
           final data = doc.data() as Map<String, dynamic>;
 
-          if (data['completedQuizzes'] == null) {
-            DatabaseHelper().currentUser.set({
-              'completedQuizzes': [quizId],
-            }, SetOptions(merge: true));
-            return;
+          Map<String, dynamic> quizResults =
+              data['quizResults'] as Map<String, dynamic>? ?? {};
+
+          Map<String, String?> userAnswers = {};
+          for (var question in quiz.questions) {
+            userAnswers[question.questionText] = question.userAnswer;
           }
 
-          List<String> completedQuizzes =
-              (data['completedQuizzes'] as List<dynamic>)
-                  .map((e) => e.toString())
-                  .toList();
+          int score = 0;
 
-          if (completedQuizzes.contains(quizId)) {
-            return;
+          for (final question in quiz.questions) {
+            if (question.userAnswer == question.correctAnswer) score++;
           }
 
-          completedQuizzes.add(quizId);
+          QuizResult result = QuizResult(
+            id: quiz.id!,
+            score: score,
+            answers: userAnswers,
+            completedAt: DateTime.now(),
+            attempts: quiz.questions.map((q) => q.attempts).toList(),
+          );
+
+          quizResults[quiz.id!] = result.toJson();
 
           DatabaseHelper().currentUser.set({
-            'completedQuizzes': completedQuizzes,
+            'quizResults': quizResults,
           }, SetOptions(merge: true));
         }
       });
     } catch (e) {
-      throw Exception('Error marking quiz as completed: $e');
+      throw Exception('Error saving quiz results: $e');
     }
   }
 
-  Future<List<String>> getCompletedQuizzes(String userId) async {
+  Stream<List<Quiz>> getQuizzesStream(String organizationId) {
+    return _firestore
+        .collection('organizations')
+        .doc(organizationId)
+        .collection('quizzes')
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data();
+        data['id'] = doc.id;
+
+        return Quiz.fromJson(data);
+      }).toList();
+    });
+  }
+
+  Future<QuizResult?> getQuizResult(String quizId) async {
     final doc = await DatabaseHelper().currentUser.get();
 
     final data = doc.data() as Map<String, dynamic>;
 
-    final List<dynamic> completedQuizzesData = data['completedQuizzes'] ?? [];
+    final Map<String, dynamic> quizResults = data['quizResults'] ?? {};
 
-    return completedQuizzesData.map((e) => e.toString()).toList();
-  }
+    final quizResultData = quizResults[quizId];
 
-  Stream<List<String>> streamCompletedQuizzes() {
-    return DatabaseHelper().currentUser.snapshots().map((snapshot) {
-      final data = snapshot.data() as Map<String, dynamic>;
-      final List<dynamic> completedQuizzesData = data['completedQuizzes'] ?? [];
-      return completedQuizzesData.map((e) => e.toString()).toList();
-    });
+    if (quizResultData == null) {
+      return null;
+    }
+
+    return QuizResult.fromJson(quizResultData);
   }
 }

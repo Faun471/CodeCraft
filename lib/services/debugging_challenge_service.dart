@@ -13,14 +13,7 @@ class DebuggingChallengeService {
           .doc(organizationId)
           .collection('debuggingChallenges')
           .doc(challenge.id)
-          .set({
-        'instructions': challenge.instructions,
-        'initialCode': challenge.initialCode,
-        'correctLine': challenge.correctLine,
-        'solution': challenge.solution,
-        'attemptsLeft': challenge.attemptsLeft,
-        'timeLimit': challenge.timeLimit,
-      }, SetOptions(merge: true));
+          .set(challenge.toJson(), SetOptions(merge: true));
     } catch (e) {
       throw Exception('Error creating debugging challenge: $e');
     }
@@ -136,5 +129,26 @@ class DebuggingChallengeService {
         data['completedDebuggingChallenges'] ?? [];
 
     return completedChallengesData.map((e) => e.toString()).toList();
+  }
+
+  Stream<List<DebuggingChallenge>> getDebuggingChallengesStream(
+      String organizationId) {
+    return _firestore
+        .collection('organizations')
+        .doc(organizationId)
+        .collection('debuggingChallenges')
+        .snapshots()
+        .map((snapshot) {
+      List<DebuggingChallenge> challenges = [];
+
+      for (var doc in snapshot.docs) {
+        Map<String, dynamic> data = doc.data();
+        data['id'] = doc.id;
+
+        challenges.add(DebuggingChallenge.fromJson(data));
+      }
+
+      return challenges;
+    });
   }
 }

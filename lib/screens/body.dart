@@ -1,35 +1,38 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:codecraft/models/app_user.dart';
+import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/providers/screen_provider.dart';
-import 'package:codecraft/services/auth/auth_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sidebarx/sidebarx.dart';
 
 class SidebarItem {
   final IconData icon;
   final String label;
   final Widget screen;
+  final List<SidebarItem>? subItems;
+  final Function()? onTap;
+  SidebarItem? parent;
 
   SidebarItem({
     required this.icon,
     required this.label,
     required this.screen,
+    this.subItems,
+    this.onTap,
+    this.parent,
   });
-}
 
-class FoldableSidebarItem extends SidebarItem {
-  final List<SidebarItem> subItems;
-
-  FoldableSidebarItem({
-    required super.icon,
-    required super.label,
-    required super.screen,
-    required this.subItems,
-  });
+  SidebarItem copyWith({List<SidebarItem>? subItems, SidebarItem? parent}) {
+    return SidebarItem(
+      icon: icon,
+      label: label,
+      screen: screen,
+      subItems: subItems ?? this.subItems,
+      onTap: onTap,
+      parent: parent ?? this.parent,
+    );
+  }
 }
 
 class Body extends ConsumerStatefulWidget {
@@ -42,115 +45,116 @@ class Body extends ConsumerStatefulWidget {
 }
 
 class BodyState extends ConsumerState<Body> {
-  late bool isVertical;
-  bool isCompleted = false;
-  int selectedIndex = 0;
+  bool isSmallScreen = false;
+  SidebarItem? selectedItem;
+  late List<SidebarItem> _flattenedItems;
 
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      ref
-          .watch(screenProvider.notifier)
-          .replaceScreen(widget.sidebarItems.first.screen);
-      ref.invalidate(appUserNotifierProvider);
+    _flattenedItems = _flattenSidebarItems(widget.sidebarItems);
+    selectedItem = _flattenedItems.first;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(screenProvider.notifier).replaceScreen(selectedItem!.screen);
     });
   }
 
-  Future<void> _refreshCurrentScreen() async {
-    await Future.delayed(const Duration(seconds: 2));
+  List<SidebarItem> _flattenSidebarItems(List<SidebarItem> items,
+      [SidebarItem? parent]) {
+    return items.expand((item) {
+      final newItem = item.copyWith(parent: parent);
+      if (item.subItems != null && item.subItems!.isNotEmpty) {
+        return [newItem, ..._flattenSidebarItems(item.subItems!, newItem)];
+      }
+      return [newItem];
+    }).toList();
+  }
 
-    ref.invalidate(authProvider);
-    ref.invalidate(appUserNotifierProvider);
+  void _onItemTap(SidebarItem item) {
+    setState(() {
+      selectedItem = item;
+    });
 
-    setState(() {});
+    if (item.onTap != null) {
+      item.onTap!();
+      return;
+    }
+
+    // Navigate to the selected item's screen
+    ref.read(screenProvider.notifier).pushScreen(item.screen);
+
+    // If the selected item has a parent, also update the screen for the parent
+    SidebarItem? currentItem = item.parent;
+    while (currentItem != null) {
+      if (currentItem.screen.runtimeType !=
+          ref.read(screenProvider).screenStack.last.runtimeType) {
+        ref.read(screenProvider.notifier).pushScreen(currentItem.screen);
+        break;
+      }
+      currentItem = currentItem.parent;
+    }
+
+    // Close the drawer on small screens
+    if (isSmallScreen) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    isVertical = MediaQuery.of(context).size.aspectRatio < 1.0;
+    isSmallScreen = MediaQuery.of(context).size.width < 768;
+
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
+      onPopInvokedWithResult: (didPop, _) {
         if (ref.read(screenProvider).screenStack.length > 1) {
           ref.read(screenProvider.notifier).popScreen();
-
-          selectedIndex = widget.sidebarItems
-              .indexOf(widget.sidebarItems.firstWhere((element) {
-            return element.screen.runtimeType ==
-                ref.read(screenProvider).screenStack.last.runtimeType;
-          }));
+          setState(() {
+            selectedItem = _findSelectedItem();
+          });
         }
       },
       child: Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: Row(
             children: [
-              if (ref.watch(screenProvider).screenStack.length > 1)
-                if (!isVertical)
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () {
-                      ref.read(screenProvider.notifier).popScreen();
-                      selectedIndex = widget.sidebarItems
-                          .indexOf(widget.sidebarItems.firstWhere((element) {
-                        return element.screen.runtimeType ==
-                            ref
-                                .read(screenProvider)
-                                .screenStack
-                                .last
-                                .runtimeType;
-                      }));
-                    },
-                  ),
-              const AutoSizeText(
-                'CODECRAFT',
+              Image.asset(
+                'assets/images/ccOrangeLogo.png',
+                fit: BoxFit.fitHeight,
+                width: 35,
+                height: 35,
+              ),
+              AutoSizeText(
+                'CodeCraft',
                 minFontSize: 24,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const Expanded(
-                child: SizedBox(),
-              ),
-              AutoSizeText(
-                '${ref.watch(appUserNotifierProvider).value!.displayName ?? 'User'} ',
-                minFontSize: 24,
-                textAlign: TextAlign.end,
-                style: const TextStyle(
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 10),
-              ClipOval(
-                child: CachedNetworkImage(
-                  imageUrl: ref
-                          .watch(appUserNotifierProvider)
-                          .value!
-                          .data['photoURL'] ??
-                      FirebaseAuth.instance.currentUser!.photoURL ??
-                      'https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png',
-                  height: 30,
-                  width: 30,
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                  color: Theme.of(context).primaryColor.computeLuminance() > 0.5
+                      ? Colors.black
+                      : Colors.white,
                 ),
               ),
             ],
           ),
+          leading: isSmallScreen
+              ? Builder(
+                  builder: (BuildContext context) {
+                    return IconButton(
+                      icon: const Icon(Icons.menu),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    );
+                  },
+                )
+              : null,
         ),
-        drawer: isVertical ? _buildSidebar(context, extended: true) : null,
+        drawer: isSmallScreen ? _buildSidebar() : null,
         body: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (!isVertical) _buildSidebar(context),
+            if (!isSmallScreen) _buildSidebar(),
             Expanded(
-              child: RefreshIndicator(
-                onRefresh: _refreshCurrentScreen,
-                child: ref.watch(screenProvider).screenStack.last,
-              ),
+              child: ref.watch(screenProvider).screenStack.last,
             ),
           ],
         ),
@@ -158,94 +162,69 @@ class BodyState extends ConsumerState<Body> {
     );
   }
 
-  Widget _buildSidebar(BuildContext context, {bool extended = false}) {
-    return SidebarX(
-      controller: SidebarXController(
-        selectedIndex: selectedIndex,
-        extended: true,
+  Widget _buildSidebar() {
+    return Drawer(
+      width: MediaQuery.of(context).size.width > 768 ? 250 : null,
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          _buildSidebarHeader(),
+          ..._buildSidebarItems(widget.sidebarItems),
+        ],
       ),
-      showToggleButton: false,
-      theme: SidebarXTheme(
-        margin: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: AdaptiveTheme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : const Color.fromARGB(255, 21, 21, 21),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        textStyle: TextStyle(
-          color: AdaptiveTheme.of(context).brightness == Brightness.light
-              ? const Color.fromARGB(255, 21, 21, 21)
-              : Colors.white,
-        ),
-        selectedTextStyle: TextStyle(
-          color: Theme.of(context).primaryColor,
-        ),
-        itemTextPadding: const EdgeInsets.only(left: 30),
-        selectedItemTextPadding: const EdgeInsets.only(left: 30),
-        iconTheme: IconThemeData(
-          color: AdaptiveTheme.of(context).brightness == Brightness.light
-              ? const Color.fromARGB(255, 21, 21, 21)
-              : Colors.white,
-          size: 20,
-        ),
-      ),
-      extendedTheme: SidebarXTheme(
-        width: extended
-            ? MediaQuery.of(context).size.width * 0.9
-            : MediaQuery.of(context).size.width * 0.2,
-        decoration: BoxDecoration(
-            color: AdaptiveTheme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : const Color.fromARGB(255, 21, 21, 21)),
-      ),
-      headerBuilder: (context, extended) {
-        return SizedBox(
-          height: 100,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Image.asset('assets/images/logo.png'),
-          ),
-        );
-      },
-      items: widget.sidebarItems.map((item) {
-        if (item is FoldableSidebarItem) {
-          return SidebarXItem(
-              icon: item.icon,
-              label: item.label,
-              onTap: () {},
-              iconBuilder: (isSelected, isHovered) {
-                return ExpansionTile(
-                  title: Text(item.label),
-                  children: item.subItems.map((subItem) {
-                    return ListTile(
-                      leading: Icon(subItem.icon),
-                      title: Text(subItem.label),
-                      onTap: () {
-                        setState(() {
-                          selectedIndex = widget.sidebarItems.indexOf(subItem);
-                        });
-                      },
-                    );
-                  }).toList(),
-                );
-              });
-        } else {
-          return SidebarXItem(
-            icon: item.icon,
-            label: item.label,
-            onTap: () {
-              if (item.screen.runtimeType ==
-                  ref.read(screenProvider).screenStack.last.runtimeType) {
-                return;
-              }
+    );
+  }
 
-              selectedIndex = widget.sidebarItems.indexOf(item);
-              ref.watch(screenProvider.notifier).pushScreen(item.screen);
-            },
-          );
-        }
-      }).toList(),
+  Widget _buildSidebarHeader() {
+    return DrawerHeader(
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 40,
+            backgroundImage: CachedNetworkImageProvider(
+              ref.read(appUserNotifierProvider).requireValue.photoURL ??
+                  FirebaseAuth.instance.currentUser!.photoURL ??
+                  'assets/images/default_profile.png',
+            ),
+          ),
+          const SizedBox(height: 10),
+          AutoSizeText(
+            ref.read(appUserNotifierProvider).value!.displayName ?? '',
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildSidebarItems(List<SidebarItem> items) {
+    return items.map((item) {
+      if (item.subItems != null && item.subItems!.isNotEmpty) {
+        return ExpansionTile(
+          leading: Icon(item.icon),
+          title: Text(item.label),
+          children: _buildSidebarItems(item.subItems!),
+        );
+      } else {
+        return ListTile(
+          leading: Icon(item.icon),
+          title: Text(item.label),
+          onTap: () => _onItemTap(item),
+          selected: _isItemSelected(item),
+        );
+      }
+    }).toList();
+  }
+
+  bool _isItemSelected(SidebarItem item) {
+    return selectedItem == item || (selectedItem?.parent == item);
+  }
+
+  SidebarItem? _findSelectedItem() {
+    final currentScreenType =
+        ref.read(screenProvider).screenStack.last.runtimeType;
+    return _flattenedItems.firstWhere(
+      (item) => item.screen.runtimeType == currentScreenType,
+      orElse: () => _flattenedItems.first,
     );
   }
 }

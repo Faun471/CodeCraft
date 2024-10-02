@@ -1,14 +1,14 @@
-import 'package:codecraft/models/app_user.dart';
+import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/challenge.dart';
 import 'package:codecraft/providers/screen_provider.dart';
-import 'package:codecraft/screens/apprentice/challenge_screen.dart';
-import 'package:codecraft/screens/apprentice/organisation.dart';
+import 'package:codecraft/screens/apprentice/coding_challenges/coding_challenge_screen.dart';
+import 'package:codecraft/screens/apprentice/organisation/organisation_screen.dart';
 import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/services/database_helper.dart';
+import 'package:codecraft/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:smooth_list_view/smooth_list_view.dart';
 
 class CodingChallenges extends ConsumerStatefulWidget {
   const CodingChallenges({super.key});
@@ -30,39 +30,48 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
 
     if (!isInOrganisation()) {
       return SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            const Text(
-              'Organisation',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'You are not part of any organisation.',
-              style: TextStyle(
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    ref
-                        .watch(screenProvider.notifier)
-                        .replaceScreen(const Organisation());
-                  },
-                  child: const Text('Join an Organization'),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 20),
+              const Text(
+                'Coding Challenges',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            )
-          ],
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'You are not part of any organisation.',
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      ref
+                          .watch(screenProvider.notifier)
+                          .replaceScreen(const OrganisationScreen());
+                    },
+                    child: Text(
+                      'Join an Organization',
+                      style: TextStyle(
+                        color: ThemeUtils.getTextColor(
+                            Theme.of(context).primaryColor),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
         ),
       );
     }
@@ -98,14 +107,20 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
               onPressed: () {
                 ref
                     .watch(screenProvider.notifier)
-                    .pushScreen(const Organisation());
+                    .pushScreen(const OrganisationScreen());
               },
-              child: const Text('Join an Organization'),
+              child: Text(
+                'Join an Organization',
+                style: TextStyle(
+                  color:
+                      ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                ),
+              ),
             ),
           ],
-          if (appUser.orgId != 'default')
-            FutureBuilder<List<Challenge>>(
-              future: ChallengeService().getChallenges(appUser.orgId!),
+          if (appUser.orgId != 'Default')
+            StreamBuilder<List<Challenge>>(
+              stream: ChallengeService().getChallengesStream(appUser.orgId!),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return LoadingAnimationWidget.flickr(
@@ -131,16 +146,16 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
                     challenge.duration.toDateTime().isBefore(DateTime.now()));
 
                 final List<String> completedChallenges = ref
-                    .watch(appUserNotifierProvider)
-                    .value!
-                    .completedChallenges!;
+                        .watch(appUserNotifierProvider)
+                        .value!
+                        .completedChallenges ??
+                    [];
 
                 snapshot.data!.removeWhere(
                   (challenge) => completedChallenges.contains(challenge.id),
                 );
 
-                return SmoothListView.builder(
-                  duration: const Duration(milliseconds: 300),
+                return ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: snapshot.data!.length,

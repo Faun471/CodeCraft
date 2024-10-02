@@ -1,64 +1,84 @@
 import 'package:codecraft/models/invitation.dart';
-import 'package:codecraft/services/auth/auth_provider.dart';
+import 'package:codecraft/services/auth/auth_helper.dart';
 import 'package:codecraft/services/invitation_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'invitation_provider.g.dart';
 
 class InvitationState {
   final List<Map<String, dynamic>> joinRequests;
+  final String? currentCode;
 
-  InvitationState({required this.joinRequests});
+  InvitationState({required this.joinRequests, this.currentCode});
 
-  InvitationState copyWith({List<Map<String, dynamic>>? joinRequests}) {
-    return InvitationState(joinRequests: joinRequests ?? this.joinRequests);
+  InvitationState copyWith({
+    List<Map<String, dynamic>>? joinRequests,
+    String? currentCode,
+  }) {
+    return InvitationState(
+      joinRequests: joinRequests ?? this.joinRequests,
+      currentCode: currentCode ?? this.currentCode,
+    );
   }
 }
 
 @riverpod
 class InvitationNotifier extends _$InvitationNotifier {
   @override
-  FutureOr<InvitationState> build() async {
-    return InvitationState(joinRequests: await _fetchJoinRequests());
+  Stream<InvitationState> build() {
+    final invitationService = ref.watch(invitationServiceProvider.notifier);
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+
+    if (userId == null) {
+      return Stream.value(InvitationState(joinRequests: []));
+    }
+
+    return invitationService.getJoinRequestsStream(userId).map((joinRequests) {
+      return InvitationState(joinRequests: joinRequests);
+    });
   }
 
   Future<void> joinOrgWithCode(String code) async {
     final invitationService = ref.watch(invitationServiceProvider.notifier);
+    final apprenticeId = ref.watch(authProvider).value!.user!.uid;
 
-    String apprenticeId = ref.watch(authProvider).auth.currentUser!.uid;
     Invitation? invitation = await invitationService.getInvitation(code);
 
     if (invitation == null) {
       throw Exception('Invalid code');
     }
 
-    if (await invitationService.hasJoinRequest(
-        apprenticeId, invitation.orgId)) {
+    if (invitation.joinRequests.any((request) =>
+        request['apprenticeId'] == apprenticeId &&
+        request['status'] == 'pending')) {
       throw Exception('You already have a pending request');
     }
 
     await invitationService.createJoinRequest(code, apprenticeId);
   }
 
-  Future<List<Map<String, dynamic>>> _fetchJoinRequests() async {
-    List<Map<String, dynamic>> requests = [];
-
+  Future<void> cancelJoinRequest(String code) async {
     final invitationService = ref.watch(invitationServiceProvider.notifier);
-    String mentorId = ref.watch(authProvider).auth.currentUser!.uid;
-    requests = await invitationService.getJoinRequests(mentorId);
+    final apprenticeId = ref.watch(authProvider).value!.user!.uid;
 
-    return requests;
+    await invitationService.cancelJoinRequest(code, apprenticeId);
   }
 
-  Future<void> updateRequestStatus(String requestId, String status) async {
+  Future<void> updateRequestStatus(
+      String code, String apprenticeId, String status) async {
     final invitationService = ref.watch(invitationServiceProvider.notifier);
-    await invitationService.updateJoinRequestStatus(requestId, status);
-    _fetchJoinRequests();
+    await invitationService.updateJoinRequestStatus(code, apprenticeId, status);
   }
 
   Future<void> createNewInvitation(String mentorId, String orgId) async {
     final invitationService = ref.watch(invitationServiceProvider.notifier);
     await invitationService.createInvitation(mentorId, orgId);
-    _fetchJoinRequests();
+  }
+
+  Future<String?> getCurrentCode() async {
+    final invitationService = ref.watch(invitationServiceProvider.notifier);
+    final userId = ref.watch(authProvider).value!.user!.uid;
+    return invitationService.getCurrentCode(userId);
   }
 }

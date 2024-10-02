@@ -1,0 +1,260 @@
+[
+  {
+    "id": "python-basics",
+    "title": "Python Variables Basics",
+    "duration": "15",
+    "experienceToEarn": 50,
+    "questions": [
+      {
+        "questionText": "Which of the following is a correct way to declare a variable in Python?",
+        "answerOptions": [
+          "x = 10",
+          "int x = 10;",
+          "var x = 10;",
+          "declare x = 10"
+        ],
+        "correctAnswer": "x = 10",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the type of a variable declared as `x = 3.14` in Python?",
+        "answerOptions": [
+          "int",
+          "float",
+          "double",
+          "decimal"
+        ],
+        "correctAnswer": "float",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which function can be used to get the type of a variable in Python?",
+        "answerOptions": [
+          "typeof(x)",
+          "typeOf(x)",
+          "getType(x)",
+          "type(x)"
+        ],
+        "correctAnswer": "type(x)",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following is a mutable data type in Python?",
+        "answerOptions": [
+          "tuple",
+          "list",
+          "int",
+          "str"
+        ],
+        "correctAnswer": "list",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "How do you create a constant variable in Python?",
+        "answerOptions": [
+          "const PI = 3.14",
+          "PI = 3.14",
+          "PI := 3.14",
+          "constant PI = 3.14"
+        ],
+        "correctAnswer": "PI = 3.14",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following is NOT a valid variable name in Python?",
+        "answerOptions": [
+          "my_var",
+          "1st_var",
+          "_myVar",
+          "myVar"
+        ],
+        "correctAnswer": "1st_var",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "How do you assign multiple variables in Python?",
+        "answerOptions": [
+          "a = 1, b = 2",
+          "a = 1; b = 2;",
+          "a, b = 1, 2",
+          "a -> 1, b -> 2"
+        ],
+        "correctAnswer": "a, b = 1, 2",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following is NOT a built-in data type in Python?",
+        "answerOptions": [
+          "list",
+          "set",
+          "dict",
+          "array"
+        ],
+        "correctAnswer": "array",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the result of `type(True)` in Python?",
+        "answerOptions": [
+          "bool",
+          "int",
+          "str",
+          "float"
+        ],
+        "correctAnswer": "bool",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "How do you delete a variable in Python?",
+        "answerOptions": [
+          "del var",
+          "remove var",
+          "delete var",
+          "unset var"
+        ],
+        "correctAnswer": "del var",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      }
+    ]
+  },
+  {
+    "id": "java-python-variables",
+    "title": "Advanced Variable Handling in Java and Python",
+    "duration": "20",
+    "experienceToEarn": 75,
+    "questions": [
+      {
+        "questionText": "In Java, which of the following is true about local variables?",
+        "answerOptions": [
+          "Local variables are automatically initialized",
+          "Local variables must be manually initialized",
+          "Local variables can be used anywhere in the class",
+          "Local variables do not exist in Java"
+        ],
+        "correctAnswer": "Local variables must be manually initialized",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will happen if you try to change a final variable in Java?",
+        "answerOptions": [
+          "It will compile successfully",
+          "It will throw a runtime error",
+          "It will cause a compile-time error",
+          "It will not affect the variable"
+        ],
+        "correctAnswer": "It will cause a compile-time error",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, which keyword is used to define global variables?",
+        "answerOptions": [
+          "global",
+          "Global",
+          "var",
+          "public"
+        ],
+        "correctAnswer": "global",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is a static variable in Java?",
+        "answerOptions": [
+          "A variable that retains its value across instances",
+          "A variable that changes value across instances",
+          "A local variable",
+          "A variable declared inside a method"
+        ],
+        "correctAnswer": "A variable that retains its value across instances",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, how are variables passed to a function?",
+        "answerOptions": [
+          "By value",
+          "By reference",
+          "Depends on the variable type",
+          "Python doesn't support passing variables to functions"
+        ],
+        "correctAnswer": "By reference",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following best describes the `static` keyword in Java?",
+        "answerOptions": [
+          "It is used to create a class-level variable or method",
+          "It is used to make a variable immutable",
+          "It is used to initialize variables",
+          "It is used to define constants"
+        ],
+        "correctAnswer": "It is used to create a class-level variable or method",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, which data type is immutable?",
+        "answerOptions": [
+          "list",
+          "dict",
+          "set",
+          "tuple"
+        ],
+        "correctAnswer": "tuple",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, can a local variable in a method be declared as static?",
+        "answerOptions": [
+          "Yes",
+          "No",
+          "Only if it's final",
+          "Only inside a class"
+        ],
+        "correctAnswer": "No",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "How do you define a private variable in Python?",
+        "answerOptions": [
+          "Using the keyword `private`",
+          "By prefixing the variable name with `__`",
+          "By adding `_` before the variable name",
+          "Private variables are not allowed in Python"
+        ],
+        "correctAnswer": "By prefixing the variable name with `__`",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the scope of a variable declared inside a loop in Python?",
+        "answerOptions": [
+          "The scope is limited to the loop",
+          "The scope is limited to the block",
+          "It has global scope",
+          "It is accessible after the loop as well"
+        ],
+        "correctAnswer": "It is accessible after the loop as well",
+        "initialTimer": 30,
+        "penaltySeconds": 5
+      }
+    ]
+  }
+]

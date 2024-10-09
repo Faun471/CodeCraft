@@ -199,7 +199,8 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
                         ),
                         if (MediaQuery.of(context).size.width < 600)
                           Text(
-                            user.displayName ?? '',
+                            user.displayName ??
+                                '${user.firstName} ${user.lastName}',
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -216,7 +217,8 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
                         children: [
                           if (MediaQuery.of(context).size.width > 600)
                             Text(
-                              user.displayName ?? '',
+                              user.displayName ??
+                                  '${user.firstName} ${user.lastName}',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

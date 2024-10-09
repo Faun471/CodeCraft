@@ -75,7 +75,7 @@ class _UserProfilePanelState extends ConsumerState<UserProfilePanel> {
 
   Widget _buildUserCard(AsyncValue<AppUser> appUserState) {
     return UserCard(
-      userName: appUserState.value!.displayName ?? 'No Username',
+      userName: appUserState.value!.displayName ?? 'No Name',
       userEmail: appUserState.value!.email ?? 'No Email',
       userLevel: appUserState.value!.level.toString(),
       userProfilePicUrl: appUserState.value!.photoUrl == null ||

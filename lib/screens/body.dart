@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/providers/screen_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -103,6 +104,7 @@ class BodyState extends ConsumerState<Body> {
   @override
   Widget build(BuildContext context) {
     isSmallScreen = MediaQuery.of(context).size.width < 768;
+    final appUser = ref.read(appUserNotifierProvider).requireValue;
 
     return PopScope(
       canPop: false,
@@ -148,11 +150,11 @@ class BodyState extends ConsumerState<Body> {
                 )
               : null,
         ),
-        drawer: isSmallScreen ? _buildSidebar() : null,
+        drawer: isSmallScreen ? _buildSidebar(appUser) : null,
         body: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (!isSmallScreen) _buildSidebar(),
+            if (!isSmallScreen) _buildSidebar(appUser),
             const SizedBox(width: 8),
             Expanded(
               child: ref.watch(screenProvider).screenStack.last,
@@ -163,7 +165,7 @@ class BodyState extends ConsumerState<Body> {
     );
   }
 
-  Widget _buildSidebar() {
+  Widget _buildSidebar(AppUser appUser) {
     return Drawer(
       width: MediaQuery.of(context).size.width > 768 ? 250 : null,
       shadowColor: Colors.black,
@@ -171,21 +173,21 @@ class BodyState extends ConsumerState<Body> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          _buildSidebarHeader(),
+          _buildSidebarHeader(appUser),
           ..._buildSidebarItems(widget.sidebarItems),
         ],
       ),
     );
   }
 
-  Widget _buildSidebarHeader() {
+  Widget _buildSidebarHeader(AppUser appUser) {
     return DrawerHeader(
       child: Column(
         children: [
           CircleAvatar(
             radius: 40,
             backgroundImage: CachedNetworkImageProvider(
-              ref.read(appUserNotifierProvider).requireValue.photoUrl == null ||
+              appUser.photoUrl == null ||
                       ref
                           .read(appUserNotifierProvider)
                           .requireValue
@@ -198,7 +200,9 @@ class BodyState extends ConsumerState<Body> {
           ),
           const SizedBox(height: 10),
           AutoSizeText(
-            ref.read(appUserNotifierProvider).value!.displayName ?? '',
+            appUser.displayName ??
+                FirebaseAuth.instance.currentUser!.displayName ??
+                '${appUser.firstName!} ${appUser.lastName!}',
           ),
         ],
       ),

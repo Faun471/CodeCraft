@@ -26,6 +26,7 @@ class _AdditionalInfoScreenState extends ConsumerState<AdditionalInfoScreen> {
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
+  final TextEditingController displayNameController = TextEditingController();
   final FocusNode phoneNumberFocusNode = FocusNode();
   Map<String, String> userData = {};
 
@@ -122,7 +123,11 @@ class _AdditionalInfoScreenState extends ConsumerState<AdditionalInfoScreen> {
       'email': widget.user.email ?? '',
       'mi': appUser.mi ?? '',
       'suffix': appUser.suffix ?? '',
-      'displayName': appUser.displayName ?? '',
+      'displayName': appUser.displayName ??
+          widget.user.displayName ??
+          (('${appUser.firstName} ${appUser.lastName}').trim().isEmpty
+              ? ''
+              : '${appUser.firstName} ${appUser.lastName}'),
       'uid': widget.user.uid,
       'accountType': appUser.accountType ?? '',
     };
@@ -148,6 +153,14 @@ class _AdditionalInfoScreenState extends ConsumerState<AdditionalInfoScreen> {
       autovalidateMode: AutovalidateMode.disabled,
       child: Column(
         children: [
+          Expanded(
+            child: CustomTextField(
+              labelText: 'Display Name',
+              icon: Icons.person,
+              controller: displayNameController,
+            ),
+          ),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
@@ -226,6 +239,7 @@ class _AdditionalInfoScreenState extends ConsumerState<AdditionalInfoScreen> {
     if (_formKey.currentState!.validate()) {
       userData = {
         ...userData,
+        'displayName': displayNameController.text,
         'firstName': firstNameController.text,
         'lastName': lastNameController.text,
         'phoneNumber': phoneNumberController.text,

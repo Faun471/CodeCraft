@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class LogoWithBackground extends StatelessWidget {
   final bool isVertical;
+  final Widget? content;
 
-  const LogoWithBackground({super.key, required this.isVertical});
+  const LogoWithBackground({super.key, required this.isVertical, this.content});
 
   @override
   Widget build(BuildContext context) {
@@ -37,18 +38,19 @@ class LogoWithBackground extends StatelessWidget {
             bottom: 0,
             child: Align(
               alignment: Alignment.center,
-              child: Image.asset(
-                isVertical
-                    ? 'assets/images/logo-hor.png'
-                    : 'assets/images/logo-ver.png',
-                width: isVertical
-                    ? MediaQuery.sizeOf(context).width - 50
-                    : MediaQuery.sizeOf(context).width / 2.5,
-                height: isVertical
-                    ? MediaQuery.sizeOf(context).height
-                    : MediaQuery.sizeOf(context).height / 2.5,
-                scale: isVertical ? 0.9 : 1.0,
-              ),
+              child: content ??
+                  Image.asset(
+                    isVertical
+                        ? 'assets/images/logo-hor.png'
+                        : 'assets/images/logo-ver.png',
+                    width: isVertical
+                        ? MediaQuery.sizeOf(context).width - 50
+                        : MediaQuery.sizeOf(context).width / 2.5,
+                    height: isVertical
+                        ? MediaQuery.sizeOf(context).height
+                        : MediaQuery.sizeOf(context).height / 2.5,
+                    scale: isVertical ? 0.9 : 1.0,
+                  ),
             ),
           )
         ],

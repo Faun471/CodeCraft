@@ -11,29 +11,65 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:re_editor/re_editor.dart';
 
 class CreateDebuggingChallengeScreen extends ConsumerStatefulWidget {
-  const CreateDebuggingChallengeScreen({super.key});
+  final DebuggingChallenge? challenge;
+
+  const CreateDebuggingChallengeScreen({super.key, this.challenge});
 
   @override
-  _CreateDebuggingChallengeScreenState createState() =>
-      _CreateDebuggingChallengeScreenState();
+  _DebuggingChallengeScreenState createState() => _DebuggingChallengeScreenState();
 }
 
-class _CreateDebuggingChallengeScreenState
-    extends ConsumerState<CreateDebuggingChallengeScreen> {
+class _DebuggingChallengeScreenState extends ConsumerState<CreateDebuggingChallengeScreen> {
   final _formKey = GlobalKey<FormState>();
-  final CodeLineEditingController controller = CodeLineEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _instructionsController = TextEditingController();
+  final TextEditingController _correctLineController = TextEditingController();
+  final TextEditingController _expectedOutputController = TextEditingController();
+  final TextEditingController _attemptsAllowedController = TextEditingController();
+  final CodeLineEditingController codeLineController = CodeLineEditingController();
+  final BoardDateTimeTextController dateTimeController = BoardDateTimeTextController();
 
-  String _duration = DateTime.now().add(const Duration(days: 1)).toString();
-  final BoardDateTimeTextController dateTimeController =
-      BoardDateTimeTextController();
   int _currentStep = 0;
 
-  String _title = '';
-  String _instructions = '';
-  String _initialCode = '';
-  int _correctLine = 1;
-  String _expectedOutput = '';
-  int _attemptsAllowed = 3;
+  late String _title;
+  late String _instructions;
+  late String _initialCode;
+  late int _correctLine;
+  late String _expectedOutput;
+  late int _attemptsAllowed;
+  late String _duration;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.challenge != null) {
+      // Editing mode
+      _title = widget.challenge!.title;
+      _instructions = widget.challenge!.instructions;
+      _initialCode = widget.challenge!.initialCode;
+      _correctLine = widget.challenge!.correctLine;
+      _expectedOutput = widget.challenge!.expectedOutput;
+      _attemptsAllowed = widget.challenge!.attemptsLeft;
+      _duration = widget.challenge!.duration;
+    } else {
+      // Creation mode
+      _title = '';
+      _instructions = '';
+      _initialCode = '';
+      _correctLine = 1;
+      _expectedOutput = '';
+      _attemptsAllowed = 3;
+      _duration = DateTime.now().add(const Duration(days: 1)).toIso8601String();
+    }
+
+    _titleController.text = _title;
+    _instructionsController.text = _instructions;
+    codeLineController.text = _initialCode;
+    _correctLineController.text = _correctLine.toString();
+    _expectedOutputController.text = _expectedOutput;
+    _attemptsAllowedController.text = _attemptsAllowed.toString();
+    dateTimeController.setDate(_duration.toDateTime());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,11 +96,7 @@ class _CreateDebuggingChallengeScreenState
                 _currentStep += 1;
               });
             } else {
-              if (_formKey.currentState!.validate()) {
-                _formKey.currentState!.save();
-                _initialCode = controller.text;
-                _submitDebuggingChallenge();
-              }
+              _submitDebuggingChallenge();
             }
           },
           steps: [
@@ -90,7 +122,7 @@ class _CreateDebuggingChallengeScreenState
             ),
             Step(
               title: const Text('Expected Output'),
-              content: _buildSolutionStep(),
+              content: _buildExpectedOutputStep(),
               isActive: _currentStep >= 4,
             ),
             Step(
@@ -114,11 +146,11 @@ class _CreateDebuggingChallengeScreenState
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          controller: _titleController,
           decoration: const InputDecoration(
             labelText: 'Title',
-            prefix: Icon(Icons.title),
+            prefixIcon: Icon(Icons.title),
           ),
-          autovalidateMode: AutovalidateMode.onUserInteraction,
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please enter the title';
@@ -138,8 +170,8 @@ class _CreateDebuggingChallengeScreenState
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          controller: _instructionsController,
           decoration: const InputDecoration(labelText: 'Instructions'),
-          autovalidateMode: AutovalidateMode.onUserInteraction,
           maxLines: 5,
           validator: (value) {
             if (value == null || value.isEmpty) {
@@ -166,7 +198,7 @@ class _CreateDebuggingChallengeScreenState
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: CodeEditorWidget(
-          controller: controller,
+          controller: codeLineController,
         ),
       ),
     );
@@ -177,9 +209,9 @@ class _CreateDebuggingChallengeScreenState
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          controller: _correctLineController,
           decoration: const InputDecoration(labelText: 'Correct Line Number'),
           keyboardType: TextInputType.number,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please enter the correct line number';
@@ -197,17 +229,17 @@ class _CreateDebuggingChallengeScreenState
     );
   }
 
-  Widget _buildSolutionStep() {
+  Widget _buildExpectedOutputStep() {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          controller: _expectedOutputController,
           decoration: const InputDecoration(labelText: 'Expected Output'),
-          autovalidateMode: AutovalidateMode.onUserInteraction,
           maxLines: 3,
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Please enter the expected output.';
+              return 'Please enter the expected output';
             }
             return null;
           },
@@ -224,10 +256,9 @@ class _CreateDebuggingChallengeScreenState
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          controller: _attemptsAllowedController,
           decoration: const InputDecoration(labelText: 'Attempts Allowed'),
           keyboardType: TextInputType.number,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          initialValue: _attemptsAllowed.toString(),
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please enter the number of attempts allowed';
@@ -271,7 +302,9 @@ class _CreateDebuggingChallengeScreenState
     Utils.displayDialog(
       context: context,
       title: 'Are you sure?',
-      content: 'Once submitted, the changes cannot be undone',
+      content: widget.challenge == null
+          ? 'Once submitted, the challenge will be created.'
+          : 'Once submitted, the changes cannot be undone.',
       lottieAsset: 'assets/anim/question.json',
       actions: [
         TextButton(
@@ -286,10 +319,10 @@ class _CreateDebuggingChallengeScreenState
             if (_formKey.currentState!.validate()) {
               _formKey.currentState!.save();
 
-              _initialCode = controller.text;
+              _initialCode = codeLineController.text;
 
-              DebuggingChallenge updatedChallenge = DebuggingChallenge(
-                id: _title.toSnakeCase(),
+              DebuggingChallenge challenge = DebuggingChallenge(
+                id: widget.challenge?.id ?? _title.toSnakeCase(),
                 title: _title,
                 instructions: _instructions,
                 initialCode: _initialCode,
@@ -301,7 +334,7 @@ class _CreateDebuggingChallengeScreenState
 
               try {
                 await DebuggingChallengeService().createDebuggingChallenge(
-                  updatedChallenge,
+                  challenge,
                   ref.read(appUserNotifierProvider).value!.orgId!,
                 );
 
@@ -309,7 +342,9 @@ class _CreateDebuggingChallengeScreenState
                   Utils.displayDialog(
                     context: context,
                     title: 'Success!',
-                    content: 'Debugging Challenge updated successfully',
+                    content: widget.challenge == null
+                        ? 'Debugging Challenge created successfully'
+                        : 'Debugging Challenge updated successfully',
                     lottieAsset: 'assets/anim/congrats.json',
                     onDismiss: () {
                       ref.read(screenProvider.notifier).popScreen();
@@ -321,8 +356,9 @@ class _CreateDebuggingChallengeScreenState
                   Utils.displayDialog(
                     context: context,
                     title: 'Error',
-                    content:
-                        'An error occurred while updating the debugging challenge',
+                    content: widget.challenge == null
+                        ? 'An error occurred while creating the debugging challenge'
+                        : 'An error occurred while updating the debugging challenge',
                     lottieAsset: 'assets/anim/error.json',
                     onDismiss: () {
                       ref.read(screenProvider.notifier).popScreen();

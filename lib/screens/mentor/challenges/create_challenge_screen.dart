@@ -13,7 +13,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:re_editor/re_editor.dart';
 
 class CreateChallengeScreen extends ConsumerStatefulWidget {
-  const CreateChallengeScreen({super.key});
+  final Challenge? challenge;
+
+  const CreateChallengeScreen({super.key, this.challenge});
 
   @override
   _CreateChallengeScreenState createState() => _CreateChallengeScreenState();
@@ -34,13 +36,27 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
   String _methodName = '';
   List<UnitTest> _unitTests = [
     UnitTest(
-      input: [],
+      input: [Input(value: '', type: '')],
       expectedOutput: ExpectedOutput(
         value: '',
         type: '',
       ),
     ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.challenge != null) {
+      _instructions = widget.challenge!.instructions;
+      _sampleCode = widget.challenge!.sampleCode ?? '';
+      _className = widget.challenge!.className;
+      _methodName = widget.challenge!.methodName;
+      _unitTests = widget.challenge!.unitTests;
+      _duration = widget.challenge!.duration;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -150,6 +166,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
           decoration: const InputDecoration(labelText: 'Instructions'),
           autovalidateMode: AutovalidateMode.onUserInteraction,
           maxLines: 5,
+          initialValue: _instructions,
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please enter the instructions';
@@ -188,6 +205,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
         child: TextFormField(
           decoration: const InputDecoration(labelText: 'Class Name'),
           autovalidateMode: AutovalidateMode.onUserInteraction,
+          initialValue: _className,
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please enter the class name';
@@ -209,6 +227,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
         child: TextFormField(
           decoration: const InputDecoration(labelText: 'Method Name'),
           autovalidateMode: AutovalidateMode.onUserInteraction,
+          initialValue: _methodName,
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please enter the method name';
@@ -390,16 +409,16 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
 
   void _resetChallenge() {
     setState(() {
-      _className = '';
-      _methodName = '';
-      _instructions = '';
-      _sampleCode = '';
+      _className = 'DefaultClassName';
+      _methodName = 'defaultMethodName';
+      _instructions = 'Default instructions';
+      _sampleCode = 'Default sample code';
       _unitTests = [
         UnitTest(
-          input: [Input(value: '', type: '')],
+          input: [Input(value: 'default input', type: 'String')],
           expectedOutput: ExpectedOutput(
-            value: '',
-            type: '',
+            value: 'default output',
+            type: 'String',
           ),
         ),
       ];

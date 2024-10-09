@@ -62,6 +62,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return ListView(
       shrinkWrap: true,
       children: [
+        Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: Text(
+            'Settings',
+            style: Theme.of(context).textTheme.headlineLarge,
+          ),
+        ),
+        const Divider(),
+        const SizedBox(height: 10),
         ListTile(
           title: const Text('User Profile'),
           onTap: () => _onSelected('User Profile'),

@@ -4,7 +4,6 @@ import 'package:codecraft/models/challenge.dart';
 import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/screens/mentor/challenges/create_challenge_screen.dart';
-import 'package:codecraft/screens/mentor/challenges/edit_challenge_screen.dart';
 import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/utils/theme_utils.dart';
 import 'package:context_menus/context_menus.dart';
@@ -131,7 +130,7 @@ class _ManageChallengeScreenState
                                 onDone: (context, snapshot1) {
                                   Navigator.pop(context);
                                   ref.watch(screenProvider.notifier).pushScreen(
-                                        EditChallengeScreen(
+                                        CreateChallengeScreen(
                                           challenge: snapshot1.data[0]!,
                                         ),
                                       );

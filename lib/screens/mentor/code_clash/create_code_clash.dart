@@ -12,16 +12,19 @@ import 'package:codecraft/widgets/codeblocks/code_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_dialogs/shared/types.dart';
+import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 import 'package:re_editor/re_editor.dart';
 
 class CreateCodeClashScreen extends ConsumerStatefulWidget {
-  const CreateCodeClashScreen({super.key});
+  final CodeClash? codeClash;
+
+  const CreateCodeClashScreen({super.key, this.codeClash});
 
   @override
-  _CreateCodeClashScreenState createState() => _CreateCodeClashScreenState();
+  _EditCodeClashScreenState createState() => _EditCodeClashScreenState();
 }
 
-class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
+class _EditCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
   final _formKey = GlobalKey<FormState>();
   final CodeLineEditingController codeController = CodeLineEditingController();
   final BoardDateTimeTextController startTimeController =
@@ -30,14 +33,36 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
       BoardDateTimeTextController();
 
   int _currentStep = 0;
+  String? _codeClash;
   String _title = '';
   String _description = '';
   String _instructions = '';
   String _sampleCode = '';
   String _className = '';
   String _methodName = '';
-  int _timeLimit = 60; // Default time limit in minutes
-  final List<UnitTest> _unitTests = [];
+  int _timeLimit = 60;
+  List<UnitTest> _unitTests = [];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.codeClash != null) {
+      _loadCodeClash();
+    }
+  }
+
+  void _loadCodeClash() {
+    _title = widget.codeClash!.title;
+    _description = widget.codeClash!.description;
+    _instructions = widget.codeClash!.instructions;
+    _sampleCode = widget.codeClash!.sampleCode ?? '';
+    codeController.text = _sampleCode;
+    _className = widget.codeClash!.className;
+    _methodName = widget.codeClash!.methodName;
+    _timeLimit = widget.codeClash!.timeLimit;
+    _unitTests = widget.codeClash!.unitTests;
+    _codeClash = widget.codeClash!.id;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +71,7 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
       child: Stepper(
         currentStep: _currentStep,
         onStepContinue: () {
-          if (_currentStep < 5) {
+          if (_currentStep < 6) {
             setState(() => _currentStep += 1);
           } else {
             _submitCodeClash();
@@ -55,6 +80,8 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
         onStepCancel: () {
           if (_currentStep > 0) {
             setState(() => _currentStep -= 1);
+          } else {
+            ref.read(screenProvider.notifier).popScreen();
           }
         },
         onStepTapped: (int index) {
@@ -91,6 +118,11 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
             content: _buildUnitTestsStep(),
             isActive: _currentStep >= 5,
           ),
+          Step(
+            title: const Text('Code Clash ID'),
+            content: _buildCodeClashStep(),
+            isActive: _currentStep >= 6,
+          ),
         ],
       ),
     );
@@ -102,15 +134,15 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
       child: Column(
         children: [
           TextFormField(
-            decoration: const InputDecoration(
-              labelText: 'Title',
-            ),
+            initialValue: _title,
+            decoration: const InputDecoration(labelText: 'Title'),
             validator: (value) =>
                 value!.isEmpty ? 'Please enter a title' : null,
             onSaved: (value) => _title = value!,
           ),
           const SizedBox(height: 16),
           TextFormField(
+            initialValue: _description,
             decoration: const InputDecoration(labelText: 'Description'),
             maxLines: 3,
             validator: (value) =>
@@ -126,6 +158,7 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
+        initialValue: _instructions,
         decoration: const InputDecoration(labelText: 'Instructions'),
         maxLines: 5,
         validator: (value) =>
@@ -153,6 +186,7 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
       child: Column(
         children: [
           TextFormField(
+            initialValue: _className,
             decoration: const InputDecoration(labelText: 'Class Name'),
             validator: (value) =>
                 value!.isEmpty ? 'Please enter a class name' : null,
@@ -160,6 +194,7 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
           ),
           const SizedBox(height: 16),
           TextFormField(
+            initialValue: _methodName,
             decoration: const InputDecoration(labelText: 'Method Name'),
             validator: (value) =>
                 value!.isEmpty ? 'Please enter a method name' : null,
@@ -176,16 +211,15 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
       child: Column(
         children: [
           TextFormField(
+            initialValue: _timeLimit.toString(),
             decoration:
                 const InputDecoration(labelText: 'Time Limit (minutes)'),
             keyboardType: TextInputType.number,
-            initialValue: _timeLimit.toString(),
             validator: (value) => int.tryParse(value!) == null
                 ? 'Please enter a valid number'
                 : null,
             onSaved: (value) => _timeLimit = int.parse(value!),
           ),
-          const SizedBox(height: 16),
         ],
       ),
     );
@@ -233,6 +267,17 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCodeClashStep() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextFormField(
+        initialValue: _codeClash,
+        decoration: const InputDecoration(labelText: 'Code Clash ID'),
+        onSaved: (value) => _codeClash = value,
       ),
     );
   }
@@ -324,8 +369,7 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
                 child: Text(
                   'Add Input',
                   style: TextStyle(
-                    color:
-                        ThemeUtils.getTextColorForBackground(
+                    color: ThemeUtils.getTextColorForBackground(
                         Theme.of(context).primaryColor),
                   ),
                 ),
@@ -379,8 +423,8 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
             } else {
               Utils.displayDialog(
                 context: context,
-                title: 'Whoops',
-                content: 'Please fill in all required fields.',
+                title: 'Error',
+                content: 'Please fill in all the required fields.',
                 lottieAsset: 'assets/anim/error.json',
               );
             }
@@ -491,10 +535,11 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
               });
               Navigator.of(context).pop();
             } else {
+              // Show an error message if either value or type is empty
               Utils.displayDialog(
                 context: context,
-                title: 'Whoops',
-                content: 'Please fill in all required fields.',
+                title: 'Error',
+                content: 'Please fill in all the required fields.',
                 lottieAsset: 'assets/anim/error.json',
               );
             }
@@ -504,34 +549,65 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
     );
   }
 
-  void _submitCodeClash() {
+  Future<void> _submitCodeClash() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       _sampleCode = codeController.text;
 
-      final codeClash = CodeClash(
-        id: _title.toSnakeCase(),
-        title: _title,
-        description: _description,
-        instructions: _instructions,
-        sampleCode: _sampleCode,
-        className: _className,
-        methodName: _methodName,
-        timeLimit: _timeLimit,
-        status: 'pending',
-        unitTests: _unitTests,
+      Utils.displayDialog(
+        context: context,
+        title: 'Are you sure about your changes?',
+        content:
+            "You are about to update the code clash ${widget.codeClash!.id} with the new changes.\n Are you sure you want to proceed?",
+        lottieAsset: 'assets/anim/question.json',
+        actions: [
+          IconsButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            text: 'No, go back.',
+            iconData: Icons.close,
+            iconColor: Colors.white,
+            color: Colors.red,
+            textStyle: const TextStyle(color: Colors.white, fontSize: 12),
+          ),
+          IconsButton(
+            onPressed: () async {
+              Navigator.pop(context);
+
+              CodeClash updatedCodeClash = CodeClash(
+                id: widget.codeClash!.id,
+                title: _title,
+                description: _description,
+                instructions: _instructions,
+                sampleCode: _sampleCode,
+                className: _className,
+                methodName: _methodName,
+                timeLimit: _timeLimit,
+                unitTests: _unitTests,
+                status: 'pending',
+              );
+
+              await CodeClashService().createCodeClash(
+                updatedCodeClash,
+                ref.read(appUserNotifierProvider).requireValue.orgId!,
+              );
+
+              ref.read(screenProvider.notifier).popScreen();
+            },
+            text: 'Yes, proceed.',
+            iconData: Icons.check,
+            iconColor: Colors.white,
+            color: Colors.green,
+            textStyle: const TextStyle(color: Colors.white, fontSize: 12),
+          ),
+        ],
       );
-
-      final appUser = ref.read(appUserNotifierProvider).value!;
-
-      CodeClashService().createCodeClash(codeClash, appUser.orgId!);
-
-      ref.read(screenProvider.notifier).popScreen();
     } else {
       Utils.displayDialog(
         context: context,
-        title: 'Whoops',
-        content: 'Please fill in all required fields.',
+        title: 'Error',
+        content: 'Please fill in all the required fields.',
         lottieAsset: 'assets/anim/error.json',
       );
     }

@@ -3,7 +3,6 @@ import 'package:codecraft/models/debugging_challenge.dart';
 import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/screens/mentor/debugging_challenge/create_debugging_challenge.dart';
-import 'package:codecraft/screens/mentor/debugging_challenge/edit_debugging_challenge.dart';
 import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/services/debugging_challenge_service.dart';
 import 'package:codecraft/utils/theme_utils.dart';
@@ -130,7 +129,7 @@ class _ManageDebuggingChallengeScreenState
                                     ref
                                         .watch(screenProvider.notifier)
                                         .pushScreen(
-                                          EditDebuggingChallengeScreen(
+                                          CreateDebuggingChallengeScreen(
                                             challenge: snapshot1.data[0]!,
                                           ),
                                         );

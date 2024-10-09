@@ -2,6 +2,7 @@ import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/screens/body.dart';
 import 'package:codecraft/screens/generic/about_us.dart';
 import 'package:codecraft/screens/generic/faq.dart';
+import 'package:codecraft/screens/generic/new_about_us.dart';
 import 'package:codecraft/screens/generic/pricing_screen.dart';
 import 'package:codecraft/screens/mentor/code_clash/manage_code_clashes_screen.dart';
 import 'package:codecraft/screens/mentor/debugging_challenge/manage_debugging_challenge.dart';
@@ -56,10 +57,11 @@ class MentorHome extends ConsumerWidget {
                 label: 'Manage Code Clashes',
                 screen: const ManageCodeClashesScreen(),
               ),
+
               SidebarItem(
                 icon: Icons.people,
                 label: 'About Us',
-                screen: const AboutUs(),
+                screen: const NewAboutUs(),
               ),
               SidebarItem(
                 icon: Icons.monetization_on,

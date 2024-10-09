@@ -8,6 +8,7 @@ import 'package:codecraft/screens/apprentice/coding_challenges/weekly_challenges
 import 'package:codecraft/screens/body.dart';
 import 'package:codecraft/screens/generic/about_us.dart';
 import 'package:codecraft/screens/generic/faq.dart';
+import 'package:codecraft/screens/generic/new_about_us.dart';
 import 'package:codecraft/screens/generic/pricing_screen.dart';
 import 'package:codecraft/screens/settings/settings.dart';
 import 'package:codecraft/utils/utils.dart';
@@ -59,6 +60,11 @@ class ApprenticeHome extends ConsumerWidget {
                     icon: Icons.people,
                     label: 'About Us',
                     screen: const AboutUs(),
+                  ),
+                  SidebarItem(
+                    icon: Icons.people,
+                    label: 'New About Us',
+                    screen: const NewAboutUs(),
                   ),
                   SidebarItem(
                     icon: Icons.monetization_on,

@@ -164,7 +164,8 @@ class _ManageDebuggingChallengeScreenState
       child: Text(
         'Create Debugging Challenge',
         style: TextStyle(
-          color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+          color: ThemeUtils.getTextColorForBackground(
+              Theme.of(context).primaryColor),
         ),
       ),
     );

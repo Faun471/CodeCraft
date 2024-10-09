@@ -61,7 +61,7 @@ class CodeClashNotifier extends StateNotifier<CodeClashState> {
 
   @override
   void dispose() {
-    _submissionSubscription?.cancel();
+    stopListening();
     super.dispose();
   }
 
@@ -72,7 +72,7 @@ class CodeClashNotifier extends StateNotifier<CodeClashState> {
   }
 
   void stopListening() {
-    // Implement any cleanup if needed
+    _submissionSubscription?.cancel();
   }
 
   Future<void> executeCode(
@@ -119,9 +119,9 @@ class CodeClashNotifier extends StateNotifier<CodeClashState> {
   }
 
   Future<void> submitSolution(
-      String userId, String solution, String organisationId) async {
+      String userId, String solution, String organizationId) async {
     await _codeClashService.submitSolution(
-      organisationId,
+      organizationId,
       state.codeClash.id,
       userId,
       solution,

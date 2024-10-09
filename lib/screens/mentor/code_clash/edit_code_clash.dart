@@ -248,7 +248,8 @@ class _EditCodeClashScreenState extends ConsumerState<EditCodeClashScreen> {
             child: Text(
               'Add Unit Test',
               style: TextStyle(
-                color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                color: ThemeUtils.getTextColorForBackground(
+                    Theme.of(context).primaryColor),
               ),
             ),
           ),
@@ -345,7 +346,8 @@ class _EditCodeClashScreenState extends ConsumerState<EditCodeClashScreen> {
                   'Add Input',
                   style: TextStyle(
                     color:
-                        ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                        ThemeUtils.getTextColorForBackground(
+                        Theme.of(context).primaryColor),
                   ),
                 ),
               ),

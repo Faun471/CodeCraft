@@ -1,9 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/quiz.dart';
-import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/screens/apprentice/coding_quizzes/coding_quiz_screen.dart';
-import 'package:codecraft/screens/apprentice/organisation/organisation_screen.dart';
 import 'package:codecraft/screens/apprentice/coding_quizzes/completed_quiz_screen.dart';
 import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/services/quiz_service.dart';
@@ -25,7 +23,7 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
   Widget build(BuildContext context) {
     final appUser = ref.watch(appUserNotifierProvider).value;
 
-    if (!isInOrganisation()) {
+    if (!isInOrganization()) {
       return SingleChildScrollView(
         child: Center(
           child: Column(
@@ -41,7 +39,7 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
               ),
               const SizedBox(height: 20),
               const Text(
-                'You are not part of any organisation.',
+                'You are not part of any organization.',
                 style: TextStyle(
                   fontSize: 16,
                 ),
@@ -49,15 +47,13 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  ref
-                      .watch(screenProvider.notifier)
-                      .replaceScreen(const OrganisationScreen());
+                  setState(() {});
                 },
                 child: Text(
                   'Join an Organization',
                   style: TextStyle(
-                    color:
-                        ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                    color: ThemeUtils.getTextColorForBackground(
+                        Theme.of(context).primaryColor),
                   ),
                 ),
               ),
@@ -97,15 +93,13 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                ref
-                    .watch(screenProvider.notifier)
-                    .pushScreen(const OrganisationScreen());
+                setState(() {});
               },
               child: Text(
                 'Join an Organization',
                 style: TextStyle(
-                  color:
-                      ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                  color: ThemeUtils.getTextColorForBackground(
+                      Theme.of(context).primaryColor),
                 ),
               ),
             ),
@@ -269,7 +263,7 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
     );
   }
 
-  bool isInOrganisation() {
+  bool isInOrganization() {
     final user = ref.watch(appUserNotifierProvider).value;
 
     if (user!.orgId == null) {

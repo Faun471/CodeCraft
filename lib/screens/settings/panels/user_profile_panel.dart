@@ -78,18 +78,22 @@ class _UserProfilePanelState extends ConsumerState<UserProfilePanel> {
       userName: appUserState.value!.displayName ?? 'No Username',
       userEmail: appUserState.value!.email ?? 'No Email',
       userLevel: appUserState.value!.level.toString(),
-      userProfilePicUrl: FirebaseAuth.instance.currentUser?.photoURL ?? '',
+      userProfilePicUrl: appUserState.value!.photoUrl == null ||
+              appUserState.value!.photoUrl!.isEmpty
+          ? FirebaseAuth.instance.currentUser!.photoURL ??
+              'https://api.dicebear.com/9.x/thumbs/png?seed=${appUserState.value!.id!}'
+          : appUserState.value!.photoUrl!,
       backgroundColor: Theme.of(context).primaryColor,
       cardActionWidget: IconsButton(
         iconData: Icons.edit,
-        iconColor: ThemeUtils.getTextColor(
+        iconColor: ThemeUtils.getTextColorForBackground(
           Theme.of(context).primaryColor,
         ),
         onPressed: () {
           _showEditProfileDialog(context);
         },
         textStyle: TextStyle(
-          color: ThemeUtils.getTextColor(
+          color: ThemeUtils.getTextColorForBackground(
             Theme.of(context).primaryColor,
           ),
         ),
@@ -352,13 +356,13 @@ class _UserProfilePanelState extends ConsumerState<UserProfilePanel> {
                 textStyle: TextStyle(
                   color: _isSaving
                       ? Colors.grey[600]
-                      : ThemeUtils.getTextColor(
+                      : ThemeUtils.getTextColorForBackground(
                           Theme.of(context).primaryColor,
                         ),
                 ),
                 iconColor: _isSaving
                     ? Colors.grey[600]
-                    : ThemeUtils.getTextColor(
+                    : ThemeUtils.getTextColorForBackground(
                         Theme.of(context).primaryColor,
                       ),
               );
@@ -409,7 +413,7 @@ class _UserProfilePanelState extends ConsumerState<UserProfilePanel> {
   Future<String> getDownloadLink(String imageFile) async {
     String url = await io.getDownloadUrl(imageFile);
     await ref.watch(authProvider).value!.user!.updatePhotoURL(url);
-    ref.watch(appUserNotifierProvider.notifier).updateData({'photoURL': url});
+    ref.watch(appUserNotifierProvider.notifier).updateData({'photoUrl': url});
 
     return url;
   }

@@ -31,6 +31,14 @@ class Quiz {
   bool get isPerfect => questions
       .every((question) => question.userAnswer == question.correctAnswer);
 
+  bool get isPassingScore =>
+      questions
+          .where((question) => question.userAnswer == question.correctAnswer)
+          .length >=
+      passingGrade;
+
+  num get passingGrade => (questions.length * 0.7).ceil();
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -83,7 +91,7 @@ class Question {
       correctAnswer: json['correctAnswer'] as String? ?? '',
       initialTimer: json['initialTimer'] as int? ?? 30,
       penaltySeconds: json['penaltySeconds'] as int? ?? 5,
-      userAnswer: json['userAnswer'],
+      userAnswer: json['userAnswer'] as String?,
       maxAttempts: json['maxAttempts'] as int? ?? 0,
       attempts: json['attempts'] as int? ?? 0,
     );
@@ -137,5 +145,15 @@ class QuizResult {
       'completedAt': completedAt,
       'attempts': attempts,
     };
+  }
+
+  factory QuizResult.empty() {
+    return QuizResult(
+      id: '',
+      score: 0,
+      answers: {},
+      completedAt: DateTime.now(),
+      attempts: [],
+    );
   }
 }

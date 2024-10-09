@@ -1,9 +1,8 @@
 [
   {
-    "id": "python-basics",
-    "title": "Python Variables Basics",
-    "duration": "15",
-    "experienceToEarn": 50,
+    "id": "variable-quiz-1",
+    "title": "Declaring and Initializing Variables",
+    "experienceToEarn": 25,
     "questions": [
       {
         "questionText": "Which of the following is a correct way to declare a variable in Python?",
@@ -19,240 +18,2038 @@
         "penaltySeconds": 5
       },
       {
-        "questionText": "What is the type of a variable declared as `x = 3.14` in Python?",
+        "questionText": "How do you declare and initialize a character variable in Java?",
         "answerOptions": [
-          "int",
-          "float",
-          "double",
-          "decimal"
+          "char var = 'A';",
+          "char var = A;",
+          "declare char var;",
+          "var char = 'A';"
         ],
-        "correctAnswer": "float",
-        "initialTimer": 30,
-        "penaltySeconds": 5
-      },
-      {
-        "questionText": "Which function can be used to get the type of a variable in Python?",
-        "answerOptions": [
-          "typeof(x)",
-          "typeOf(x)",
-          "getType(x)",
-          "type(x)"
-        ],
-        "correctAnswer": "type(x)",
-        "initialTimer": 30,
-        "penaltySeconds": 5
-      },
-      {
-        "questionText": "Which of the following is a mutable data type in Python?",
-        "answerOptions": [
-          "tuple",
-          "list",
-          "int",
-          "str"
-        ],
-        "correctAnswer": "list",
+        "correctAnswer": "char var = 'A';",
         "initialTimer": 30,
         "maxAttempts": 2,
         "penaltySeconds": 5
       },
       {
-        "questionText": "How do you create a constant variable in Python?",
+        "questionText": "What symbol is used to assign a value to a variable in Python?",
         "answerOptions": [
-          "const PI = 3.14",
-          "PI = 3.14",
-          "PI := 3.14",
-          "constant PI = 3.14"
+          "=",
+          ":",
+          "=>",
+          "<-"
         ],
-        "correctAnswer": "PI = 3.14",
+        "correctAnswer": "=",
         "initialTimer": 30,
+        "maxAttempts": 2,
         "penaltySeconds": 5
       },
       {
-        "questionText": "Which of the following is NOT a valid variable name in Python?",
+        "questionText": "Which of the following is a valid variable name in Python?",
         "answerOptions": [
-          "my_var",
-          "1st_var",
-          "_myVar",
-          "myVar"
+          "2nd_value",
+          "value#2",
+          "_second_value",
+          "second value"
         ],
-        "correctAnswer": "1st_var",
+        "correctAnswer": "_second_value",
         "initialTimer": 30,
+        "maxAttempts": 2,
         "penaltySeconds": 5
       },
       {
-        "questionText": "How do you assign multiple variables in Python?",
+        "questionText": "Which keyword is used to declare an integer in Java?",
         "answerOptions": [
-          "a = 1, b = 2",
-          "a = 1; b = 2;",
-          "a, b = 1, 2",
-          "a -> 1, b -> 2"
-        ],
-        "correctAnswer": "a, b = 1, 2",
-        "initialTimer": 30,
-        "penaltySeconds": 5
-      },
-      {
-        "questionText": "Which of the following is NOT a built-in data type in Python?",
-        "answerOptions": [
-          "list",
-          "set",
-          "dict",
-          "array"
-        ],
-        "correctAnswer": "array",
-        "initialTimer": 30,
-        "penaltySeconds": 5
-      },
-      {
-        "questionText": "What is the result of `type(True)` in Python?",
-        "answerOptions": [
-          "bool",
+          "var",
           "int",
-          "str",
-          "float"
+          "declare",
+          "new"
         ],
-        "correctAnswer": "bool",
+        "correctAnswer": "int",
         "initialTimer": 30,
+        "maxAttempts": 2,
         "penaltySeconds": 5
       },
       {
-        "questionText": "How do you delete a variable in Python?",
+        "questionText": "How is a string variable declared and initialized in Python?",
         "answerOptions": [
-          "del var",
-          "remove var",
-          "delete var",
-          "unset var"
+          "string name = 'John';",
+          "name = 'John';",
+          "String name = John;",
+          "declare name = 'John';"
         ],
-        "correctAnswer": "del var",
+        "correctAnswer": "name = 'John';",
         "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what is the correct way to declare multiple integer variables?",
+        "answerOptions": [
+          "int a, b, c;",
+          "int a, String b, int c;",
+          "int a = b = c = 0;",
+          "int a = 0, b = 0, c = 0;"
+        ],
+        "correctAnswer": "int a, b, c;",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the correct syntax to declare a float variable in Java?",
+        "answerOptions": [
+          "float f = 5.0f;",
+          "f = float(5.0);",
+          "flat f = '5.0';",
+          "declare float f = 5.0f;"
+        ],
+        "correctAnswer": "float f = 5.0f;",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following correctly initializes a list in Python?",
+        "answerOptions": [
+          "list = [1, 2, 3]",
+          "list(1, 2, 3)",
+          "list = (1, 2, 3)",
+          "list = 1, 2, 3"
+        ],
+        "correctAnswer": "list = [1, 2, 3]",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the output of the following code: name = 'Alice'; print(name)?",
+        "answerOptions": [
+          "Alice",
+          "'Alice'",
+          "name",
+          "Error"
+        ],
+        "correctAnswer": "Alice",
+        "initialTimer": 30,
+        "maxAttempts": 2,
         "penaltySeconds": 5
       }
     ]
   },
   {
-    "id": "java-python-variables",
-    "title": "Advanced Variable Handling in Java and Python",
-    "duration": "20",
-    "experienceToEarn": 75,
+    "id": "variable-quiz-2",
+    "title": "Types of Variables in Java",
+    "experienceToEarn": 25,
     "questions": [
       {
-        "questionText": "In Java, which of the following is true about local variables?",
+        "questionText": "Which type of variable is declared within a method in Java?",
         "answerOptions": [
-          "Local variables are automatically initialized",
-          "Local variables must be manually initialized",
-          "Local variables can be used anywhere in the class",
-          "Local variables do not exist in Java"
+          "Instance variable",
+          "Local variable",
+          "Static variable",
+          "Global variable"
         ],
-        "correctAnswer": "Local variables must be manually initialized",
+        "correctAnswer": "Local variable",
         "initialTimer": 30,
+        "maxAttempts": 2,
         "penaltySeconds": 5
       },
       {
-        "questionText": "What will happen if you try to change a final variable in Java?",
+        "questionText": "What is the default value of a String instance variable in Java?",
         "answerOptions": [
-          "It will compile successfully",
-          "It will throw a runtime error",
-          "It will cause a compile-time error",
-          "It will not affect the variable"
+          "\"\" (empty string)",
+          "null",
+          "0",
+          "undefined"
         ],
-        "correctAnswer": "It will cause a compile-time error",
+        "correctAnswer": "null",
         "initialTimer": 30,
+        "maxAttempts": 2,
         "penaltySeconds": 5
       },
       {
-        "questionText": "In Python, which keyword is used to define global variables?",
+        "questionText": "Which of the following can be shared across all instances of a Java class?",
         "answerOptions": [
-          "global",
+          "Local variables",
+          "Instance variables",
+          "Static variables",
+          "Method variables"
+        ],
+        "correctAnswer": "Static variables",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following is a trait of instance variables in Java?",
+        "answerOptions": [
+          "They are declared within a method.",
+          "They are shared among all instances of a class.",
+          "They are initialized with default values based on their type.",
+          "They can be accessed without creating an object."
+        ],
+        "correctAnswer": "They are initialized with default values based on their type.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which keyword is used to declare a static variable in Java?",
+        "answerOptions": [
+          "static",
+          "final",
+          "const",
+          "class"
+        ],
+        "correctAnswer": "static",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which type of variable exists only while a method is executing?",
+        "answerOptions": [
+          "Instance variable",
+          "Static variable",
+          "Local variable",
+          "Global variable"
+        ],
+        "correctAnswer": "Local variable",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the primary difference between instance variables and static variables?",
+        "answerOptions": [
+          "Static variables cannot be modified.",
+          "Instance variables belong to a class instance.",
+          "Static variables are declared inside methods.",
+          "Instance variables have a single copy."
+        ],
+        "correctAnswer": "Instance variables belong to a class instance.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which type of variable must be initialized before use in Java?",
+        "answerOptions": [
+          "Static variable",
+          "Instance variable",
+          "Local variable",
+          "Global variable"
+        ],
+        "correctAnswer": "Local variable",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the output of the following code: int a = 5; System.out.println(a);?",
+        "answerOptions": [
+          "5",
+          "a",
+          "Error",
+          "0"
+        ],
+        "correctAnswer": "5",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is a characteristic of static variables?",
+        "answerOptions": [
+          "They can be declared in methods.",
+          "They are tied to a specific object.",
+          "They exist for the duration of the class.",
+          "They must be initialized at declaration."
+        ],
+        "correctAnswer": "They exist for the duration of the class.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      }
+    ]
+  },
+  {
+    "id": "variable-quiz-3",
+    "title": "Types of Variables in Python",
+    "experienceToEarn": 25,
+    "questions": [
+      {
+        "questionText": "What is the scope of a local variable in Python?",
+        "answerOptions": [
+          "Accessible throughout the program",
+          "Accessible inside the function it is declared in",
+          "Accessible in the global scope",
+          "Accessible only in a class"
+        ],
+        "correctAnswer": "Accessible inside the function it is declared in",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following is a global variable in Python?",
+        "answerOptions": [
+          "A variable declared within a function",
+          "A variable declared outside any function",
+          "A variable declared with the 'nonlocal' keyword",
+          "A variable declared using 'self'"
+        ],
+        "correctAnswer": "A variable declared outside any function",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "How can you modify a global variable inside a function in Python?",
+        "answerOptions": [
+          "By using the 'global' keyword",
+          "By using the 'nonlocal' keyword",
+          "By using the 'local' keyword",
+          "You cannot modify global variables inside a function"
+        ],
+        "correctAnswer": "By using the 'global' keyword",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the scope of a nonlocal variable in Python?",
+        "answerOptions": [
+          "It is accessible in the global scope",
+          "It is accessible in the nested function scope",
+          "It is accessible throughout the entire module",
+          "It is a special type of instance variable"
+        ],
+        "correctAnswer": "It is accessible in the nested function scope",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following code output: global_var = 10; def my_func(): return global_var?",
+        "answerOptions": [
+          "10",
+          "global_var",
+          "None",
+          "Error"
+        ],
+        "correctAnswer": "10",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the default scope of a variable declared within a function in Python?",
+        "answerOptions": [
           "Global",
-          "var",
-          "public"
+          "Local",
+          "Nonlocal",
+          "Class"
         ],
-        "correctAnswer": "global",
+        "correctAnswer": "Local",
         "initialTimer": 30,
+        "maxAttempts": 2,
         "penaltySeconds": 5
       },
       {
-        "questionText": "What is a static variable in Java?",
+        "questionText": "Which keyword is used to declare a variable with nonlocal scope?",
         "answerOptions": [
-          "A variable that retains its value across instances",
-          "A variable that changes value across instances",
-          "A local variable",
-          "A variable declared inside a method"
+          "local",
+          "nonlocal",
+          "global",
+          "declare"
         ],
-        "correctAnswer": "A variable that retains its value across instances",
+        "correctAnswer": "nonlocal",
         "initialTimer": 30,
+        "maxAttempts": 2,
         "penaltySeconds": 5
       },
       {
-        "questionText": "In Python, how are variables passed to a function?",
+        "questionText": "How is a variable declared in Python?",
         "answerOptions": [
-          "By value",
-          "By reference",
-          "Depends on the variable type",
-          "Python doesn't support passing variables to functions"
+          "var name = 'John'",
+          "name = 'John'",
+          "declare name = 'John'",
+          "string name = 'John'"
         ],
-        "correctAnswer": "By reference",
+        "correctAnswer": "name = 'John'",
         "initialTimer": 30,
+        "maxAttempts": 2,
         "penaltySeconds": 5
       },
       {
-        "questionText": "Which of the following best describes the `static` keyword in Java?",
+        "questionText": "What will the following code output: x = [1, 2, 3]; print(x[1])?",
         "answerOptions": [
-          "It is used to create a class-level variable or method",
-          "It is used to make a variable immutable",
-          "It is used to initialize variables",
-          "It is used to define constants"
+          "1",
+          "2",
+          "3",
+          "Error"
         ],
-        "correctAnswer": "It is used to create a class-level variable or method",
+        "correctAnswer": "2",
         "initialTimer": 30,
+        "maxAttempts": 2,
         "penaltySeconds": 5
       },
       {
-        "questionText": "In Python, which data type is immutable?",
+        "questionText": "What is the output of the following code: y = 5; print(y + 2)?",
         "answerOptions": [
+          "7",
+          "5",
+          "2",
+          "Error"
+        ],
+        "correctAnswer": "7",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      }
+    ]
+  },
+  {
+    "id": "arrays-quiz-1",
+    "title": "Basics of Arrays in Java and Python",
+    "experienceToEarn": 25,
+    "questions": [
+      {
+        "questionText": "What is an array?",
+        "answerOptions": [
+          "A collection of elements of different types",
+          "A collection of elements of the same type",
+          "A type of loop",
+          "A type of function"
+        ],
+        "correctAnswer": "A collection of elements of the same type",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following is a valid declaration of a one-dimensional array in Java?",
+        "answerOptions": [
+          "int[] arr = {1, 2, 3};",
+          "int arr[3] = new int();",
+          "array arr = [1, 2, 3];",
+          "int arr = (1, 2, 3);"
+        ],
+        "correctAnswer": "int[] arr = {1, 2, 3};",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "How do you create a list in Python?",
+        "answerOptions": [
+          "list = [1, 2, 3]",
+          "list(1, 2, 3)",
+          "new list[1, 2, 3]",
+          "list{1, 2, 3}"
+        ],
+        "correctAnswer": "list = [1, 2, 3]",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the main difference between Java arrays and Python lists?",
+        "answerOptions": [
+          "Java arrays can change size dynamically.",
+          "Python lists can store multiple data types.",
+          "Java arrays support multidimensional structures.",
+          "Python lists are fixed size."
+        ],
+        "correctAnswer": "Python lists can store multiple data types.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following is a valid declaration of a multidimensional array in Java?",
+        "answerOptions": [
+          "int[][] arr = new int[3][4];",
+          "int arr[3][4];",
+          "int arr[][] = new int[3][4];",
+          "Both A and C"
+        ],
+        "correctAnswer": "Both A and C",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "How do you access the first element of a list in Python?",
+        "answerOptions": [
+          "list[0]",
+          "list[1]",
+          "list.first()",
+          "list.get(0)"
+        ],
+        "correctAnswer": "list[0]",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What keyword is used to create an array in Java?",
+        "answerOptions": [
+          "array",
+          "new",
           "list",
-          "dict",
-          "set",
-          "tuple"
+          "create"
         ],
-        "correctAnswer": "tuple",
+        "correctAnswer": "new",
         "initialTimer": 30,
+        "maxAttempts": 2,
         "penaltySeconds": 5
       },
       {
-        "questionText": "In Java, can a local variable in a method be declared as static?",
+        "questionText": "Which of the following is true about Java arrays?",
         "answerOptions": [
-          "Yes",
-          "No",
-          "Only if it's final",
-          "Only inside a class"
+          "They can store elements of different data types.",
+          "They are dynamic in size.",
+          "They have a fixed size.",
+          "They require an import statement to use."
         ],
-        "correctAnswer": "No",
+        "correctAnswer": "They have a fixed size.",
         "initialTimer": 30,
+        "maxAttempts": 2,
         "penaltySeconds": 5
       },
       {
-        "questionText": "How do you define a private variable in Python?",
+        "questionText": "What module in Python can be used for creating arrays?",
         "answerOptions": [
-          "Using the keyword `private`",
-          "By prefixing the variable name with `__`",
-          "By adding `_` before the variable name",
-          "Private variables are not allowed in Python"
+          "array",
+          "numpy",
+          "list",
+          "Both A and B"
         ],
-        "correctAnswer": "By prefixing the variable name with `__`",
+        "correctAnswer": "Both A and B",
         "initialTimer": 30,
+        "maxAttempts": 2,
         "penaltySeconds": 5
       },
       {
-        "questionText": "What is the scope of a variable declared inside a loop in Python?",
+        "questionText": "How do you create a 2D array in Python using lists?",
         "answerOptions": [
-          "The scope is limited to the loop",
-          "The scope is limited to the block",
-          "It has global scope",
-          "It is accessible after the loop as well"
+          "array = [[1, 2], [3, 4]]",
+          "array = (1, 2), (3, 4)",
+          "array = new int[2][2];",
+          "array = [1, 2, 3], [4, 5, 6]"
         ],
-        "correctAnswer": "It is accessible after the loop as well",
+        "correctAnswer": "array = [[1, 2], [3, 4]]",
         "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      }
+    ]
+  },
+  {
+    "id": "arrays-quiz-2",
+    "title": "Operations and Manipulation of Arrays",
+    "experienceToEarn": 25,
+    "questions": [
+      {
+        "questionText": "Which method can be used to sort an array in Java?",
+        "answerOptions": [
+          "sort()",
+          "Arrays.sort()",
+          "array.sort()",
+          "new sort()"
+        ],
+        "correctAnswer": "Arrays.sort()",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "How do you append an element to a list in Python?",
+        "answerOptions": [
+          "list.add()",
+          "list.append()",
+          "list.insert()",
+          "list.push()"
+        ],
+        "correctAnswer": "list.append()",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will `int[] arr = new int[5]` create in Java?",
+        "answerOptions": [
+          "An array with 5 elements, all initialized to 0.",
+          "An array with 5 elements, all initialized to null.",
+          "An array with a length of 5, but no elements.",
+          "A list with 5 elements."
+        ],
+        "correctAnswer": "An array with 5 elements, all initialized to 0.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following removes an element from a list in Python?",
+        "answerOptions": [
+          "remove()",
+          "del()",
+          "pop()",
+          "All of the above"
+        ],
+        "correctAnswer": "All of the above",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which method in Java checks if two arrays are equal?",
+        "answerOptions": [
+          "equals()",
+          "compare()",
+          "Arrays.equals()",
+          "Arrays.compare()"
+        ],
+        "correctAnswer": "Arrays.equals()",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "How do you get the length of an array in Java?",
+        "answerOptions": [
+          "array.length",
+          "length(array)",
+          "array.size()",
+          "array.length()"
+        ],
+        "correctAnswer": "array.length",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "How do you reverse a list in Python?",
+        "answerOptions": [
+          "list.reverse()",
+          "reverse(list)",
+          "list[::-1]",
+          "Both A and C"
+        ],
+        "correctAnswer": "Both A and C",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What method can be used to copy an array in Java?",
+        "answerOptions": [
+          "clone()",
+          "copy()",
+          "Arrays.copy()",
+          "copyOf()"
+        ],
+        "correctAnswer": "clone()",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "How do you check the type of elements in a Python array created with the array module?",
+        "answerOptions": [
+          "array.type()",
+          "type(array[0])",
+          "array.dtype",
+          "type(array)"
+        ],
+        "correctAnswer": "type(array[0])",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What method returns the maximum value in a numpy array?",
+        "answerOptions": [
+          "max()",
+          "numpy.max()",
+          "array.max()",
+          "maximum()"
+        ],
+        "correctAnswer": "numpy.max()",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      }
+    ]
+  },
+  {
+    "id": "arrays-quiz-3",
+    "title": "Advanced Topics and Comparison of Arrays",
+    "experienceToEarn": 25,
+    "questions": [
+      {
+        "questionText": "What keyword is used to create a new array in Java?",
+        "answerOptions": [
+          "array",
+          "new",
+          "create",
+          "list"
+        ],
+        "correctAnswer": "new",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following is true about Java arrays?",
+        "answerOptions": [
+          "They can store elements of different data types.",
+          "They are dynamic in size.",
+          "They have a fixed size.",
+          "They are declared with the 'list' keyword."
+        ],
+        "correctAnswer": "They have a fixed size.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, what is the main advantage of using numpy arrays over lists?",
+        "answerOptions": [
+          "Numpy arrays can store mixed data types.",
+          "Numpy arrays are faster and more memory-efficient for numerical operations.",
+          "Numpy arrays can grow dynamically.",
+          "Numpy arrays require less coding."
+        ],
+        "correctAnswer": "Numpy arrays are faster and more memory-efficient for numerical operations.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "How can you create a 2D numpy array in Python?",
+        "answerOptions": [
+          "np.array([[1, 2], [3, 4]])",
+          "np.create(2, 2, 1, 2, 3, 4)",
+          "array([[1, 2], [3, 4]])",
+          "new numpy.array([[1, 2], [3, 4]])"
+        ],
+        "correctAnswer": "np.array([[1, 2], [3, 4]])",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which method can be used to concatenate two arrays in Java?",
+        "answerOptions": [
+          "Arrays.concat()",
+          "array.concat()",
+          "System.arraycopy()",
+          "join()"
+        ],
+        "correctAnswer": "System.arraycopy()",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What happens if you try to access an index out of range in an array in Java?",
+        "answerOptions": [
+          "It returns null.",
+          "It throws an ArrayIndexOutOfBoundsException.",
+          "It returns a default value.",
+          "It crashes the program."
+        ],
+        "correctAnswer": "It throws an ArrayIndexOutOfBoundsException.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the output of 'print(numbers[1:3])' if numbers = [10, 20, 30, 40, 50] in Python?",
+        "answerOptions": [
+          "[20, 30]",
+          "[10, 20]",
+          "[30, 40]",
+          "[20, 30, 40]"
+        ],
+        "correctAnswer": "[20, 30]",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following correctly retrieves the last element from a Python list named 'my_list'?",
+        "answerOptions": [
+          "my_list[-1]",
+          "my_list[length(my_list)]",
+          "my_list.last()",
+          "my_list[length(my_list) - 1]"
+        ],
+        "correctAnswer": "my_list[-1]",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, how can you convert a list to a numpy array?",
+        "answerOptions": [
+          "np.to_array(list)",
+          "np.array(list)",
+          "list.to_array()",
+          "array(list)"
+        ],
+        "correctAnswer": "np.array(list)",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following statements is correct regarding array memory allocation in Java?",
+        "answerOptions": [
+          "Memory is allocated at compile time.",
+          "Memory is allocated at runtime.",
+          "Memory allocation is not required.",
+          "Memory is allocated in the stack only."
+        ],
+        "correctAnswer": "Memory is allocated at runtime.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      }
+    ]
+  },
+  {
+    "id": "operators-quiz-1",
+    "title": "Arithmetic Operators",
+    "experienceToEarn": 25,
+    "questions": [
+      {
+        "questionText": "What is the result of 7 % 3 in both Python and Java?",
+        "answerOptions": [
+          "1",
+          "2",
+          "3",
+          "0"
+        ],
+        "correctAnswer": "1",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, what does 2 ** 3 return?",
+        "answerOptions": [
+          "6",
+          "8",
+          "9",
+          "16"
+        ],
+        "correctAnswer": "8",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the output of 10 // 3 in Python?",
+        "answerOptions": [
+          "3",
+          "3.33",
+          "3.0",
+          "4"
+        ],
+        "correctAnswer": "3",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which operator performs multiplication in both Java and Python?",
+        "answerOptions": [
+          "x",
+          "*",
+          "/",
+          "%"
+        ],
+        "correctAnswer": "*",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what is the result of 9 / 2?",
+        "answerOptions": [
+          "4.5",
+          "4",
+          "5",
+          "Error"
+        ],
+        "correctAnswer": "4",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following is the correct syntax for addition in Python?",
+        "answerOptions": [
+          "a - b",
+          "a * b",
+          "a / b",
+          "a + b"
+        ],
+        "correctAnswer": "a + b",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the output of 10 % 3 in Java?",
+        "answerOptions": [
+          "1",
+          "2",
+          "3",
+          "0"
+        ],
+        "correctAnswer": "1",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, what is the result of 15 // 2?",
+        "answerOptions": [
+          "7",
+          "7.5",
+          "8",
+          "6"
+        ],
+        "correctAnswer": "7",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What does the expression a += 2 mean in Java?",
+        "answerOptions": [
+          "a = a + 2",
+          "a = 2",
+          "a * 2",
+          "Syntax Error"
+        ],
+        "correctAnswer": "a = a + 2",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, how do you perform exponentiation?",
+        "answerOptions": [
+          "x * y",
+          "x ** y",
+          "x ^ y",
+          "x & y"
+        ],
+        "correctAnswer": "x ** y",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      }
+    ]
+  },
+  {
+    "id": "operators-quiz-2",
+    "title": "Relational and Logical Operators",
+    "experienceToEarn": 25,
+    "questions": [
+      {
+        "questionText": "What is the result of 5 > 3 in Python?",
+        "answerOptions": [
+          "True",
+          "False",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "True",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which operator checks if two values are equal in Java?",
+        "answerOptions": [
+          "=",
+          "==",
+          "!=",
+          ">="
+        ],
+        "correctAnswer": "==",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, what does the 'and' operator do?",
+        "answerOptions": [
+          "Performs addition",
+          "Checks two conditions",
+          "Negates a value",
+          "Returns a string"
+        ],
+        "correctAnswer": "Checks two conditions",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what is the output of true && false?",
+        "answerOptions": [
+          "true",
+          "false",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "false",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which operator is used to check if two values are not equal in Python?",
+        "answerOptions": [
+          "!=",
+          "==",
+          ">",
+          "<"
+        ],
+        "correctAnswer": "!=",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the result of 5 <= 5 in Java?",
+        "answerOptions": [
+          "True",
+          "False",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "True",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, how would you check if 5 is greater than or equal to 2?",
+        "answerOptions": [
+          "5 > 2",
+          "5 >= 2",
+          "5 <= 2",
+          "5 = 2"
+        ],
+        "correctAnswer": "5 >= 2",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what does the '||' operator do?",
+        "answerOptions": [
+          "Checks for equality",
+          "Performs logical OR",
+          "Performs addition",
+          "Multiplies values"
+        ],
+        "correctAnswer": "Performs logical OR",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which operator is used for logical negation in Python?",
+        "answerOptions": [
+          "not",
+          "&&",
+          "||",
+          "!"
+        ],
+        "correctAnswer": "not",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what is the result of true || false?",
+        "answerOptions": [
+          "true",
+          "false",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "true",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      }
+    ]
+  },
+  {
+    "id": "operators-quiz-3",
+    "title": "Bitwise, Assignment, and Special Operators",
+    "experienceToEarn": 25,
+    "questions": [
+      {
+        "questionText": "Which operator performs bitwise AND in Java and Python?",
+        "answerOptions": [
+          "&",
+          "|",
+          "^",
+          "&&"
+        ],
+        "correctAnswer": "&",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, what does the expression a //= 2 do?",
+        "answerOptions": [
+          "Divides a by 2 and assigns the result to a",
+          "Divides a by 2 and assigns the quotient",
+          "Multiplies a by 2",
+          "Adds 2 to a"
+        ],
+        "correctAnswer": "Divides a by 2 and assigns the quotient",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the purpose of the `instanceof` operator in Java?",
+        "answerOptions": [
+          "Check if an object is an instance of a class",
+          "Performs addition",
+          "Checks equality",
+          "Performs subtraction"
+        ],
+        "correctAnswer": "Check if an object is an instance of a class",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the result of 5 | 3 in Java?",
+        "answerOptions": [
+          "7",
+          "6",
+          "5",
+          "3"
+        ],
+        "correctAnswer": "7",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, what does the 'is' operator check?",
+        "answerOptions": [
+          "Equality",
+          "Identity",
+          "Membership",
+          "None of the above"
+        ],
+        "correctAnswer": "Identity",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What does the expression a %= 5 do in both Java and Python?",
+        "answerOptions": [
+          "Assigns the modulus of a and 5 to a",
+          "Assigns 5 to a",
+          "Divides a by 5",
+          "Adds 5 to a"
+        ],
+        "correctAnswer": "Assigns the modulus of a and 5 to a",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following is a bitwise NOT operation in Java and Python?",
+        "answerOptions": [
+          "~",
+          "!",
+          "&",
+          "|"
+        ],
+        "correctAnswer": "~",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, what does 'in' operator check?",
+        "answerOptions": [
+          "Identity",
+          "Membership",
+          "Equality",
+          "Comparison"
+        ],
+        "correctAnswer": "Membership",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which operator in Java is used for left shifting the bits of a number?",
+        "answerOptions": [
+          "<<",
+          ">>",
+          "&",
+          "^"
+        ],
+        "correctAnswer": "<<",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What does the expression a ^= b do in both Java and Python?",
+        "answerOptions": [
+          "Performs bitwise XOR and assigns the result to a",
+          "Assigns b to a",
+          "Adds a and b",
+          "Performs bitwise AND and assigns the result to a"
+        ],
+        "correctAnswer": "Performs bitwise XOR and assigns the result to a",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      }
+    ]
+  },
+  {
+    "id": "conditionals-quiz-1",
+    "title": "Basic Conditionals",
+    "experienceToEarn": 25,
+    "questions": [
+      {
+        "questionText": "What will the following code output: age = 18; if age >= 18: print('You are an adult.')?",
+        "answerOptions": [
+          "You are an adult.",
+          "You are not an adult.",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "You are an adult.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following code output: age = 16; if age >= 18: print('Adult'); else: print('Not an adult')?",
+        "answerOptions": [
+          "Adult",
+          "Not an adult",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "Not an adult",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following code output: age = 20; if age < 18: print('Minor'); elif age < 65: print('Adult'); else: print('Senior')?",
+        "answerOptions": [
+          "Minor",
+          "Adult",
+          "Senior",
+          "Error"
+        ],
+        "correctAnswer": "Adult",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following code output: age = 70; if age < 18: print('Minor'); elif age < 65: print('Adult'); else: print('Senior')?",
+        "answerOptions": [
+          "Minor",
+          "Adult",
+          "Senior",
+          "Error"
+        ],
+        "correctAnswer": "Senior",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what will the following code output: int age = 18; if (age >= 18) { System.out.println('You are an adult.'); }?",
+        "answerOptions": [
+          "You are an adult.",
+          "You are not an adult.",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "You are an adult.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what will the following code output: int age = 16; if (age >= 18) { System.out.println('Adult'); } else { System.out.println('Not an adult'); }?",
+        "answerOptions": [
+          "Adult",
+          "Not an adult",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "Not an adult",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what will the following code output: int age = 20; if (age < 18) { System.out.println('Minor'); } else if (age < 65) { System.out.println('Adult'); } else { System.out.println('Senior'); }?",
+        "answerOptions": [
+          "Minor",
+          "Adult",
+          "Senior",
+          "Error"
+        ],
+        "correctAnswer": "Adult",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the purpose of an if-else statement?",
+        "answerOptions": [
+          "To loop through a block of code",
+          "To execute code conditionally based on true or false",
+          "To define functions",
+          "To declare variables"
+        ],
+        "correctAnswer": "To execute code conditionally based on true or false",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following Python code output: age = 19; if age < 18: print('Minor'); else: print('Adult')?",
+        "answerOptions": [
+          "Minor",
+          "Adult",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "Adult",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what will the following code output: int num = 5; if (num > 10) { System.out.println('Greater'); } else { System.out.println('Smaller'); }?",
+        "answerOptions": [
+          "Greater",
+          "Smaller",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "Smaller",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      }
+    ]
+  },
+  {
+    "id": "conditionals-quiz-2",
+    "title": "Nested and Elif Statements",
+    "experienceToEarn": 25,
+    "questions": [
+      {
+        "questionText": "What will the following code output: age = 20; if age >= 18: if age < 21: print('Adult but not old enough to drink.')?",
+        "answerOptions": [
+          "Adult but not old enough to drink.",
+          "Adult",
+          "Minor",
+          "Error"
+        ],
+        "correctAnswer": "Adult but not old enough to drink.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following code output: age = 22; if age >= 18: if age < 21: print('Adult but not old enough to drink.'); else: print('Adult and can drink.')?",
+        "answerOptions": [
+          "Adult but not old enough to drink.",
+          "Adult and can drink.",
+          "Minor",
+          "Error"
+        ],
+        "correctAnswer": "Adult and can drink.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following code output: age = 16; if age >= 18: print('Adult'); elif age < 18: print('Minor')?",
+        "answerOptions": [
+          "Adult",
+          "Minor",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "Minor",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what will the following code output: int age = 20; if (age >= 18) { if (age < 21) { System.out.println('Adult but not old enough to drink.'); } else { System.out.println('Adult and can drink.'); } }?",
+        "answerOptions": [
+          "Adult but not old enough to drink.",
+          "Adult and can drink.",
+          "Minor",
+          "Error"
+        ],
+        "correctAnswer": "Adult but not old enough to drink.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following code output: age = 30; if age < 18: print('Minor'); elif age < 65: print('Adult'); else: print('Senior')?",
+        "answerOptions": [
+          "Minor",
+          "Adult",
+          "Senior",
+          "Error"
+        ],
+        "correctAnswer": "Adult",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following code output: age = 70; if age < 18: print('Minor'); elif age < 65: print('Adult'); else: print('Senior')?",
+        "answerOptions": [
+          "Minor",
+          "Adult",
+          "Senior",
+          "Error"
+        ],
+        "correctAnswer": "Senior",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the result of using nested if statements?",
+        "answerOptions": [
+          "More complex decision-making",
+          "Less code",
+          "No effect",
+          "Always leads to errors"
+        ],
+        "correctAnswer": "More complex decision-making",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following Python code output: age = 21; if age < 18: print('Minor'); elif age < 21: print('Almost Adult'); else: print('Adult')?",
+        "answerOptions": [
+          "Minor",
+          "Almost Adult",
+          "Adult",
+          "Error"
+        ],
+        "correctAnswer": "Adult",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what will the following code output: int num = 8; if (num % 2 == 0) { System.out.println('Even'); } else { System.out.println('Odd'); }?",
+        "answerOptions": [
+          "Even",
+          "Odd",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "Even",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following code output: number = 7; if number < 10: print('Single digit'); else: print('Double digit')?",
+        "answerOptions": [
+          "Single digit",
+          "Double digit",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "Single digit",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      }
+    ]
+  },
+  {
+    "id": "conditionals-quiz-3",
+    "title": "Practical Applications of Conditionals",
+    "experienceToEarn": 25,
+    "questions": [
+      {
+        "questionText": "What will the following code output: temperature = 30; if temperature > 25: print('It's hot.'); else: print('It's cold.')?",
+        "answerOptions": [
+          "It's hot.",
+          "It's cold.",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "It's hot.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what will the following code output: int score = 85; if (score >= 90) { System.out.println('A'); } else if (score >= 80) { System.out.println('B'); } else { System.out.println('C'); }?",
+        "answerOptions": [
+          "A",
+          "B",
+          "C",
+          "Error"
+        ],
+        "correctAnswer": "B",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following code output: password = 'admin'; if password == 'admin': print('Access granted'); else: print('Access denied')?",
+        "answerOptions": [
+          "Access granted",
+          "Access denied",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "Access granted",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what will the following code output: boolean isRaining = true; if (isRaining) { System.out.println('Take an umbrella.'); } else { System.out.println('No need for an umbrella.'); }?",
+        "answerOptions": [
+          "Take an umbrella.",
+          "No need for an umbrella.",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "Take an umbrella.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following code output: age = 10; if age < 13: print('Child'); elif age < 20: print('Teenager'); else: print('Adult')?",
+        "answerOptions": [
+          "Child",
+          "Teenager",
+          "Adult",
+          "Error"
+        ],
+        "correctAnswer": "Child",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following code output: speed = 70; if speed > 60: print('Over speed limit'); else: print('Within speed limit')?",
+        "answerOptions": [
+          "Over speed limit",
+          "Within speed limit",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "Over speed limit",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what will the following code output: boolean isMember = false; if (isMember) { System.out.println('Welcome member!'); } else { System.out.println('Welcome guest!'); }?",
+        "answerOptions": [
+          "Welcome member!",
+          "Welcome guest!",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "Welcome guest!",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following code output: is_logged_in = False; if is_logged_in: print('Welcome back!'); else: print('Please log in.')?",
+        "answerOptions": [
+          "Welcome back!",
+          "Please log in.",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "Please log in.",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the result of using if statements in programming?",
+        "answerOptions": [
+          "Control the flow of the program based on conditions",
+          "End the program",
+          "Repeat code",
+          "None"
+        ],
+        "correctAnswer": "Control the flow of the program based on conditions",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will the following code output: number = 10; if number % 2 == 0: print('Even'); else: print('Odd')?",
+        "answerOptions": [
+          "Even",
+          "Odd",
+          "Error",
+          "None"
+        ],
+        "correctAnswer": "Even",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      }
+    ]
+  },
+  {
+    "id": "loops-quiz-1",
+    "title": "For Loops",
+    "experienceToEarn": 25,
+    "questions": [
+      {
+        "questionText": "Which of the following is the correct syntax for a traditional for loop in Java?",
+        "answerOptions": [
+          "for i in range(5):",
+          "for (int i = 0; i < 5; i++)",
+          "while (i < 5)",
+          "foreach (int i : numbers)"
+        ],
+        "correctAnswer": "for (int i = 0; i < 5; i++)",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "How do you iterate over a list in Python?",
+        "answerOptions": [
+          "for number in list:",
+          "while number in list:",
+          "for (number in list)",
+          "foreach number in list"
+        ],
+        "correctAnswer": "for number in list:",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What does the following loop do in Python? for i in range(3): print(i)",
+        "answerOptions": [
+          "Prints 0, 1, 2",
+          "Prints 1, 2, 3",
+          "Prints 3, 2, 1",
+          "Throws an error"
+        ],
+        "correctAnswer": "Prints 0, 1, 2",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what is the output of this code?\nfor (int i = 0; i < 2; i++) {\nSystem.out.println(i);\n}",
+        "answerOptions": [
+          "Prints 0, 1",
+          "Prints 0, 1, 2",
+          "Prints 1, 2",
+          "Throws an error"
+        ],
+        "correctAnswer": "Prints 0, 1",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which type of loop is best when you know the number of iterations in advance?",
+        "answerOptions": [
+          "For loop",
+          "While loop",
+          "Do-While loop",
+          "Infinite loop"
+        ],
+        "correctAnswer": "For loop",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What keyword is used to skip the current iteration in a Python for loop?",
+        "answerOptions": [
+          "break",
+          "skip",
+          "continue",
+          "pass"
+        ],
+        "correctAnswer": "continue",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What happens if a for loop condition in Java never becomes false?",
+        "answerOptions": [
+          "The loop terminates immediately",
+          "The program throws an error",
+          "An infinite loop occurs",
+          "The loop skips to the next condition"
+        ],
+        "correctAnswer": "An infinite loop occurs",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, how can you loop through both index and value of a list?",
+        "answerOptions": [
+          "for i, value in enumerate(list):",
+          "for (i, value) in list:",
+          "for i in range(len(list)) { value }",
+          "for i++ in list"
+        ],
+        "correctAnswer": "for i, value in enumerate(list):",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following is an example of a Java enhanced for loop?",
+        "answerOptions": [
+          "for (int num in numbers)",
+          "for each num in numbers",
+          "for (int num : numbers)",
+          "for (num; num++)"
+        ],
+        "correctAnswer": "for (int num : numbers)",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the output of this Python loop?\nfor i in range(3, 6):\n  print(i)",
+        "answerOptions": [
+          "3, 4, 5",
+          "3, 4, 5, 6",
+          "0, 1, 2",
+          "Throws an error"
+        ],
+        "correctAnswer": "3, 4, 5",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      }
+    ]
+  },
+  {
+    "id": "loops-quiz-2",
+    "title": "While Loops",
+    "experienceToEarn": 25,
+    "questions": [
+      {
+        "questionText": "Which of the following is the correct syntax for a while loop in Java?",
+        "answerOptions": [
+          "while i in range(5):",
+          "while (i < 5)",
+          "do while (i < 5)",
+          "while (i++)"
+        ],
+        "correctAnswer": "while (i < 5)",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, what happens if the while condition never becomes False?",
+        "answerOptions": [
+          "The loop runs infinitely",
+          "The loop exits immediately",
+          "An error is raised",
+          "The program terminates"
+        ],
+        "correctAnswer": "The loop runs infinitely",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the output of this Java code?\nint i = 0;\nwhile (i < 2) {\n  System.out.println(i);\n  i++;\n}",
+        "answerOptions": [
+          "Prints 0, 1",
+          "Prints 1, 2",
+          "Prints 0, 1, 2",
+          "Throws an error"
+        ],
+        "correctAnswer": "Prints 0, 1",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which loop is best suited when the number of iterations is unknown?",
+        "answerOptions": [
+          "For loop",
+          "While loop",
+          "Do-While loop",
+          "Infinite loop"
+        ],
+        "correctAnswer": "While loop",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, how do you exit a while loop prematurely?",
+        "answerOptions": [
+          "continue",
+          "skip",
+          "exit",
+          "break"
+        ],
+        "correctAnswer": "break",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will happen in this Python code?\nwhile False:\n  print(\"Hello\")",
+        "answerOptions": [
+          "It will print 'Hello' infinitely",
+          "It will throw an error",
+          "It will never print 'Hello'",
+          "It will print 'Hello' once"
+        ],
+        "correctAnswer": "It will never print 'Hello'",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which statement is true for both Java and Python while loops?",
+        "answerOptions": [
+          "The loop body runs at least once",
+          "The loop checks the condition before running the body",
+          "The condition is checked after the loop body executes",
+          "You cannot break out of a while loop"
+        ],
+        "correctAnswer": "The loop checks the condition before running the body",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what is the difference between while and do-while loops?",
+        "answerOptions": [
+          "No difference",
+          "do-while loop checks the condition before executing the body",
+          "while loop always runs at least once",
+          "do-while loop executes the body before checking the condition"
+        ],
+        "correctAnswer": "do-while loop executes the body before checking the condition",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What will happen if a while loop's condition is initially False in Java?",
+        "answerOptions": [
+          "The loop runs at least once",
+          "The loop will not run at all",
+          "It throws an error",
+          "The loop will run infinitely"
+        ],
+        "correctAnswer": "The loop will not run at all",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which keyword is used to immediately exit a loop in both Python and Java?",
+        "answerOptions": [
+          "exit",
+          "skip",
+          "break",
+          "return"
+        ],
+        "correctAnswer": "break",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      }
+    ]
+  },
+  {
+    "id": "loops-quiz-3",
+    "title": "Do-While Loops",
+    "experienceToEarn": 25,
+    "questions": [
+      {
+        "questionText": "What is the key difference between a while loop and a do-while loop in Java?",
+        "answerOptions": [
+          "while loop executes at least once",
+          "do-while loop checks the condition before running",
+          "do-while loop executes at least once",
+          "No difference"
+        ],
+        "correctAnswer": "do-while loop executes at least once",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the correct syntax for a do-while loop in Java?",
+        "answerOptions": [
+          "do {\n  // code \n} while (condition);",
+          "while (condition) {\n  // code \n}",
+          "do (condition) {\n  // code \n}",
+          "do while (condition) {\n  // code \n}"
+        ],
+        "correctAnswer": "do {\n  // code \n} while (condition);",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which of the following is true for a Python loop?",
+        "answerOptions": [
+          "Python has do-while loops",
+          "Python supports only while and for loops",
+          "Python loops always run at least once",
+          "Python has a do-until loop"
+        ],
+        "correctAnswer": "Python supports only while and for loops",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "What is the output of this code?\nint i = 0;\ndo {\n  System.out.println(i);\n  i++;\n} while (i < 3);",
+        "answerOptions": [
+          "Prints 0, 1, 2",
+          "Prints 1, 2, 3",
+          "Prints 0, 1, 2, 3",
+          "Throws an error"
+        ],
+        "correctAnswer": "Prints 0, 1, 2",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which loop type guarantees at least one iteration?",
+        "answerOptions": [
+          "While loop",
+          "Do-while loop",
+          "For loop",
+          "Infinite loop"
+        ],
+        "correctAnswer": "Do-while loop",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Java, what will happen in this do-while loop?\nint i = 0;\ndo {\n  i--;\n} while (i > 0);",
+        "answerOptions": [
+          "The loop runs infinitely",
+          "The loop runs once",
+          "The loop runs twice",
+          "The loop never runs"
+        ],
+        "correctAnswer": "The loop runs once",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "How does a do-while loop differ from a for loop?",
+        "answerOptions": [
+          "The do-while loop guarantees one execution before checking condition",
+          "A for loop does not allow conditions",
+          "A for loop checks the condition after execution",
+          "No difference"
+        ],
+        "correctAnswer": "The do-while loop guarantees one execution before checking condition",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Which Java loop executes the block at least once before checking the condition?",
+        "answerOptions": [
+          "While loop",
+          "For loop",
+          "Do-while loop",
+          "None of the above"
+        ],
+        "correctAnswer": "Do-while loop",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "In Python, which loop type checks the condition first?",
+        "answerOptions": [
+          "For loop",
+          "While loop",
+          "Both check condition first",
+          "Neither checks condition first"
+        ],
+        "correctAnswer": "Both check condition first",
+        "initialTimer": 30,
+        "maxAttempts": 2,
+        "penaltySeconds": 5
+      },
+      {
+        "questionText": "Can a do-while loop be used in Python?",
+        "answerOptions": [
+          "Yes, by using a 'while True' construct",
+          "Yes, Python natively supports do-while",
+          "No, Python does not support do-while loops",
+          "Yes, but only in newer versions"
+        ],
+        "correctAnswer": "No, Python does not support do-while loops",
+        "initialTimer": 30,
+        "maxAttempts": 2,
         "penaltySeconds": 5
       }
     ]

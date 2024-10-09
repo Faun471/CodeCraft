@@ -1,5 +1,5 @@
-import 'package:codecraft/screens/mentor/organisation/join_requests_list.dart';
-import 'package:codecraft/screens/mentor/organisation/organisation_details_mentor.dart';
+import 'package:codecraft/screens/mentor/organization/join_requests_list.dart';
+import 'package:codecraft/screens/mentor/organization/organisation_details_mentor.dart';
 import 'package:codecraft/services/auth/auth_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,21 +19,35 @@ class ManageRequestsScreen extends ConsumerWidget {
           return Center(child: Text('Not authenticated, auth is $auth'));
         }
 
-        return SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 56),
+          child: SingleChildScrollView(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
                 Center(
                   child: Text(
-                    'Organisation Details',
+                    'Organization Details',
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                 ),
                 const SizedBox(height: 20),
-                OrganisationInviteRow(userId: auth.user!.uid),
-                const SizedBox(height: 10),
+                const Divider(),
+                const SizedBox(height: 20),
+                Text(
+                  'Invite Apprentice',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'All invited apprentices will be granted access to all challenges within your organization.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 20),
+                OrganizationInviteRow(userId: auth.user!.uid),
+                const SizedBox(height: 20),
+                const Divider(),
                 JoinRequestsList(userId: auth.user!.uid),
               ],
             ),

@@ -295,7 +295,9 @@ class AccountEditState extends ConsumerState<AccountEdit> {
   Future<String> getDownloadLink(String imageFile) async {
     String url = await io.getDownloadUrl(imageFile);
     await ref.watch(authProvider).value!.user!.updatePhotoURL(url);
-    ref.watch(appUserNotifierProvider.notifier).updateData({'photoURL': url});
+    await ref
+        .watch(appUserNotifierProvider.notifier)
+        .updateData({'photoUrl': url});
 
     return url;
   }

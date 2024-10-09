@@ -22,7 +22,8 @@ class CodeClashDetailScreen extends ConsumerWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+            color: ThemeUtils.getTextColorForBackground(
+                Theme.of(context).primaryColor),
           ),
         ),
       ),
@@ -42,7 +43,8 @@ class CodeClashDetailScreen extends ConsumerWidget {
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color:
-                        ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                        ThemeUtils.getTextColorForBackground(
+                        Theme.of(context).primaryColor),
                   ),
                 ),
               ),
@@ -127,7 +129,7 @@ class CodeClashDetailScreen extends ConsumerWidget {
             id: FirebaseAuth.instance.currentUser!.uid,
             displayName: appUser.displayName ?? 'User',
             score: 0,
-            photoURL: appUser.photoURL,
+            photoUrl: appUser.photoUrl,
           ));
       if (!context.mounted) return;
 

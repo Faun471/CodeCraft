@@ -155,7 +155,8 @@ class _ManageChallengeScreenState extends ConsumerState<ManageQuizzesScreen> {
       child: Text(
         'Create Quiz',
         style: TextStyle(
-          color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+          color: ThemeUtils.getTextColorForBackground(
+              Theme.of(context).primaryColor),
         ),
       ),
     );

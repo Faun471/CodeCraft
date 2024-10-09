@@ -153,6 +153,7 @@ class BodyState extends ConsumerState<Body> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (!isSmallScreen) _buildSidebar(),
+            const SizedBox(width: 8),
             Expanded(
               child: ref.watch(screenProvider).screenStack.last,
             ),
@@ -165,6 +166,8 @@ class BodyState extends ConsumerState<Body> {
   Widget _buildSidebar() {
     return Drawer(
       width: MediaQuery.of(context).size.width > 768 ? 250 : null,
+      shadowColor: Colors.black,
+      elevation: 24,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
@@ -182,9 +185,15 @@ class BodyState extends ConsumerState<Body> {
           CircleAvatar(
             radius: 40,
             backgroundImage: CachedNetworkImageProvider(
-              ref.read(appUserNotifierProvider).requireValue.photoURL ??
-                  FirebaseAuth.instance.currentUser!.photoURL ??
-                  'assets/images/default_profile.png',
+              ref.read(appUserNotifierProvider).requireValue.photoUrl == null ||
+                      ref
+                          .read(appUserNotifierProvider)
+                          .requireValue
+                          .photoUrl!
+                          .isEmpty
+                  ? FirebaseAuth.instance.currentUser!.photoURL ??
+                      'https://api.dicebear.com/9.x/thumbs/png?seed=${FirebaseAuth.instance.currentUser!.uid}'
+                  : ref.read(appUserNotifierProvider).requireValue.photoUrl!,
             ),
           ),
           const SizedBox(height: 10),

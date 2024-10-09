@@ -112,7 +112,7 @@ class _CodeClashScreenState extends ConsumerState<CodeClashScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => LeaderboardScreen(
+              builder: (context) => CodeClashResultsScreen(
                 codeClashId: widget.codeClash.id,
                 organizationId: appUserState.value!.orgId!,
               ),
@@ -138,7 +138,7 @@ class _CodeClashScreenState extends ConsumerState<CodeClashScreen> {
         .endCodeClash(appUserState.value!.orgId!, widget.codeClash.id);
     if (!mounted) return;
     Navigator.of(context).pushReplacement(MaterialPageRoute(
-      builder: (context) => LeaderboardScreen(
+      builder: (context) => CodeClashResultsScreen(
         codeClashId: widget.codeClash.id,
         organizationId: appUserState.value!.orgId!,
       ),
@@ -154,7 +154,8 @@ class _CodeClashScreenState extends ConsumerState<CodeClashScreen> {
         title: Text(
           'Code Clash: ${widget.codeClash.title}',
           style: TextStyle(
-              color: ThemeUtils.getTextColor(Theme.of(context).primaryColor)),
+              color: ThemeUtils.getTextColorForBackground(
+                  Theme.of(context).primaryColor)),
         ),
         actions: [
           Center(
@@ -280,7 +281,8 @@ class _CodeClashScreenState extends ConsumerState<CodeClashScreen> {
             child: Text(
               'Run Code',
               style: TextStyle(
-                color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                color: ThemeUtils.getTextColorForBackground(
+                    Theme.of(context).primaryColor),
               ),
             ),
           ),
@@ -290,7 +292,8 @@ class _CodeClashScreenState extends ConsumerState<CodeClashScreen> {
             child: Text(
               'Submit Solution',
               style: TextStyle(
-                color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                color: ThemeUtils.getTextColorForBackground(
+                    Theme.of(context).primaryColor),
               ),
             ),
           ),

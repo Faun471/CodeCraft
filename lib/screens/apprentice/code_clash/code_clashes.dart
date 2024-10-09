@@ -1,10 +1,8 @@
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/code_clash.dart';
-import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/screens/apprentice/code_clash/code_clash_details.dart';
 import 'package:codecraft/screens/apprentice/code_clash/code_clash_lobby_screen.dart';
 import 'package:codecraft/screens/apprentice/code_clash/code_clash_results_screen.dart';
-import 'package:codecraft/screens/apprentice/organisation/organisation_screen.dart';
 import 'package:codecraft/services/code_clash_service.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/utils/theme_utils.dart';
@@ -31,7 +29,7 @@ class _CodeClashesScreenState extends ConsumerState<CodeClashes> {
       );
     }
 
-    if (!isInOrganisation()) {
+    if (!isInOrganization()) {
       return SingleChildScrollView(
         child: Center(
           child: Column(
@@ -47,7 +45,7 @@ class _CodeClashesScreenState extends ConsumerState<CodeClashes> {
               ),
               const SizedBox(height: 20),
               const Text(
-                'You are not part of any organisation.',
+                'You are not part of any organization.',
                 style: TextStyle(
                   fontSize: 16,
                 ),
@@ -59,14 +57,12 @@ class _CodeClashesScreenState extends ConsumerState<CodeClashes> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      ref
-                          .watch(screenProvider.notifier)
-                          .replaceScreen(const OrganisationScreen());
+                      setState(() {});
                     },
                     child: Text(
                       'Join an Organization',
                       style: TextStyle(
-                        color: ThemeUtils.getTextColor(
+                        color: ThemeUtils.getTextColorForBackground(
                             Theme.of(context).primaryColor),
                       ),
                     ),
@@ -175,7 +171,7 @@ class _CodeClashesScreenState extends ConsumerState<CodeClashes> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => LeaderboardScreen(
+          builder: (context) => CodeClashResultsScreen(
             codeClashId: codeClash.id,
             organizationId: ref.watch(appUserNotifierProvider).value!.orgId!,
           ),
@@ -194,7 +190,7 @@ class _CodeClashesScreenState extends ConsumerState<CodeClashes> {
     );
   }
 
-  bool isInOrganisation() {
+  bool isInOrganization() {
     final user = ref.watch(appUserNotifierProvider).value;
 
     if (user!.orgId == null) {

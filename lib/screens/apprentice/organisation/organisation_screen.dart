@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codecraft/services/database_helper.dart';
 
-class OrganisationScreen extends ConsumerWidget {
-  const OrganisationScreen({super.key});
+class OrganizationScreen extends ConsumerWidget {
+  const OrganizationScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,32 +22,37 @@ class OrganisationScreen extends ConsumerWidget {
             user.orgId != DatabaseHelper.defaultOrgId;
 
         if (!isInOrg) {
-          return const JoinOrganisation();
+          return const JoinOrganization();
         }
 
-        return StreamBuilder<DocumentSnapshot>(
-          stream: DatabaseHelper().organisations.doc(user.orgId).snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return StreamBuilder<DocumentSnapshot>(
+              stream:
+                  DatabaseHelper().organizations.doc(user.orgId).snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
 
-            if (snapshot.hasError) {
-              return Center(
-                child: Text('Error: ${snapshot.error}'),
-              );
-            }
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error: ${snapshot.error}'),
+                  );
+                }
 
-            if (!snapshot.hasData || !snapshot.data!.exists) {
-              return const Center(
-                child: Text('Organisation details not available.'),
-              );
-            }
+                if (!snapshot.hasData || !snapshot.data!.exists) {
+                  return const Center(
+                    child: Text('Organization details not available.'),
+                  );
+                }
 
-            final orgData = snapshot.data!.data() as Map<String, dynamic>;
-            return OrganisationDetailsApprentice(orgData: orgData);
+                final orgData = snapshot.data!.data() as Map<String, dynamic>;
+                return OrganizationDetailsApprentice(orgData: orgData);
+              },
+            );
           },
         );
       },

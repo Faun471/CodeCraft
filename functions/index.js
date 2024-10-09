@@ -100,6 +100,7 @@ function generateFullScript(userScript, unitTests, className, language, methodNa
         script += 'public class Main {\n';
         script += '  public static void main(String[] args) {\n';
         script += `    ${className} instance = new ${className}();\n`;
+        script += '    boolean allTestsPassed = true;\n';
 
         unitTests.forEach((test, index) => {
             const args = test.input.map(input => inputToString(input, language)).join(', ');
@@ -110,7 +111,12 @@ function generateFullScript(userScript, unitTests, className, language, methodNa
 
             script += `    boolean result${index + 1} = ${comparison};\n`;
             script += `    System.out.println("${methodName}(${escapeJavaString(args)}) == ${escapeJavaString(expectedOutput)} : " + result${index + 1});\n`;
+            script += `    allTestsPassed = allTestsPassed && result${index + 1};\n`;
         });
+
+        script += '    if (allTestsPassed) {\n';
+        script += '      System.out.println("All tests passed!");\n';
+        script += '    }\n';
 
         script += '  }\n';
         script += '}\n';
@@ -122,6 +128,7 @@ function generateFullScript(userScript, unitTests, className, language, methodNa
         script += `${userScript}\n`;
         script += 'if __name__ == "__main__":\n';
         script += `    instance = ${className}()\n`;
+        script += '    all_tests_passed = True\n';
 
         unitTests.forEach((test, index) => {
             const args = test.input.map(input => inputToString(input, language)).join(', ');
@@ -129,7 +136,11 @@ function generateFullScript(userScript, unitTests, className, language, methodNa
 
             script += `    result${index + 1} = instance.${methodName}(${args}) == ${expectedOutput}\n`;
             script += `    print(f"${methodName}(${args}) == ${expectedOutputToString(escapeJavaString(expectedOutput))} : {str(result${index + 1}).lower()}")\n`;
+            script += `    all_tests_passed = all_tests_passed and result${index + 1}\n`;
         });
+
+        script += '    if all_tests_passed:\n';
+        script += '        print("All tests passed!")\n';
 
         return script;
     }

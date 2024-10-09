@@ -5,12 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CodeExecutionState {
   final String output;
+  final bool isLoading;
 
-  CodeExecutionState({required this.output});
+  CodeExecutionState({required this.output, this.isLoading = false});
 
-  CodeExecutionState copyWith({String? output}) {
+  CodeExecutionState copyWith({String? output, bool? isLoading}) {
     return CodeExecutionState(
       output: output ?? this.output,
+      isLoading: isLoading ?? this.isLoading,
     );
   }
 }
@@ -20,6 +22,8 @@ class CodeExecutionNotifier extends StateNotifier<CodeExecutionState> {
 
   Future<void> executeCode(String script, List<UnitTest> unitTests,
       String className, String language, String methodName) async {
+    state = state.copyWith(isLoading: true);
+
     final url = Uri.parse(
         'https://us-central1-code-craft-bb5b1.cloudfunctions.net/executeCode');
 
@@ -35,14 +39,25 @@ class CodeExecutionNotifier extends StateNotifier<CodeExecutionState> {
       "methodName": methodName,
     });
 
-    final response = await http.post(url, headers: headers, body: body);
+    try {
+      final response = await http.post(url, headers: headers, body: body);
 
-    if (response.statusCode == 200) {
-      final responseJson = jsonDecode(response.body);
-      state = state.copyWith(output: responseJson['output'] ?? '');
-    } else {
+      if (response.statusCode == 200) {
+        final responseJson = jsonDecode(response.body);
+        state = state.copyWith(
+          output: responseJson['output'] ?? '',
+          isLoading: false,
+        );
+      } else {
+        state = state.copyWith(
+          output: 'Error: ${response.statusCode}, ${response.body}',
+          isLoading: false,
+        );
+      }
+    } catch (e) {
       state = state.copyWith(
-        output: 'Error: ${response.statusCode}, ${response.body}',
+        output: 'Error: $e',
+        isLoading: false,
       );
     }
   }
@@ -71,15 +86,11 @@ class CodeExecutionNotifier extends StateNotifier<CodeExecutionState> {
       }
     }
 
-    // Reset output
-    state = state.copyWith(output: '');
-
-    // Return whether all tests passed
     return allPassed;
   }
 
   void resetOutput() {
-    state = state.copyWith(output: '');
+    state = state.copyWith(output: '', isLoading: false);
   }
 }
 

@@ -20,6 +20,8 @@ Different types of operators serve different purposes, such as performing mathem
         -   **Floor Division:** `x // y`
         -   **Exponentiation:** `x ** y`
 
+<quiz quiz-id="operators-quiz-1">
+
 #### **Relational (Comparison) Operators**
 
 -   **Purpose:** Compare two values or expressions.
@@ -43,6 +45,8 @@ Different types of operators serve different purposes, such as performing mathem
         -   **Logical AND:** `x and y`
         -   **Logical OR:** `x or y`
         -   **Logical NOT:** `not x`
+
+<quiz quiz-id="operators-quiz-2">
 
 #### **Assignment Operators**
 
@@ -113,3 +117,9 @@ Different types of operators serve different purposes, such as performing mathem
 9.  **Utilize Assignment Operators:** Use compound assignment operators to simplify and reduce redundancy in your code.
     
 10.  **Prioritize Readability:** Write clear, maintainable code, even if it means sacrificing cleverness.
+
+<quiz quiz-id="operators-quiz-3">
+
+### With that you can now proceed with the story by finishing this challenge.
+
+<challenge challenge-id="arkan_dodging">

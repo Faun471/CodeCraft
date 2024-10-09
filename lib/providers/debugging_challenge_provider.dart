@@ -88,19 +88,13 @@ class DebuggingChallengeNotifier extends _$DebuggingChallengeNotifier {
   }
 
   void updateProposedFix(String fix) {
-    state.value!.copyWith(
-      proposedFix: fix,
-    );
-
-    print('Proposed fix: $fix');
+    state = AsyncValue.data(state.value!.copyWith(proposedFix: fix));
   }
 
   Future<void> proposeFix() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final currentState = state.value!;
-
-      print('Running code: ${currentState.proposedFix}');
 
       String newOutput = await _executeCode(currentState.proposedFix ?? '');
 
@@ -110,6 +104,8 @@ class DebuggingChallengeNotifier extends _$DebuggingChallengeNotifier {
 
   Future<bool> submitFix() async {
     state = const AsyncValue.loading();
+
+    await _executeCode(state.value!.proposedFix ?? '');
 
     final result = await AsyncValue.guard(() async {
       final currentState = state.value!;

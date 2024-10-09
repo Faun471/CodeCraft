@@ -129,7 +129,7 @@ class FAQCard extends StatelessWidget {
                               .computeLuminance() >
                           0.5
                       ? Colors.black87
-                      : Colors.white70,
+                      : Colors.white,
                 ),
               ),
               trailing: Icon(

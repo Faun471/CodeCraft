@@ -37,7 +37,8 @@ class DebuggingChallengeScreen extends ConsumerWidget {
             title: Text(
               'Debug Challenge',
               style: GoogleFonts.firaCode().copyWith(
-                color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                color: ThemeUtils.getTextColorForBackground(
+                    Theme.of(context).primaryColor),
               ),
             ),
           ),

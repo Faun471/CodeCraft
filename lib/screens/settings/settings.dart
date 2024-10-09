@@ -68,9 +68,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           selected: widget.initialTab == 'User Profile',
         ),
         // ListTile(
-        //   title: const Text('Organisation'),
-        //   onTap: () => _onSelected('Organisation'),
-        //   selected: widget.initialTab == 'Organisation',
+        //   title: const Text('Organization'),
+        //   onTap: () => _onSelected('Organization'),
+        //   selected: widget.initialTab == 'Organization',
         // ),
         ListTile(
           title: const Text('Appearance'),
@@ -111,9 +111,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     switch (widget.initialTab) {
       case 'User Profile':
         panel = const UserProfilePanel();
-      // case 'Organisation':
-      //   panel = OrganisationPanel(
-      //     organisation: ref.read(appUserNotifierProvider).value!.orgId!,
+      // case 'Organization':
+      //   panel = OrganizationPanel(
+      //     organization: ref.read(appUserNotifierProvider).value!.orgId!,
       //   );
       case 'Appearance':
         panel = const AppearancePanel();

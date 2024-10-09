@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codecraft/services/database_helper.dart';
 
-class OrganisationDetailsApprentice extends StatelessWidget {
+class OrganizationDetailsApprentice extends StatelessWidget {
   final Map<String, dynamic> orgData;
 
-  const OrganisationDetailsApprentice({super.key, required this.orgData});
+  const OrganizationDetailsApprentice({super.key, required this.orgData});
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +28,9 @@ class OrganisationDetailsApprentice extends StatelessWidget {
         return SingleChildScrollView(
           child: Column(
             children: [
-              Text('Organisation Name: ${orgData['orgName']}'),
-              Text('Organisation Description: ${orgData['orgDescription']}'),
-              Text('Organisation Mentor: $mentorName'),
+              Text('Organization Name: ${orgData['orgName']}'),
+              Text('Organization Description: ${orgData['orgDescription']}'),
+              Text('Organization Mentor: $mentorName'),
             ],
           ),
         );

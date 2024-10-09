@@ -22,13 +22,20 @@ class _CopiableTextState extends State<CopiableText> {
         await Future.delayed(const Duration(seconds: 2));
         setState(() => _isCopied = false);
       },
-      child: _isCopied
-          ? const Row(children: [
-              Icon(Icons.check),
-              SizedBox(width: 4),
-              Text('Copied!')
-            ])
-          : Text(widget.text, style: const TextStyle(fontSize: 16)),
+      child: Container(
+        padding: const EdgeInsets.all(2),
+        color: Colors.grey[200],
+        child: _isCopied
+            ? const Row(children: [
+                Icon(Icons.check),
+                SizedBox(width: 4),
+                Text('Copied!')
+              ])
+            : Text(
+                widget.text,
+                style: const TextStyle(fontSize: 16),
+              ),
+      ),
     );
   }
 }

@@ -138,41 +138,46 @@ class QuizService {
     });
   }
 
-  Future<void> saveQuizResultsWithAnswers(Quiz quiz) async {
+  Future<QuizResult> saveQuizResultsWithAnswers(Quiz quiz) async {
+    QuizResult result = QuizResult.empty();
     try {
-      await DatabaseHelper().currentUser.get().then((doc) {
-        if (doc.exists) {
-          final data = doc.data() as Map<String, dynamic>;
+      await DatabaseHelper().currentUser.get().then(
+        (doc) async {
+          if (doc.exists) {
+            final userData = doc.data() as Map<String, dynamic>;
 
-          Map<String, dynamic> quizResults =
-              data['quizResults'] as Map<String, dynamic>? ?? {};
+            Map<String, dynamic> quizResults =
+                userData['quizResults'] as Map<String, dynamic>? ?? {};
 
-          Map<String, String?> userAnswers = {};
-          for (var question in quiz.questions) {
-            userAnswers[question.questionText] = question.userAnswer;
+            Map<String, String?> userAnswers = {};
+            for (var question in quiz.questions) {
+              userAnswers[question.questionText] = question.userAnswer;
+            }
+
+            int score = 0;
+
+            for (final question in quiz.questions) {
+              if (question.userAnswer == question.correctAnswer) score++;
+            }
+
+            result = QuizResult(
+              id: quiz.id!,
+              score: score,
+              answers: userAnswers,
+              completedAt: DateTime.now(),
+              attempts: quiz.questions.map((q) => q.attempts).toList(),
+            );
+
+            quizResults[quiz.id!] = result.toJson();
+
+            await DatabaseHelper().currentUser.set({
+              'quizResults': quizResults,
+            }, SetOptions(merge: true));
           }
+        },
+      );
 
-          int score = 0;
-
-          for (final question in quiz.questions) {
-            if (question.userAnswer == question.correctAnswer) score++;
-          }
-
-          QuizResult result = QuizResult(
-            id: quiz.id!,
-            score: score,
-            answers: userAnswers,
-            completedAt: DateTime.now(),
-            attempts: quiz.questions.map((q) => q.attempts).toList(),
-          );
-
-          quizResults[quiz.id!] = result.toJson();
-
-          DatabaseHelper().currentUser.set({
-            'quizResults': quizResults,
-          }, SetOptions(merge: true));
-        }
-      });
+      return result;
     } catch (e) {
       throw Exception('Error saving quiz results: $e');
     }

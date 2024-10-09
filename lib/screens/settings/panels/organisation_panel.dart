@@ -3,19 +3,19 @@ import 'package:codecraft/services/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class OrganisationPanel extends ConsumerStatefulWidget {
-  final String organisation;
+class OrganizationPanel extends ConsumerStatefulWidget {
+  final String organization;
 
-  const OrganisationPanel({
+  const OrganizationPanel({
     super.key,
-    required this.organisation,
+    required this.organization,
   });
 
   @override
-  _OrganisationPanelState createState() => _OrganisationPanelState();
+  _OrganizationPanelState createState() => _OrganizationPanelState();
 }
 
-class _OrganisationPanelState extends ConsumerState<OrganisationPanel> {
+class _OrganizationPanelState extends ConsumerState<OrganizationPanel> {
   final db = DatabaseHelper();
 
   @override
@@ -25,18 +25,18 @@ class _OrganisationPanelState extends ConsumerState<OrganisationPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Organisation',
+          Text('Organization',
               style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: 20),
-          _buildOrganisationDetails(),
+          _buildOrganizationDetails(),
         ],
       ),
     );
   }
 
-  Widget _buildOrganisationDetails() {
+  Widget _buildOrganizationDetails() {
     return FutureBuilder(
-      future: db.getOrganisation(widget.organisation),
+      future: db.getOrganization(widget.organization),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -46,18 +46,18 @@ class _OrganisationPanelState extends ConsumerState<OrganisationPanel> {
           return const Center(child: Text('An error occurred'));
         }
 
-        final organisation =
-            Organisation.fromMap(snapshot.data as Map<String, dynamic>);
+        final organization =
+            Organization.fromMap(snapshot.data as Map<String, dynamic>);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Name: ${organisation.orgName}'),
-            Text('Description: ${organisation.orgDescription}'),
-            Text('Created At: ${organisation.createdAt}'),
-            Text('Mentor ID: ${organisation.mentorId}'),
-            Text('Code: ${organisation.code}'),
-            Text('Apprentices: ${organisation.apprentices}'),
+            Text('Name: ${organization.orgName}'),
+            Text('Description: ${organization.orgDescription}'),
+            Text('Created At: ${organization.createdAt}'),
+            Text('Mentor ID: ${organization.mentorId}'),
+            Text('Code: ${organization.code}'),
+            Text('Apprentices: ${organization.apprentices}'),
           ],
         );
       },

@@ -28,6 +28,8 @@ class _RegisterState extends ConsumerState<Register> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  final TextEditingController displayNameController =
+      TextEditingController(); // Added controller for display name
   final FocusNode passwordFocusNode = FocusNode();
   final FocusNode confirmPasswordFocusNode = FocusNode();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -175,6 +177,12 @@ class _RegisterState extends ConsumerState<Register> {
           ),
           const SizedBox(height: 10),
           CustomTextField(
+            labelText: 'Display Name',
+            icon: Icons.person,
+            controller: displayNameController,
+          ),
+          const SizedBox(height: 10),
+          CustomTextField(
             labelText: 'Email',
             icon: Icons.email,
             mode: ValidationMode.email,
@@ -300,6 +308,7 @@ class _RegisterState extends ConsumerState<Register> {
                 'mi': miController.text,
                 'lastName': lastNameController.text,
                 'suffix': suffixController.text,
+                'displayName': displayNameController.text,
                 'email': emailController.text,
                 'phoneNumber': phoneNumberController.text,
                 'password': passwordController.text,

@@ -23,7 +23,16 @@ class EditDebuggingChallengeScreen extends ConsumerStatefulWidget {
 class _EditDebuggingChallengeScreenState
     extends ConsumerState<EditDebuggingChallengeScreen> {
   final _formKey = GlobalKey<FormState>();
-  final CodeLineEditingController controller = CodeLineEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _instructionsController = TextEditingController();
+  final TextEditingController _initialCodeController = TextEditingController();
+  final TextEditingController _correctLineController = TextEditingController();
+  final TextEditingController _expectedOutputController =
+      TextEditingController();
+  final TextEditingController _attemptsAllowedController =
+      TextEditingController();
+  final CodeLineEditingController codeLineController =
+      CodeLineEditingController();
   final BoardDateTimeTextController dateTimeController =
       BoardDateTimeTextController();
   int _currentStep = 0;
@@ -42,11 +51,19 @@ class _EditDebuggingChallengeScreenState
     _title = widget.challenge.title;
     _instructions = widget.challenge.instructions;
     _initialCode = widget.challenge.initialCode;
-    controller.text = _initialCode;
+    codeLineController.text = _initialCode;
     _correctLine = widget.challenge.correctLine;
     _expectedOutput = widget.challenge.expectedOutput;
     _attemptsAllowed = widget.challenge.attemptsLeft;
     _duration = widget.challenge.duration;
+
+    _titleController.text = _title;
+    _instructionsController.text = _instructions;
+    _initialCodeController.text = _initialCode;
+    _correctLineController.text = _correctLine.toString();
+    _expectedOutputController.text = _expectedOutput;
+    _attemptsAllowedController.text = _attemptsAllowed.toString();
+    dateTimeController.setDate(_duration.toDateTime());
   }
 
   @override
@@ -126,7 +143,7 @@ class _EditDebuggingChallengeScreenState
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
-          initialValue: widget.challenge.title,
+          controller: _titleController,
           decoration: const InputDecoration(
             labelText: 'Title',
             prefixIcon: Icon(Icons.title),
@@ -138,7 +155,7 @@ class _EditDebuggingChallengeScreenState
             return null;
           },
           onSaved: (value) {
-            // _title = value!;
+            _title = value!;
           },
         ),
       ),
@@ -150,7 +167,7 @@ class _EditDebuggingChallengeScreenState
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
-          initialValue: _instructions,
+          controller: _instructionsController,
           decoration: const InputDecoration(labelText: 'Instructions'),
           maxLines: 5,
           validator: (value) {
@@ -178,7 +195,7 @@ class _EditDebuggingChallengeScreenState
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: CodeEditorWidget(
-          controller: controller,
+          controller: codeLineController,
         ),
       ),
     );
@@ -189,7 +206,7 @@ class _EditDebuggingChallengeScreenState
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
-          initialValue: _correctLine.toString(),
+          controller: _correctLineController,
           decoration: const InputDecoration(labelText: 'Correct Line Number'),
           keyboardType: TextInputType.number,
           validator: (value) {
@@ -214,7 +231,7 @@ class _EditDebuggingChallengeScreenState
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
-          initialValue: _expectedOutput,
+          controller: _expectedOutputController,
           decoration: const InputDecoration(labelText: 'Expected Output'),
           maxLines: 3,
           validator: (value) {
@@ -236,7 +253,7 @@ class _EditDebuggingChallengeScreenState
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
-          initialValue: _attemptsAllowed.toString(),
+          controller: _attemptsAllowedController,
           decoration: const InputDecoration(labelText: 'Attempts Allowed'),
           keyboardType: TextInputType.number,
           validator: (value) {
@@ -297,7 +314,7 @@ class _EditDebuggingChallengeScreenState
             if (_formKey.currentState!.validate()) {
               _formKey.currentState!.save();
 
-              _initialCode = controller.text;
+              _initialCode = codeLineController.text;
 
               DebuggingChallenge updatedChallenge = DebuggingChallenge(
                 id: widget.challenge.id,
@@ -341,6 +358,13 @@ class _EditDebuggingChallengeScreenState
                   );
                 }
               }
+            } else {
+              Utils.displayDialog(
+                context: context,
+                title: 'Error',
+                content: 'Please fill all the fields',
+                lottieAsset: 'assets/anim/error.json',
+              );
             }
           },
           child: const Text('Submit'),

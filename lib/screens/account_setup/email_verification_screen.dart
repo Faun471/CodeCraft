@@ -28,6 +28,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerifScreen> {
   @override
   void initState() {
     super.initState();
+    FirebaseAuth.instance.currentUser?.sendEmailVerification();
     _startVerificationCheck();
   }
 
@@ -54,7 +55,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerifScreen> {
 
       if (updatedUser != null && updatedUser.emailVerified) {
         _timer.cancel();
-        _navigateToNextScreen();
+        await _navigateToNextScreen();
       } else {}
     } finally {
       if (mounted) {
@@ -63,17 +64,13 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerifScreen> {
     }
   }
 
-  void _navigateToNextScreen() {
+  Future<void> _navigateToNextScreen() async {
     if (!mounted) return;
 
-    final appUserState = ref.read(appUserNotifierProvider);
-
-    if (appUserState.value == null) {
-      return;
-    }
+    final appUserState = await ref.refresh(appUserNotifierProvider.future);
 
     Widget nextScreen;
-    switch (appUserState.value!.accountType) {
+    switch (appUserState.accountType!) {
       case 'apprentice':
         nextScreen = const ApprenticeHome();
         break;
@@ -83,6 +80,8 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerifScreen> {
       default:
         nextScreen = const AccountSetup(Register());
     }
+
+    if (!mounted) return;
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => nextScreen),
@@ -102,7 +101,8 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerifScreen> {
         title: Text(
           'Verify Email',
           style: TextStyle(
-            color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+            color: ThemeUtils.getTextColorForBackground(
+                Theme.of(context).primaryColor),
           ),
         ),
       ),

@@ -67,7 +67,7 @@ class CodeClashService {
       id: userId,
       displayName: '${userData['firstName']} ${userData['lastName']}',
       score: 0, // Default score, will be updated later
-      photoURL: userData['photoUrl'],
+      photoUrl: userData['photoUrl'],
     );
   }
 
@@ -144,7 +144,7 @@ class CodeClashService {
         userId: userId,
         solution: solution,
         displayName: user['displayName'],
-        photoURL: user['photoURL'],
+        photoUrl: user['photoUrl'],
         submissionTime: DateTime.now(),
         score: 0,
       );
@@ -167,12 +167,12 @@ class CodeClashService {
   }
 
   Future<int> _computeScore(
-      Submission submission, String codeClashId, String organisationId) async {
+      Submission submission, String codeClashId, String organizationId) async {
     final submissionTime = submission.submissionTime;
 
     final CodeClashService codeClashService = CodeClashService();
     final codeClash = await codeClashService.getCodeClash(
-      organisationId,
+      organizationId,
       codeClashId,
     );
 
@@ -192,8 +192,10 @@ class CodeClashService {
       return 0;
     }
 
-    final score = (timeLimitInSeconds - durationInSeconds) ~/ 60;
-    return score;
+    // Calculate the score out of 1000
+    final score =
+        ((timeLimitInSeconds - durationInSeconds) / timeLimitInSeconds) * 1000;
+    return score.round();
   }
 
   Future<bool> hasUserSubmitted(
@@ -254,7 +256,7 @@ class CodeClashService {
     final userData = await db.getUserData(participant.id);
     final user = AppUser.fromMap(userData);
 
-    await db.organisations
+    await db.organizations
         .doc(user.orgId)
         .collection('codeClashes')
         .doc(codeClashId)

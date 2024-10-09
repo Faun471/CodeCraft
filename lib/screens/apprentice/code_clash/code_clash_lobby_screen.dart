@@ -41,7 +41,7 @@ class _CodeClashLobbyScreenState extends ConsumerState<CodeClashLobbyScreen> {
         title: Text(
           'Lobby: ${widget.codeClash.title}',
           style: TextStyle(
-            color: ThemeUtils.getTextColor(
+            color: ThemeUtils.getTextColorForBackground(
               Theme.of(context).primaryColor,
             ),
           ),
@@ -108,7 +108,7 @@ class _CodeClashLobbyScreenState extends ConsumerState<CodeClashLobbyScreen> {
                                 width: 50,
                                 height: 50,
                                 child: CachedNetworkImage(
-                                  imageUrl: participant.photoURL ?? '',
+                                  imageUrl: participant.photoUrl ?? '',
                                   placeholder: (context, url) =>
                                       const CircularProgressIndicator(),
                                   errorWidget: (context, url, error) =>

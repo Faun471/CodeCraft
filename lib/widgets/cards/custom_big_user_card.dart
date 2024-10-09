@@ -109,7 +109,8 @@ class UserCard extends StatelessWidget {
                               .headlineMedium
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: ThemeUtils.getTextColor(cardColor)
+                                color: ThemeUtils.getTextColorForBackground(
+                                        cardColor)
                                     .withOpacity(0.9),
                               ),
                           maxLines: 1,
@@ -119,7 +120,8 @@ class UserCard extends StatelessWidget {
                           "Level: $userLevel",
                           style:
                               Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: ThemeUtils.getTextColor(cardColor)
+                                    color: ThemeUtils.getTextColorForBackground(
+                                            cardColor)
                                         .withOpacity(0.7),
                                   ),
                           maxLines: 1,
@@ -129,7 +131,8 @@ class UserCard extends StatelessWidget {
                           userEmail,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: ThemeUtils.getTextColor(cardColor)
+                                    color: ThemeUtils.getTextColorForBackground(
+                                            cardColor)
                                         .withOpacity(0.7),
                                   ),
                           maxLines: 1,

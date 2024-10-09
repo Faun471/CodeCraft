@@ -1,18 +1,18 @@
-import 'package:codecraft/screens/mentor/organisation/copiable_text.dart';
+import 'package:codecraft/screens/mentor/organization/copiable_text.dart';
 import 'package:codecraft/services/invitation_service.dart';
 import 'package:codecraft/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:codecraft/services/database_helper.dart';
 
-class OrganisationInviteRow extends ConsumerWidget {
+class OrganizationInviteRow extends ConsumerWidget {
   final String userId;
 
-  const OrganisationInviteRow({super.key, required this.userId});
+  const OrganizationInviteRow({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final orgStream = DatabaseHelper().getOrganisationStreamForMentor(userId);
+    final orgStream = DatabaseHelper().getOrganizationStreamForMentor(userId);
     final userStream = DatabaseHelper().getUserStream(userId);
     final invitationService = ref.watch(invitationServiceProvider.notifier);
 
@@ -29,8 +29,12 @@ class OrganisationInviteRow extends ConsumerWidget {
             final user = userSnapshot.data!.data()! as Map<String, dynamic>;
 
             return Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  'Add to Organization',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
                 const SizedBox(width: 4),
                 Row(
                   children: [
@@ -52,7 +56,7 @@ class OrganisationInviteRow extends ConsumerWidget {
                       child: Text(
                         'Generate New Code',
                         style: TextStyle(
-                          color: ThemeUtils.getTextColor(
+                          color: ThemeUtils.getTextColorForBackground(
                               Theme.of(context).primaryColor),
                         ),
                       ),

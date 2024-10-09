@@ -66,7 +66,7 @@ class InvitationService extends _$InvitationService {
         .doc(code)
         .set(invitation.toMap());
 
-    await DatabaseHelper().organisations.doc(orgId).set({
+    await DatabaseHelper().organizations.doc(orgId).set({
       'code': code,
     }, SetOptions(merge: true));
 
@@ -140,7 +140,7 @@ class InvitationService extends _$InvitationService {
     });
 
     if (status == 'accepted') {
-      await DatabaseHelper().organisations.doc(invitation.orgId).set({
+      await DatabaseHelper().organizations.doc(invitation.orgId).set({
         'apprentices': FieldValue.arrayUnion([apprenticeId]),
       }, SetOptions(merge: true));
 
@@ -185,11 +185,11 @@ class InvitationService extends _$InvitationService {
     });
   }
 
-  Future<void> leaveOrganisation(String userId) async {
+  Future<void> leaveOrganization(String userId) async {
     var user = await DatabaseHelper().getUserData(userId);
     var orgId = user['orgId'];
 
-    await DatabaseHelper().organisations.doc(orgId).update({
+    await DatabaseHelper().organizations.doc(orgId).update({
       'apprentices': FieldValue.arrayRemove([userId]),
     });
 

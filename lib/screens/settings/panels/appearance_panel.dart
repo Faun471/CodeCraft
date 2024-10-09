@@ -145,7 +145,8 @@ class _AppearancePanelState extends ConsumerState<AppearancePanel> {
                         child: selectedColor == shade
                             ? Icon(
                                 Icons.check,
-                                color: ThemeUtils.getTextColor(shade),
+                                color:
+                                    ThemeUtils.getTextColorForBackground(shade),
                               ) // Show checkmark on selected shade
                             : null,
                       ),

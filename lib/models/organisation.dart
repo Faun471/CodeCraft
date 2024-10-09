@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Organisation {
+class Organization {
   final String id;
   final String orgName;
   final String orgDescription;
@@ -9,7 +9,7 @@ class Organisation {
   final String code;
   final List<String> apprentices;
 
-  Organisation(
+  Organization(
     this.id,
     this.orgName,
     this.orgDescription,
@@ -19,7 +19,7 @@ class Organisation {
     this.apprentices,
   );
 
-  Organisation.fromMap(Map<String, dynamic> data)
+  Organization.fromMap(Map<String, dynamic> data)
       : id = data['id'] ?? '',
         orgName = data['name'] ?? '',
         orgDescription = data['description'] ?? '',

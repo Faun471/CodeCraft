@@ -6,14 +6,14 @@ import 'package:codecraft/providers/invitation_provider.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/buttons/custom_text_fields.dart';
 
-class JoinOrganisation extends ConsumerStatefulWidget {
-  const JoinOrganisation({super.key});
+class JoinOrganization extends ConsumerStatefulWidget {
+  const JoinOrganization({super.key});
 
   @override
-  _JoinOrganisationState createState() => _JoinOrganisationState();
+  _JoinOrganizationState createState() => _JoinOrganizationState();
 }
 
-class _JoinOrganisationState extends ConsumerState<JoinOrganisation> {
+class _JoinOrganizationState extends ConsumerState<JoinOrganization> {
   final orgController = TextEditingController();
   bool isLoading = false;
 
@@ -23,12 +23,12 @@ class _JoinOrganisationState extends ConsumerState<JoinOrganisation> {
       children: [
         const SizedBox(height: 20),
         const Text(
-          'Organisation',
+          'Organization',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 20),
         const Text(
-          'You are not part of any organisation.',
+          'You are not part of any organization.',
           style: TextStyle(fontSize: 16),
         ),
         const SizedBox(height: 20),
@@ -47,7 +47,7 @@ class _JoinOrganisationState extends ConsumerState<JoinOrganisation> {
             const SizedBox(width: 10),
             ElevatedButton(
               onPressed: () =>
-                  isLoading ? null : _joinOrganisation(context, ref),
+                  isLoading ? null : _joinOrganization(context, ref),
               child: isLoading
                   ? const Padding(
                       padding: EdgeInsets.all(2.0),
@@ -56,9 +56,9 @@ class _JoinOrganisationState extends ConsumerState<JoinOrganisation> {
                       ),
                     )
                   : Text(
-                      'Join Organisation',
+                      'Join Organization',
                       style: TextStyle(
-                        color: ThemeUtils.getTextColor(
+                        color: ThemeUtils.getTextColorForBackground(
                             Theme.of(context).primaryColor),
                       ),
                     ),
@@ -69,7 +69,7 @@ class _JoinOrganisationState extends ConsumerState<JoinOrganisation> {
     );
   }
 
-  Future<void> _joinOrganisation(BuildContext context, WidgetRef ref) async {
+  Future<void> _joinOrganization(BuildContext context, WidgetRef ref) async {
     if (orgController.text.isEmpty) {
       Utils.displayDialog(
         context: context,
@@ -118,7 +118,7 @@ class _JoinOrganisationState extends ConsumerState<JoinOrganisation> {
         lottieAsset: 'assets/anim/congrats.json',
         title: 'Success',
         content:
-            'You have successfully sent a request to join the organisation.',
+            'You have successfully sent a request to join the organization.',
       );
     } catch (e) {
       if (!context.mounted) {

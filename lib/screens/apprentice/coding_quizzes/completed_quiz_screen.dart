@@ -9,6 +9,7 @@ class QuizResultsScreen extends ConsumerStatefulWidget {
   final QuizResult quizResult;
   final bool? showSolutions;
   final bool? canRetake;
+  final String? orgId;
 
   const QuizResultsScreen({
     super.key,
@@ -16,6 +17,7 @@ class QuizResultsScreen extends ConsumerStatefulWidget {
     required this.quizResult,
     this.showSolutions,
     this.canRetake,
+    this.orgId,
   });
 
   @override
@@ -138,15 +140,32 @@ class _QuizResultsScreenState extends ConsumerState<QuizResultsScreen> {
                   children: [
                     if (widget.canRetake ?? false)
                       ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
+                        onPressed: () async {
+                          final result = await Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => QuizScreen(
                                 quizId: widget.quiz.id!,
+                                orgId: widget.orgId,
                               ),
                             ),
                           );
+
+                          if (result is QuizResult) {
+                            if (!context.mounted) return;
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => QuizResultsScreen(
+                                  quiz: widget.quiz,
+                                  quizResult: result,
+                                  showSolutions: true,
+                                  canRetake: true,
+                                  orgId: widget.orgId,
+                                ),
+                              ),
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(

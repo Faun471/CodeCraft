@@ -1,7 +1,5 @@
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/debugging_challenge.dart';
-import 'package:codecraft/providers/screen_provider.dart';
-import 'package:codecraft/screens/apprentice/organisation/organisation_screen.dart';
 import 'package:codecraft/screens/apprentice/coding_debugging/debugging_challenge_screen.dart';
 import 'package:codecraft/services/debugging_challenge_service.dart';
 import 'package:codecraft/services/database_helper.dart';
@@ -28,7 +26,7 @@ class _DebuggingChallengesState extends ConsumerState<DebuggingChallenges> {
       );
     }
 
-    if (!isInOrganisation()) {
+    if (!isInOrganization()) {
       return SingleChildScrollView(
         child: Center(
           child: Column(
@@ -43,7 +41,7 @@ class _DebuggingChallengesState extends ConsumerState<DebuggingChallenges> {
               ),
               const SizedBox(height: 20),
               const Text(
-                'You are not part of any organisation.',
+                'You are not part of any organization.',
                 style: TextStyle(
                   fontSize: 16,
                 ),
@@ -51,15 +49,13 @@ class _DebuggingChallengesState extends ConsumerState<DebuggingChallenges> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  ref
-                      .watch(screenProvider.notifier)
-                      .replaceScreen(const OrganisationScreen());
+                  setState(() {});
                 },
                 child: Text(
                   'Join an Organization',
                   style: TextStyle(
-                    color:
-                        ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                    color: ThemeUtils.getTextColorForBackground(
+                        Theme.of(context).primaryColor),
                   ),
                 ),
               ),
@@ -98,15 +94,13 @@ class _DebuggingChallengesState extends ConsumerState<DebuggingChallenges> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                ref
-                    .watch(screenProvider.notifier)
-                    .pushScreen(const OrganisationScreen());
+                setState(() {});
               },
               child: Text(
                 'Join an Organization',
                 style: TextStyle(
-                  color:
-                      ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                  color: ThemeUtils.getTextColorForBackground(
+                      Theme.of(context).primaryColor),
                 ),
               ),
             ),
@@ -170,7 +164,7 @@ class _DebuggingChallengesState extends ConsumerState<DebuggingChallenges> {
                         itemCount: availableChallenges.length,
                         itemBuilder: (context, index) {
                           return ListTile(
-                            title: Text(availableChallenges[index].id),
+                            title: Text(availableChallenges[index].title),
                             subtitle: Text(
                               availableChallenges[index].instructions,
                               maxLines: 3,
@@ -241,7 +235,7 @@ class _DebuggingChallengesState extends ConsumerState<DebuggingChallenges> {
     );
   }
 
-  bool isInOrganisation() {
+  bool isInOrganization() {
     final user = ref.watch(appUserNotifierProvider).value;
 
     if (user!.orgId == null) {

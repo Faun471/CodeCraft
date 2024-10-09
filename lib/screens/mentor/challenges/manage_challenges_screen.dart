@@ -164,7 +164,8 @@ class _ManageChallengeScreenState
       child: Text(
         'Create Challenge',
         style: TextStyle(
-          color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+          color: ThemeUtils.getTextColorForBackground(
+              Theme.of(context).primaryColor),
         ),
       ),
     );

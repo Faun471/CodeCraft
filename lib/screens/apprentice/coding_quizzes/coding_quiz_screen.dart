@@ -1,6 +1,7 @@
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/quiz.dart';
 import 'package:codecraft/providers/quiz_provider.dart';
+import 'package:codecraft/screens/apprentice/coding_quizzes/completed_quiz_screen.dart';
 import 'package:codecraft/services/quiz_service.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/viewers/quiz_viewer.dart';
@@ -11,8 +12,9 @@ import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 
 class QuizScreen extends ConsumerWidget {
   final String quizId;
+  final String? orgId;
 
-  const QuizScreen({super.key, required this.quizId});
+  const QuizScreen({super.key, required this.quizId, this.orgId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,49 +22,80 @@ class QuizScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     Quiz? quiz;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: theme.colorScheme.onPrimary.computeLuminance() > 0.5
-                ? theme.colorScheme.onPrimary
-                : Colors.white,
-          ),
-          onPressed: () => _onWillPop(context, ref, quiz),
-        ),
-      ),
-      body: PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, _) async {
-          if (didPop) return;
-          await _onWillPop(context, ref, quiz);
-        },
-        child: FutureBuilder(
-          future: QuizService().getQuizFromId(quizId, appUser.value!.orgId!),
-          builder: (context2, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: LoadingAnimationWidget.staggeredDotsWave(
-                  color: Colors.white,
-                  size: 200,
+    return FutureBuilder(
+      future:
+          QuizService().getQuizFromId(quizId, orgId ?? appUser.value!.orgId!),
+      builder: (context2, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: LoadingAnimationWidget.staggeredDotsWave(
+              color: Colors.white,
+              size: 200,
+            ),
+          );
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          quiz = snapshot.data as Quiz;
+
+          return Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: theme.colorScheme.onPrimary.computeLuminance() > 0.5
+                      ? theme.colorScheme.onPrimary
+                      : Colors.white,
                 ),
-              );
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else {
-              quiz = snapshot.data as Quiz;
-              return QuizViewer(
+                onPressed: () => _onWillPop(context, ref, quiz),
+              ),
+              centerTitle: true,
+              title: Text(
+                quiz!.title,
+                style: theme.textTheme.headlineMedium!.copyWith(
+                  color: theme.colorScheme.onPrimary.computeLuminance() > 0.5
+                      ? theme.colorScheme.onPrimary
+                      : Colors.white,
+                ),
+              ),
+            ),
+            body: PopScope(
+              canPop: false,
+              onPopInvokedWithResult: (didPop, _) async {
+                if (didPop) return;
+                await _onWillPop(context, ref, quiz);
+              },
+              child: QuizViewer(
                 quiz: quiz!,
-                onQuizFinished: (quiz) {
-                  Navigator.pop(context);
-                  QuizService().saveQuizResultsWithAnswers(quiz);
+                onQuizFinished: (quiz) async {
+                  final result =
+                      await QuizService().saveQuizResultsWithAnswers(quiz);
+
+                  if (!context.mounted) return;
+
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => QuizResultsScreen(
+                        quiz: quiz,
+                        quizResult: result,
+                        showSolutions: true,
+                        canRetake: true,
+                      ),
+                    ),
+                  );
+
+                  final appUserNotifier =
+                      ref.watch(appUserNotifierProvider.notifier);
+                  await appUserNotifier.addExperience(
+                    quiz.experienceToEarn,
+                  );
                 },
-              );
-            }
-          },
-        ),
-      ),
+              ),
+            ),
+          );
+        }
+      },
     );
   }
 

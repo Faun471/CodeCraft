@@ -1,7 +1,9 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/page.dart';
 import 'package:codecraft/screens/loading_screen.dart';
+import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/viewers/markdown_viewer.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +40,18 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   late PopupMenu _menu;
 
+  final TransformationController _transformationController =
+      TransformationController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Set the initial zoom to minimum when the widget is first created
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _transformationController.value = Matrix4.identity()..scale(2);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     isSmallScreen = MediaQuery.of(context).size.width < 800;
@@ -63,9 +77,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         child: Stack(
           children: [
             InteractiveViewer(
+              transformationController: _transformationController,
               clipBehavior: Clip.antiAliasWithSaveLayer,
               constrained: false,
-              minScale: 0.1,
               maxScale: 4.0,
               child: SizedBox(
                 width: 1280,
@@ -74,7 +88,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   children: [
                     SizedBox.expand(
                       child: Image.asset(
-                        'assets/images/map_br.png',
+                        AdaptiveTheme.of(context).mode.isDark
+                            ? 'assets/images/map_night.png'
+                            : 'assets/images/map.png',
+                        fit: BoxFit.cover,
                       ),
                     ),
                     ...levelPositions.asMap().entries.map((entry) {
@@ -101,9 +118,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               child: Container(
                 width: 250,
                 height: 100,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/images/level_bg.png'),
+                    image: AssetImage(
+                      AdaptiveTheme.of(context).mode.isDark
+                          ? 'assets/images/level_bg_night.png'
+                          : 'assets/images/level_bg.png',
+                    ),
                     fit: BoxFit.scaleDown,
                     scale: 3.5,
                   ),
@@ -247,12 +268,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
+                          color: Colors.black,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         module.description,
-                        style: const TextStyle(fontSize: 14),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       SizedBox(
@@ -261,7 +286,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                           onPressed: () {
                             _navigateToModule(context, module);
                           },
-                          child: const Text('Start Module'),
+                          child: Text(
+                            'Start Module',
+                            style: TextStyle(
+                              color: ThemeUtils.getTextColorForBackground(
+                                Theme.of(context).primaryColor,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -298,6 +330,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 MaterialPageRoute(
                   builder: (context) => MarkdownViewer(
                     markdownData: snapshot1.data[0]!,
+                    introAnimation: module.introAnimation,
                   ),
                 ),
               );
@@ -345,7 +378,9 @@ class LevelNode extends StatelessWidget {
           children: [
             ClipOval(
               child: Image.asset(
-                'assets/images/level_node.png',
+                AdaptiveTheme.of(context).mode.isDark
+                    ? 'assets/images/level_node_night.png'
+                    : 'assets/images/level_node.png',
                 fit: BoxFit.cover,
                 color: isUnlocked ? null : Colors.grey,
                 colorBlendMode: BlendMode.saturation,

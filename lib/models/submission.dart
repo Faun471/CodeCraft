@@ -4,7 +4,7 @@ class Submission {
   final String userId;
   final String solution;
   final String displayName;
-  final String photoURL;
+  final String photoUrl;
   final DateTime submissionTime;
   final int score;
 
@@ -12,7 +12,7 @@ class Submission {
     required this.userId,
     required this.solution,
     required this.displayName,
-    required this.photoURL,
+    required this.photoUrl,
     required this.submissionTime,
     required this.score,
   });
@@ -22,7 +22,9 @@ class Submission {
       userId: json['userId'] ?? '',
       solution: json['solution'] ?? '',
       displayName: json['displayName'] ?? '',
-      photoURL: json['photoURL'] ?? '',
+      photoUrl: json['photoUrl'] == null || json['photoUrl'].isEmpty
+          ? 'https://api.dicebear.com/9.x/thumbs/png?seed=${json['userId']}'
+          : json['photoUrl'],
       submissionTime: json['submissionTime'] != null
           ? (json['submissionTime'] as Timestamp).toDate()
           : DateTime.now(),
@@ -35,7 +37,7 @@ class Submission {
       'userId': userId,
       'solution': solution,
       'displayName': displayName,
-      'photoURL': photoURL,
+      'photoUrl': photoUrl,
       'submissionTime': Timestamp.fromDate(submissionTime),
       'score': score,
     };
@@ -45,7 +47,7 @@ class Submission {
     String? userId,
     String? solution,
     String? displayName,
-    String? photoURL,
+    String? photoUrl,
     DateTime? submissionTime,
     int? score,
   }) {
@@ -53,7 +55,7 @@ class Submission {
       userId: userId ?? this.userId,
       solution: solution ?? this.solution,
       displayName: displayName ?? this.displayName,
-      photoURL: photoURL ?? this.photoURL,
+      photoUrl: photoUrl ?? this.photoUrl,
       submissionTime: submissionTime ?? this.submissionTime,
       score: score ?? this.score,
     );

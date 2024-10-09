@@ -83,13 +83,6 @@ class ApprenticeHome extends ConsumerWidget {
                         screen: const SettingsScreen(),
                       ),
                       SidebarItem(
-                        icon: Icons.business,
-                        label: 'Organisation',
-                        screen: const SettingsScreen(
-                          initialTab: 'Organisation',
-                        ),
-                      ),
-                      SidebarItem(
                         icon: Icons.palette,
                         label: 'Appearance',
                         screen: const SettingsScreen(

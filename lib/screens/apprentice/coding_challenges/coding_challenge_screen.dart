@@ -14,11 +14,17 @@ import 'package:codecraft/widgets/viewers/markdown_viewer.dart';
 import 'package:re_editor/re_editor.dart';
 import 'package:re_highlight/languages/java.dart';
 import 'package:re_highlight/languages/python.dart';
+import 'package:video_player/video_player.dart';
 
 class ChallengeScreen extends ConsumerStatefulWidget {
   final Challenge challenge;
+  final VoidCallback? onChallengeCompleted;
 
-  const ChallengeScreen({super.key, required this.challenge});
+  const ChallengeScreen({
+    super.key,
+    required this.challenge,
+    this.onChallengeCompleted,
+  });
 
   @override
   _ChallengeScreenState createState() => _ChallengeScreenState();
@@ -29,16 +35,111 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
   String _selectedLanguage = 'java';
   String _returnType = 'String';
 
+  late VideoPlayerController controller;
+
   @override
   void initState() {
     super.initState();
     _initializeChallenge();
+    if (widget.challenge.introAnimation != null) {
+      _initializeVideoController(widget.challenge.introAnimation!);
+    }
   }
 
   void _initializeChallenge() {
     _returnType = _getReturnType();
     _codeController.text = widget.challenge.sampleCode ??
         generateSampleCode('java', widget.challenge);
+  }
+
+  void _initializeVideoController(String videoUrl) {
+    controller = VideoPlayerController.networkUrl(
+      Uri.parse(videoUrl),
+      httpHeaders: {
+        'Cache-Control': 'max-age=3600',
+      },
+    )..initialize().then((_) {
+        if (controller.value.isInitialized) {
+          setState(() {
+            _showVideoDialog();
+          });
+        }
+      });
+
+    controller.addListener(() {
+      if (controller.value.position == controller.value.duration) {
+        Navigator.of(context).pop();
+      }
+    });
+  }
+
+  void _showVideoDialog() {
+    if (controller.value.isInitialized) {
+      showDialog(
+        context: context,
+        builder: (_) => _buildVideoDialog(),
+      );
+    }
+  }
+
+  Widget _buildVideoDialog() {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.8,
+        height: MediaQuery.of(context).size.height * 0.6,
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(10)),
+                child: controller.value.isInitialized
+                    ? AspectRatio(
+                        aspectRatio: controller.value.aspectRatio,
+                        child: VideoPlayer(controller),
+                      )
+                    : const Center(child: CircularProgressIndicator()),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      controller.value.isPlaying
+                          ? Icons.pause
+                          : Icons.play_arrow,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        controller.value.isPlaying
+                            ? controller.pause()
+                            : controller.play();
+                      });
+                    },
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Close'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   String _getReturnType() {
@@ -67,28 +168,39 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
     );
   }
 
-  void _submitCode() async {
-    final codeExecution = ref.watch(codeExecutionProvider.notifier);
-    if (await codeExecution.allTestsPassed(
-        _codeController.text,
-        widget.challenge.unitTests,
-        widget.challenge.className,
-        _selectedLanguage,
-        widget.challenge.methodName)) {
+  Future<void> _submitCode() async {
+    final codeExecution = ref.read(codeExecutionProvider.notifier);
+
+    final allPassed = await codeExecution.allTestsPassed(
+      _codeController.text,
+      widget.challenge.unitTests,
+      widget.challenge.className,
+      _selectedLanguage,
+      widget.challenge.methodName,
+    );
+
+    if (allPassed) {
+      if (!mounted) return;
+      _handleChallengeSuccess(context);
+
+      final appUser = ref.watch(appUserNotifierProvider).value!;
+
+      final completedChallenges = appUser.completedChallenges ?? <String>[];
+
+      if (completedChallenges.contains(widget.challenge.id)) {
+        return;
+      }
+
+      print('app user $appUser');
+      print('completed challenges ${appUser.completedChallenges} ');
+
       await ChallengeService().markChallengeAsCompleted(widget.challenge.id);
       ref
           .read(appUserNotifierProvider.notifier)
           .addExperience(widget.challenge.experienceToEarn);
-      if (!mounted) return;
-      Utils.displayDialog(
-        context: context,
-        title: 'Challenge Completed!',
-        content: 'Your code passed all the test cases.',
-        lottieAsset: 'assets/anim/congrats.json',
-        onDismiss: () => Navigator.of(context).pop(),
-      );
     } else {
       if (!mounted) return;
+
       Utils.displayDialog(
         context: context,
         title: 'Challenge Failed!',
@@ -99,21 +211,33 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
     }
   }
 
+  void _handleChallengeSuccess(BuildContext context) {
+    if (widget.challenge.outroAnimation != null) {
+      _initializeVideoController(widget.challenge.outroAnimation!);
+      return;
+    }
+
+    widget.onChallengeCompleted?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
-    String output = ref.watch(codeExecutionProvider).output;
+    final codeExecutionState = ref.watch(codeExecutionProvider);
+    String output = codeExecutionState.output;
+    bool isLoading = codeExecutionState.isLoading;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Coding Challenge',
           style: TextStyle(
-              color: ThemeUtils.getTextColor(Theme.of(context).primaryColor)),
+              color: ThemeUtils.getTextColorForBackground(
+                  Theme.of(context).primaryColor)),
         ),
       ),
       body: DraggableSplitScreen(
         leftWidget: _buildLeftPanel(output),
-        rightWidget: _buildRightPanel(),
+        rightWidget: _buildRightPanel(isLoading),
       ),
     );
   }
@@ -126,7 +250,7 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
     );
   }
 
-  Widget _buildRightPanel() {
+  Widget _buildRightPanel(bool isLoading) {
     return Stack(
       children: [
         _buildCodeEditorCard(),
@@ -158,7 +282,7 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
         Positioned(
           bottom: 16,
           right: 16,
-          child: _buildActionButtons(),
+          child: _buildActionButtons(isLoading),
         ),
       ],
     );
@@ -181,6 +305,14 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
                 displayToc: false,
               ),
             ),
+            if (widget.challenge.introAnimation != null) ...[
+              ElevatedButton(
+                onPressed: () {
+                  _showVideoDialog();
+                },
+                child: const Text('Replay animation'),
+              ),
+            ]
           ],
         ),
       ),
@@ -241,20 +373,36 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(bool isLoading) {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           ElevatedButton(
-            onPressed: _runCode,
-            child: const Text('Run Code'),
+            onPressed: isLoading ? null : _runCode,
+            child: isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text('Run Code'),
           ),
           const SizedBox(width: 8),
           ElevatedButton(
-            onPressed: _submitCode,
-            child: const Text('Submit Code'),
+            onPressed: isLoading ? null : _submitCode,
+            child: isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text('Submit Code'),
           ),
         ],
       ),
@@ -296,5 +444,11 @@ class $className:
 ''';
     }
     return '';
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }

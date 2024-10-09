@@ -13,7 +13,6 @@ In Java, declaring a variable involves specifying the type of the variable and g
 
  **Semicolon:** End the declaration statement with a semicolon (`;`). In this way, a name can only be given to a memory location. It can be assigned values in two ways:
 
- <quiz quiz-id="java-basics">
 
 ### Declaring Variables in Python
 
@@ -56,6 +55,8 @@ name = "Alice"           # String
 height = 5.9             # Float
 is_student = True        # Boolean
 ```
+
+ <quiz quiz-id="variable-quiz-1">
 
 ## Types of Variables in Java
 
@@ -162,6 +163,8 @@ public class StaticVariableExample {
     }
 }
 ```
+
+<quiz quiz-id="variable-quiz-2">
 
 ## Types of Variables in Python
 
@@ -281,3 +284,8 @@ def outer_function():
 outer_function()`
 ```
 
+<quiz quiz-id="variable-quiz-3">
+
+### With that you can now proceed with the story by finishing this challenge.
+
+<challenge challenge-id="hello-world">

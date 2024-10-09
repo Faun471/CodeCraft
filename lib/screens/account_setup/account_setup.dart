@@ -23,7 +23,8 @@ class _AccountSetupState extends State<AccountSetup> {
         title: Text(
           'Account Setup',
           style: TextStyle(
-            color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+            color: ThemeUtils.getTextColorForBackground(
+                Theme.of(context).primaryColor),
           ),
         ),
       ),

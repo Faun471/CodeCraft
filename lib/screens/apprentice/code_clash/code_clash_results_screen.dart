@@ -6,11 +6,11 @@ import 'package:codecraft/services/code_clash_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LeaderboardScreen extends ConsumerWidget {
+class CodeClashResultsScreen extends ConsumerWidget {
   final String codeClashId;
   final String organizationId;
 
-  const LeaderboardScreen({
+  const CodeClashResultsScreen({
     super.key,
     required this.codeClashId,
     required this.organizationId,
@@ -27,11 +27,11 @@ class LeaderboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text('Leaderboard',
             style: TextStyle(
-                color: ThemeUtils.getTextColor(
+                color: ThemeUtils.getTextColorForBackground(
               Theme.of(context).primaryColor,
             ))),
       ),
-      backgroundColor: Theme.of(context).primaryColor.withOpacity(0.75),
+      backgroundColor: Colors.white,
       body: codeClashFuture.when(
         data: (codeClash) => _buildLeaderboard(context, codeClash),
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -46,166 +46,208 @@ class LeaderboardScreen extends ConsumerWidget {
       codeClash.id,
     );
 
-    return StreamBuilder<List<Submission>>(
-      stream: submissionsStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final submissions = snapshot.data!;
-          final participantsScores = <String, int>{};
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Container(
+            color: ThemeUtils.getDarkColor(
+              Theme.of(context).primaryColor,
+            ),
+          ),
+        ),
 
-          for (var submission in submissions) {
-            final userId = submission.userId;
-            final score = submission.score;
+        // low opacity shapes in the background
+        Positioned(
+          bottom: -250,
+          left: -250,
+          child: CircleAvatar(
+            radius: 300,
+            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.2),
+          ),
+        ),
 
-            if (participantsScores.containsKey(userId)) {
-              participantsScores[userId] = participantsScores[userId]! + score;
-            } else {
-              participantsScores[userId] = score;
-            }
-          }
+        Positioned(
+          top: -250,
+          right: -250,
+          child: CircleAvatar(
+            radius: 300,
+            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.15),
+          ),
+        ),
 
-          final sortedParticipants = participantsScores.entries.map((entry) {
-            return CodeClashParticipant(
-              id: entry.key,
-              displayName: submissions
-                  .firstWhere((s) => s.userId == entry.key)
-                  .displayName,
-              score: entry.value,
-              photoURL:
-                  submissions.firstWhere((s) => s.userId == entry.key).photoURL,
-            );
-          }).toList();
+        StreamBuilder<List<Submission>>(
+          stream: submissionsStream,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final submissions = snapshot.data!;
+              final participantsScores = <String, int>{};
 
-          sortedParticipants.sort((a, b) => b.score.compareTo(a.score));
+              for (var submission in submissions) {
+                final userId = submission.userId;
+                final score = submission.score;
 
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Container(
-                width: 640,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(16.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
+                if (participantsScores.containsKey(userId)) {
+                  participantsScores[userId] =
+                      participantsScores[userId]! + score;
+                } else {
+                  participantsScores[userId] = score;
+                }
+              }
+        
+              final sortedParticipants =
+                  participantsScores.entries.map((entry) {
+                return CodeClashParticipant(
+                  id: entry.key,
+                  displayName: submissions
+                      .firstWhere((s) => s.userId == entry.key)
+                      .displayName,
+                  score: entry.value,
+                  photoUrl: submissions
+                      .firstWhere((s) => s.userId == entry.key)
+                      .photoUrl,
+                );
+              }).toList();
+
+              sortedParticipants.sort((a, b) => b.score.compareTo(a.score));
+
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Container(
+                    width: 640,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      borderRadius: BorderRadius.circular(16.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: const Offset(0, -5),
+                        ),
+                      ],
                     ),
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, -5),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    // Header
-                    Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Logo
-                          Image.asset(
-                            'assets/images/logo.png',
-                            width: 50,
-                            height: 50,
-                            fit: BoxFit.contain,
-                          ),
-                          // Title
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        // Header
+                        Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              AutoSizeText(
-                                'FINAL LEADERBOARD',
-                                maxFontSize: 24,
+                              // Logo
+                              Image.asset(
+                                'assets/images/logo.png',
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.contain,
+                              ),
+                              // Title
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  AutoSizeText(
+                                    'FINAL LEADERBOARD',
+                                    maxFontSize: 24,
+                                    style: TextStyle(
+                                      color:
+                                          ThemeUtils.getTextColorForBackground(
+                                        Theme.of(context).primaryColor,
+                                      ),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    codeClash.title,
+                                    style: TextStyle(
+                                      color:
+                                          ThemeUtils.getTextColorForBackground(
+                                        Theme.of(context).primaryColor,
+                                      ).withOpacity(0.5),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Leaderboard List
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 24.0),
+                              child: Column(
+                                children: [
+                                  const SizedBox(height: 8),
+                                  for (int i = 0;
+                                      i < sortedParticipants.length;
+                                      i++)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 8.0,
+                                        left: 16.0,
+                                      ),
+                                      child: LeaderboardRow(
+                                        rank: i + 1,
+                                        name: sortedParticipants[i].displayName,
+                                        score: sortedParticipants[i].score,
+                                        isTop: i == 0,
+                                        photoUrl:
+                                            sortedParticipants[i].photoUrl,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Footer
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'CodeCraft',
                                 style: TextStyle(
-                                  color: ThemeUtils.getTextColor(
+                                  color: ThemeUtils.getTextColorForBackground(
                                     Theme.of(context).primaryColor,
                                   ),
-                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                               Text(
-                                codeClash.title,
+                                'Date: ${getDate(codeClash.startTime!.toDate())}',
                                 style: TextStyle(
-                                  color: ThemeUtils.getTextColor(
+                                  color: ThemeUtils.getTextColorForBackground(
                                     Theme.of(context).primaryColor,
-                                  ).withOpacity(0.5),
-                                  fontSize: 14,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-
-                    const SizedBox(height: 36),
-
-                    // Leaderboard List
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: sortedParticipants.length,
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) {
-                          var participant = sortedParticipants[index];
-                          return Padding(
-                            padding:
-                                const EdgeInsets.only(bottom: 8.0, left: 16.0),
-                            child: LeaderboardRow(
-                              rank: index + 1,
-                              name: participant.displayName,
-                              score: participant.score,
-                              isTop: index < 3,
-                              photoURL: participant.photoURL,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-
-                    // Footer
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'CodeCraft',
-                            style: TextStyle(
-                              color: ThemeUtils.getTextColor(
-                                Theme.of(context).primaryColor,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            'Date: ${getDate(codeClash.startTime!.toDate())}',
-                            style: TextStyle(
-                              color: ThemeUtils.getTextColor(
-                                Theme.of(context).primaryColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          );
-        }
+              );
+            }
 
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
+            if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            }
 
-        return const Center(child: CircularProgressIndicator());
-      },
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
+      ],
     );
   }
 
@@ -219,7 +261,7 @@ class LeaderboardRow extends StatelessWidget {
   final String name;
   final int score;
   final bool isTop;
-  final String? photoURL;
+  final String? photoUrl;
 
   const LeaderboardRow({
     super.key,
@@ -227,7 +269,7 @@ class LeaderboardRow extends StatelessWidget {
     required this.name,
     required this.score,
     required this.isTop,
-    this.photoURL,
+    this.photoUrl,
   });
 
   @override
@@ -247,7 +289,7 @@ class LeaderboardRow extends StatelessWidget {
                   child: Text(
                     '$rank',
                     style: TextStyle(
-                      color: ThemeUtils.getTextColor(
+                      color: ThemeUtils.getTextColorForBackground(
                         isTop
                             ? Colors.amber
                             : Theme.of(context).colorScheme.onPrimary,
@@ -276,8 +318,8 @@ class LeaderboardRow extends StatelessWidget {
                 backgroundColor: Colors.teal,
                 radius: 25,
                 backgroundImage:
-                    photoURL != null ? NetworkImage(photoURL!) : null,
-                child: photoURL == null
+                    photoUrl != null ? NetworkImage(photoUrl!) : null,
+                child: photoUrl == null
                     ? const Icon(
                         Icons.person,
                         color: Colors.white,
@@ -291,7 +333,7 @@ class LeaderboardRow extends StatelessWidget {
               child: Text(
                 name,
                 style: TextStyle(
-                  color: ThemeUtils.getTextColor(
+                  color: ThemeUtils.getTextColorForBackground(
                     Theme.of(context).primaryColor,
                   ),
                   fontSize: 18,
@@ -301,7 +343,7 @@ class LeaderboardRow extends StatelessWidget {
             Text(
               '$score pts',
               style: TextStyle(
-                color: ThemeUtils.getTextColor(
+                color: ThemeUtils.getTextColorForBackground(
                   Theme.of(context).primaryColor,
                 ),
                 fontSize: 18,

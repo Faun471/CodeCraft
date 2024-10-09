@@ -9,7 +9,6 @@ class PricingScreen extends StatefulWidget {
 }
 
 class _PricingScreenState extends State<PricingScreen> {
-  bool isAnnually = false;
   int _selectedCardIndex = 1;
 
   @override
@@ -20,10 +19,9 @@ class _PricingScreenState extends State<PricingScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Header(isAnnually: isAnnually, onToggle: _toggleSwitch),
+              const Header(),
               const SizedBox(height: 20),
               PricingCards(
-                isAnnually: isAnnually,
                 selectedCardIndex: _selectedCardIndex,
                 onCardSelected: _toggleCardActive,
               ),
@@ -35,12 +33,6 @@ class _PricingScreenState extends State<PricingScreen> {
     );
   }
 
-  void _toggleSwitch(bool value) {
-    setState(() {
-      isAnnually = value;
-    });
-  }
-
   void _toggleCardActive(int index) {
     setState(() {
       _selectedCardIndex = index;
@@ -49,50 +41,31 @@ class _PricingScreenState extends State<PricingScreen> {
 }
 
 class Header extends StatelessWidget {
-  final bool isAnnually;
-  final ValueChanged<bool> onToggle;
-
-  const Header({super.key, required this.isAnnually, required this.onToggle});
+  const Header({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       children: [
-        const Text(
+        Text(
           'Our Pricing',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Monthly'),
-            Switch(
-              value: isAnnually,
-              onChanged: onToggle,
-              activeColor: Theme.of(context).primaryColor,
-              inactiveTrackColor:
-                  Theme.of(context).primaryColor.withOpacity(0.5),
-            ),
-            const Text('Annually'),
-          ],
-        ),
+        SizedBox(height: 20),
       ],
     );
   }
 }
 
 class PricingCards extends StatelessWidget {
-  final bool isAnnually;
   final int selectedCardIndex;
   final ValueChanged<int> onCardSelected;
 
   const PricingCards({
     super.key,
-    required this.isAnnually,
     required this.selectedCardIndex,
     required this.onCardSelected,
   });
@@ -118,7 +91,7 @@ class PricingCards extends StatelessWidget {
             children: [
               PricingCard(
                 title: 'Basic',
-                price: isAnnually ? '\$99.99' : '\$9.99',
+                price: '\$9.99',
                 features: const [
                   '3 Apprentices',
                   'Up to 10 active challenges',
@@ -131,7 +104,7 @@ class PricingCards extends StatelessWidget {
               ),
               PricingCard(
                 title: 'Professional',
-                price: isAnnually ? '\$249.99' : '\$24.99',
+                price: '\$24.99',
                 features: const [
                   '10 Apprentices',
                   'Up to 50 active challenges',
@@ -144,7 +117,7 @@ class PricingCards extends StatelessWidget {
               ),
               PricingCard(
                 title: 'Master',
-                price: isAnnually ? '\$399.99' : '\$39.99',
+                price: '\$39.99',
                 features: const [
                   'Unlimited Apprentices',
                   'Unlimited active challenges',
@@ -248,7 +221,7 @@ class PricingCardState extends State<PricingCard>
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: ThemeUtils.getTextColor(
+                      color: ThemeUtils.getTextColorForBackground(
                         widget.isActive
                             ? Theme.of(context).primaryColor
                             : Theme.of(context).cardColor,
@@ -260,7 +233,7 @@ class PricingCardState extends State<PricingCard>
                     widget.price,
                     style: TextStyle(
                       fontSize: 28,
-                      color: ThemeUtils.getTextColor(
+                      color: ThemeUtils.getTextColorForBackground(
                         widget.isActive
                             ? Theme.of(context).primaryColor
                             : Theme.of(context).cardColor,
@@ -274,7 +247,7 @@ class PricingCardState extends State<PricingCard>
                       child: Text(
                         feature,
                         style: TextStyle(
-                          color: ThemeUtils.getTextColor(
+                          color: ThemeUtils.getTextColorForBackground(
                             widget.isActive
                                 ? Theme.of(context).primaryColor
                                 : Theme.of(context).cardColor,
@@ -296,7 +269,7 @@ class PricingCardState extends State<PricingCard>
                     child: Text(
                       'Learn More',
                       style: TextStyle(
-                        color: ThemeUtils.getTextColor(
+                        color: ThemeUtils.getTextColorForBackground(
                           !widget.isActive
                               ? Theme.of(context).primaryColor
                               : Colors.white,

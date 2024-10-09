@@ -71,7 +71,7 @@ class _CodeWrapperState extends State<CodeWrapperWidget> {
         text: lineCount.toString(),
         style: GoogleFonts.firaCode(
           fontSize: 14,
-          color: ThemeUtils.getTextColor(
+          color: ThemeUtils.getTextColorForBackground(
             widget.theme.root.backgroundColor!,
           ),
         ),
@@ -131,7 +131,7 @@ class _CodeWrapperState extends State<CodeWrapperWidget> {
                       '${idx + 1}',
                       style: GoogleFonts.firaCode(
                         fontSize: 14,
-                        color: ThemeUtils.getTextColor(
+                        color: ThemeUtils.getTextColorForBackground(
                           widget.theme.root.backgroundColor!,
                         ),
                       ),

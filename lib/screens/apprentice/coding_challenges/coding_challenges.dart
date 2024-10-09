@@ -1,8 +1,6 @@
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/challenge.dart';
-import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/screens/apprentice/coding_challenges/coding_challenge_screen.dart';
-import 'package:codecraft/screens/apprentice/organisation/organisation_screen.dart';
 import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/utils/theme_utils.dart';
@@ -28,7 +26,7 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
       );
     }
 
-    if (!isInOrganisation()) {
+    if (!isInOrganization()) {
       return SingleChildScrollView(
         child: Center(
           child: Column(
@@ -44,7 +42,7 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
               ),
               const SizedBox(height: 20),
               const Text(
-                'You are not part of any organisation.',
+                'You are not part of any organization.',
                 style: TextStyle(
                   fontSize: 16,
                 ),
@@ -56,14 +54,12 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      ref
-                          .watch(screenProvider.notifier)
-                          .replaceScreen(const OrganisationScreen());
+                      setState(() {});
                     },
                     child: Text(
                       'Join an Organization',
                       style: TextStyle(
-                        color: ThemeUtils.getTextColor(
+                        color: ThemeUtils.getTextColorForBackground(
                             Theme.of(context).primaryColor),
                       ),
                     ),
@@ -105,15 +101,13 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                ref
-                    .watch(screenProvider.notifier)
-                    .pushScreen(const OrganisationScreen());
+                setState(() {});
               },
               child: Text(
                 'Join an Organization',
                 style: TextStyle(
-                  color:
-                      ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                  color: ThemeUtils.getTextColorForBackground(
+                      Theme.of(context).primaryColor),
                 ),
               ),
             ),
@@ -187,7 +181,7 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
     );
   }
 
-  bool isInOrganisation() {
+  bool isInOrganization() {
     final user = ref.watch(appUserNotifierProvider).value;
 
     if (user!.orgId == null) {

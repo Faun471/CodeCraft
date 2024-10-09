@@ -158,14 +158,14 @@ class Utils {
                         Navigator.pop(context);
                       }
                     },
-                    iconColor: ThemeUtils.getTextColor(
+                    iconColor: ThemeUtils.getTextColorForBackground(
                       Theme.of(context).primaryColor,
                     ),
                     text: buttonText,
                     iconData: Icons.close,
                     color: Theme.of(context).primaryColor,
                     textStyle: TextStyle(
-                        color: ThemeUtils.getTextColor(
+                        color: ThemeUtils.getTextColorForBackground(
                       Theme.of(context).primaryColor,
                     )),
                   )

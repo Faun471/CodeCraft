@@ -21,7 +21,7 @@ class DebuggingChallenge {
 
   factory DebuggingChallenge.fromJson(Map<String, dynamic> data) {
     return DebuggingChallenge(
-      id: data['id'],
+      id: data['id'] ?? '',
       title: data['title'] ?? '',
       instructions: data['instructions'] ?? '',
       initialCode: data['initialCode'] ?? '',

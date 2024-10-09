@@ -15,27 +15,7 @@ class ChallengeService {
           .doc(organizationId)
           .collection('challenges')
           .doc(challenge.id)
-          .set({
-        'instructions': challenge.instructions,
-        'sampleCode': challenge.sampleCode,
-        'className': challenge.className,
-        'methodName': challenge.methodName,
-        'duration': challenge.duration,
-        'unitTests': challenge.unitTests
-            .map((test) => {
-                  'input': test.input
-                      .map((input) => {
-                            'value': input.value,
-                            'type': input.type,
-                          })
-                      .toList(),
-                  'expectedOutput': {
-                    'value': test.expectedOutput.value,
-                    'type': test.expectedOutput.type,
-                  },
-                })
-            .toList(),
-      }, SetOptions(merge: true));
+          .set(challenge.toJson(), SetOptions(merge: true));
     } catch (e) {
       throw Exception('Error creating challenge: $e');
     }
@@ -110,32 +90,22 @@ class ChallengeService {
 
   Future<void> markChallengeAsCompleted(String challengeId) async {
     try {
-      await DatabaseHelper().currentUser.get().then((doc) {
+      await DatabaseHelper().currentUser.get().then((doc) async {
         if (doc.exists) {
           final data = doc.data() as Map<String, dynamic>;
 
-          if (data['completedChallenges'] == null) {
-            DatabaseHelper().currentUser.set({
-              'completedChallenges': [challengeId],
-            }, SetOptions(merge: true));
-            return;
+          List<dynamic> completedChallengesData =
+              data['completedChallenges'] ?? [];
+
+          if (!completedChallengesData.contains(challengeId)) {
+            completedChallengesData.add(challengeId);
           }
 
-          List<String> completedChallenges =
-              (data['completedChallenges'] as List<dynamic>)
-                  .map((e) => e.toString())
-                  .toList();
+          await DatabaseHelper().currentUser.update({
+            'completedChallenges': completedChallengesData,
+          });
 
-          if (completedChallenges.contains(challengeId)) {
-            return;
-          }
-
-          completedChallenges.add(challengeId);
-
-          DatabaseHelper().currentUser.set({
-            'completedChallenges': completedChallenges,
-          }, SetOptions(merge: true));
-
+          return;
         }
       });
     } catch (e) {

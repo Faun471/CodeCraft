@@ -97,13 +97,13 @@ class CodeClashParticipant {
   final String id;
   final String displayName;
   final int score;
-  final String? photoURL;
+  final String? photoUrl;
 
   CodeClashParticipant({
     required this.id,
     required this.displayName,
     required this.score,
-    this.photoURL,
+    this.photoUrl,
   });
 
   factory CodeClashParticipant.fromJson(Map<String, dynamic> json) {
@@ -111,7 +111,9 @@ class CodeClashParticipant {
       id: json['id'] ?? '',
       displayName: json['displayName'] ?? '',
       score: json['score'] ?? 0,
-      photoURL: json['photoURL'] ?? '',
+      photoUrl: json['photoUrl'] == null || json['photoUrl'].isEmpty
+          ? 'https://api.dicebear.com/9.x/thumbs/png?seed=${json['id']}'
+          : json['photoUrl'],
     );
   }
 
@@ -120,7 +122,7 @@ class CodeClashParticipant {
       'id': id,
       'displayName': displayName,
       'score': score,
-      'photoURL': photoURL,
+      'photoUrl': photoUrl,
     };
   }
 
@@ -128,13 +130,13 @@ class CodeClashParticipant {
     String? id,
     String? displayName,
     int? score,
-    String? photoURL,
+    String? photoUrl,
   }) {
     return CodeClashParticipant(
       id: id ?? this.id,
       displayName: displayName ?? this.displayName,
       score: score ?? this.score,
-      photoURL: photoURL ?? this.photoURL,
+      photoUrl: photoUrl ?? this.photoUrl,
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/code_clash.dart';
 import 'package:codecraft/providers/screen_provider.dart';
+import 'package:codecraft/screens/apprentice/code_clash/code_clash_results_screen.dart';
 import 'package:codecraft/screens/mentor/code_clash/create_code_clash.dart';
 import 'package:codecraft/screens/mentor/code_clash/edit_code_clash.dart';
 import 'package:codecraft/screens/mentor/code_clash/start_code_clash_screen.dart';
@@ -101,11 +102,14 @@ class _ManageCodeClashesScreenState
                                 _navigateToEditScreen(context, codeClash),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.play_arrow),
+                            icon: Icon(codeClash.status == 'pending'
+                                ? Icons.play_arrow
+                                : Icons.visibility),
                             onPressed: codeClash.status == 'pending'
                                 ? () =>
                                     _navigateToStartScreen(context, codeClash)
-                                : null,
+                                : () => _navigateToLeaderboardScreen(
+                                    context, codeClash),
                           ),
                         ],
                       ),
@@ -132,7 +136,8 @@ class _ManageCodeClashesScreenState
       child: Text(
         'Create Code Clash',
         style: TextStyle(
-          color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+          color: ThemeUtils.getTextColorForBackground(
+              Theme.of(context).primaryColor),
         ),
       ),
     );
@@ -148,6 +153,17 @@ class _ManageCodeClashesScreenState
     ref.watch(screenProvider.notifier).pushScreen(
           StartCodeClashScreen(codeClash: codeClash),
         );
+  }
+
+  void _navigateToLeaderboardScreen(BuildContext context, CodeClash codeClash) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CodeClashResultsScreen(
+          codeClashId: codeClash.id,
+          organizationId: ref.watch(appUserNotifierProvider).value!.orgId!,
+        ),
+      ),
+    );
   }
 }
 

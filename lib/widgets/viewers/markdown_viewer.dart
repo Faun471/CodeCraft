@@ -1,29 +1,33 @@
-import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/challenge.dart';
 import 'package:codecraft/models/quiz.dart';
 import 'package:codecraft/parser/html_parser.dart';
 import 'package:codecraft/screens/apprentice/coding_challenges/coding_challenge_screen.dart';
+import 'package:codecraft/screens/apprentice/coding_quizzes/coding_quiz_screen.dart';
 import 'package:codecraft/screens/apprentice/coding_quizzes/completed_quiz_screen.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/services/quiz_service.dart';
 import 'package:codecraft/themes/theme.dart';
+import 'package:codecraft/utils/theme_utils.dart';
+import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/codeblocks/code_wrapper.dart';
-import 'package:codecraft/widgets/viewers/quiz_viewer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:highlight/highlight.dart' show Node, highlight;
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 
 class MarkdownViewer extends StatefulWidget {
   final String markdownData;
   final bool? displayToc;
+  final String? introAnimation;
 
   const MarkdownViewer({
     super.key,
     required this.markdownData,
     this.displayToc = true,
+    this.introAnimation,
   });
 
   @override
@@ -35,25 +39,122 @@ class MarkdownViewerState extends State<MarkdownViewer> {
   FocusNode focusNode = FocusNode();
   String get markdownData => controller.text;
 
+  late VideoPlayerController videoController;
+
   @override
   void initState() {
     super.initState();
     controller.text = widget.markdownData;
     controller.addListener(refresh);
+    if (widget.introAnimation != null) {
+      _initializeVideoController();
+    }
+  }
+
+  void _initializeVideoController() {
+    videoController = VideoPlayerController.networkUrl(
+      Uri.parse(widget.introAnimation!),
+      httpHeaders: {
+        'Cache-Control': 'max-age=3600',
+      },
+    )..initialize().then((_) {
+        if (videoController.value.isInitialized) {
+          setState(() {
+            if (!videoController.value.isBuffering) {
+              _showVideoDialog();
+            }
+          });
+        }
+      });
+  }
+
+  void _showVideoDialog() {
+    if (videoController.value.isInitialized) {
+      showDialog(
+        context: context,
+        builder: (_) => _buildVideoDialog(),
+      ).then((_) {
+        videoController.play();
+      });
+    }
+  }
+
+  Widget _buildVideoDialog() {
+    videoController.play();
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.8,
+        height: MediaQuery.of(context).size.height * 0.6,
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(10)),
+                child: videoController.value.isInitialized
+                    ? AspectRatio(
+                        aspectRatio: videoController.value.aspectRatio,
+                        child: VideoPlayer(videoController),
+                      )
+                    : const Center(child: CircularProgressIndicator()),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      videoController.value.isPlaying
+                          ? Icons.pause
+                          : Icons.play_arrow,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        videoController.value.isPlaying
+                            ? videoController.pause()
+                            : videoController.play();
+                      });
+                    },
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Close'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   void dispose() {
+    if (widget.introAnimation != null) {
+      videoController.dispose();
+    }
     super.dispose();
   }
 
   final tocController = TocController();
 
   final List<WidgetConfig> configs = [
-    CodeConfig(
+    const CodeConfig(
       style: TextStyle(
         fontSize: 14,
-        color: SyntaxTheme.dracula.isLight ? Colors.black : Colors.white,
       ),
     ),
     PreConfig(
@@ -78,11 +179,22 @@ class MarkdownViewerState extends State<MarkdownViewer> {
         : MarkdownConfig.defaultConfig.copy(
             configs: [
               const PConfig(
-                  textStyle: TextStyle(fontSize: 16, color: Colors.black)),
+                textStyle: TextStyle(fontSize: 16, color: Colors.black),
+              ),
             ],
           );
     return Scaffold(
-      appBar: widget.displayToc == true ? AppBar() : null,
+      appBar: widget.displayToc == true
+          ? AppBar(
+              actions: [
+                if (widget.introAnimation != null)
+                  IconButton(
+                    icon: const Icon(Icons.play_circle_outline),
+                    onPressed: _showVideoDialog,
+                  ),
+              ],
+            )
+          : null,
       drawer: isVertical && widget.displayToc == true
           ? Drawer(
               child: Column(
@@ -257,7 +369,9 @@ class _ChallengeButtonState extends State<ChallengeButton> {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(Colors.blue),
+        backgroundColor: WidgetStateProperty.all(
+          Theme.of(context).primaryColor,
+        ),
         fixedSize: WidgetStateProperty.all(const Size(200, 50)),
       ),
       onPressed: () async {
@@ -289,7 +403,22 @@ class _ChallengeButtonState extends State<ChallengeButton> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChallengeScreen(challenge: challenge),
+                    builder: (context) => ChallengeScreen(
+                      challenge: challenge,
+                      onChallengeCompleted: () {
+                        // pop until we're back to the map screen
+                        Navigator.popUntil(
+                          context,
+                          ModalRoute.withName('/apprentice_home'),
+                        );
+
+                        Utils.displayDialog(
+                          context: context,
+                          title: 'Challenge Completed',
+                          content: 'You have completed the challenge!',
+                        );
+                      },
+                    ),
                   ),
                 );
               },
@@ -297,7 +426,14 @@ class _ChallengeButtonState extends State<ChallengeButton> {
           ),
         );
       },
-      child: const Text('Proceed to challenge'),
+      child: Text(
+        'Proceed to challenge',
+        style: TextStyle(
+          color: ThemeUtils.getTextColorForBackground(
+            Theme.of(context).primaryColor,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -340,7 +476,9 @@ class _QuizButtonState extends ConsumerState<QuizButton> {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(Colors.blue),
+        backgroundColor: WidgetStateProperty.all(
+          Theme.of(context).primaryColor,
+        ),
         fixedSize: WidgetStateProperty.all(const Size(200, 50)),
       ),
       onPressed: () async {
@@ -353,31 +491,28 @@ class _QuizButtonState extends ConsumerState<QuizButton> {
                 QuizService().getCompletedQuizzes(
                   FirebaseAuth.instance.currentUser!.uid,
                 ),
-                QuizService().getQuizResult(
-                  widget.quizId!,
-                ),
+                QuizService().getQuizResult(widget.quizId!),
               ],
               onDone: (context, snapshot) {
-                if (snapshot.data[0] == null) {
-                  return;
-                }
-
-                if (snapshot.error != null) {
+                if (snapshot.data[0] == null || snapshot.error != null) {
                   return;
                 }
 
                 final quiz = snapshot.data[0] as Quiz;
 
-                final QuizResult? quizResult = snapshot.data[2] as QuizResult?;
-                if (quizResult != null) {
+                final QuizResult? previousResult =
+                    snapshot.data[2] as QuizResult?;
+
+                if (previousResult != null) {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                       builder: (context) => QuizResultsScreen(
                         quiz: quiz,
-                        quizResult: quizResult,
+                        quizResult: previousResult,
                         showSolutions: false,
                         canRetake: true,
+                        orgId: 'Default',
                       ),
                     ),
                   );
@@ -387,22 +522,9 @@ class _QuizButtonState extends ConsumerState<QuizButton> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => QuizViewer(
-                      quiz: quiz,
-                      onQuizFinished: (quiz) {
-                        QuizService().saveQuizResultsWithAnswers(quiz);
-
-                        //if quiz is perfect, add experience
-                        if (quiz.isPerfect) {
-                          final appUserNotifier =
-                              ref.watch(appUserNotifierProvider.notifier);
-                          appUserNotifier.addExperience(
-                            quiz.experienceToEarn,
-                          );
-                        }
-
-                        Navigator.pop(context);
-                      },
+                    builder: (context) => QuizScreen(
+                      quizId: widget.quizId!,
+                      orgId: 'Default',
                     ),
                   ),
                 );
@@ -411,7 +533,14 @@ class _QuizButtonState extends ConsumerState<QuizButton> {
           ),
         );
       },
-      child: const Text('Proceed to Quiz'),
+      child: Text(
+        'Proceed to Quiz',
+        style: TextStyle(
+          color: ThemeUtils.getTextColorForBackground(
+            Theme.of(context).primaryColor,
+          ),
+        ),
+      ),
     );
   }
 }

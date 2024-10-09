@@ -10,60 +10,63 @@ part 'app_user_notifier.g.dart';
 
 @riverpod
 class AppUserNotifier extends _$AppUserNotifier {
+  StreamSubscription<DocumentSnapshot>? _userSubscription;
+
   @override
   FutureOr<AppUser> build() async {
-    return await _fetchData();
+    // Cancel any existing subscription when the provider is rebuilt
+    await _userSubscription?.cancel();
+    return await _fetchAndListenToUserData();
   }
 
-  Future<AppUser> _fetchData() async {
-    AppUser user = state.value ?? AppUser();
+  Future<AppUser> _fetchAndListenToUserData() async {
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      return user;
+      return AppUser();
     }
 
-    print('Fetching user data for ${currentUser.uid}');
+    final userDoc = DatabaseHelper().currentUser;
 
-    // Fetch accurate data first
-    if (user.isEmpty()) {
-      final data = await DatabaseHelper().getUserData(currentUser.uid);
-      user = AppUser.fromMap(data);
-    }
-
-    // Set up a listener to listen for changes
-    DatabaseHelper().currentUser.snapshots().listen((doc) async {
-      if (doc.exists) {
-        user = AppUser.fromMap(doc.data() as Map<String, dynamic>);
+    // Set up a listener for real-time updates
+    _userSubscription = userDoc.snapshots().listen((docSnapshot) {
+      if (docSnapshot.exists) {
+        final userData = docSnapshot.data() as Map<String, dynamic>;
+        state = AsyncValue.data(AppUser.fromMap(userData));
       }
+    }, onError: (error) {
+      state = AsyncValue.error(error, StackTrace.current);
     });
 
-    print('returning user: $user');
-
-    return user;
+    // Fetch initial data
+    final initialDoc = await userDoc.get();
+    if (initialDoc.exists) {
+      return AppUser.fromMap(initialDoc.data() as Map<String, dynamic>);
+    } else {
+      // If the document doesn't exist, create a new user
+      final newUser = AppUser(id: currentUser.uid, email: currentUser.email);
+      await userDoc.set(newUser.toMap());
+      return newUser;
+    }
   }
 
   Future<void> fillMissingData(Map<String, dynamic> data) async {
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser != null) {
-      if (data['id'] == null) {
-        data['id'] = currentUser.uid;
+      final updatedData = {
+        'id': currentUser.uid,
+        'displayName': currentUser.displayName,
+        'email': currentUser.email,
+        ...data,
+      };
+
+      if (updatedData['photoUrl'] == null || updatedData['photoUrl']!.isEmpty) {
+        updatedData['photoUrl'] =
+            'https://api.dicebear.com/9.x/thumbs/png?seed=${currentUser.uid}';
       }
 
-      if (data['photoURL'] == null) {
-        data['photoURL'] = currentUser.photoURL;
-      }
-
-      if (data['displayName'] == null) {
-        data['displayName'] = currentUser.displayName;
-      }
-
-      if (data['email'] == null) {
-        data['email'] = currentUser.email;
-      }
-
-      await updateData(data);
+      await updateData(updatedData);
     } else {
       state = AsyncValue.error("No authenticated user", StackTrace.current);
     }
@@ -71,24 +74,26 @@ class AppUserNotifier extends _$AppUserNotifier {
 
   Future<void> updateData(Map<String, dynamic> newData) async {
     try {
-      state = const AsyncValue.loading();
-      var updatedData = {
-        ...(state.value!.toMap()),
+      final currentData = state.value?.toMap() ?? {};
+      final updatedData = {
+        ...currentData,
         ...newData,
         'id': FirebaseAuth.instance.currentUser!.uid
       };
+
       await DatabaseHelper()
           .currentUser
           .set(updatedData, SetOptions(merge: true));
-      state = AsyncValue.data(AppUser.fromMap(updatedData));
+      // The listener will update the state automatically
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
     }
   }
 
   Future<void> addExperience(int experience) async {
+    if (state.value == null) return;
+
     try {
-      state = const AsyncValue.loading();
       final currentExperience = state.value!.experience ?? 0;
       final newExperience = currentExperience + experience;
 
@@ -104,10 +109,5 @@ class AppUserNotifier extends _$AppUserNotifier {
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
     }
-  }
-
-  // Add this reset method
-  void reset() {
-    state = AsyncValue.data(AppUser());
   }
 }

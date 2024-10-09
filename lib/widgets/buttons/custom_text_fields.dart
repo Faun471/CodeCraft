@@ -19,8 +19,11 @@ mixin TextFieldMixin {
           if (!RegExp(r'(?=.*?[A-Z])').hasMatch(value)) {
             return 'Password must contain at least one uppercase character';
           }
-          if (!RegExp(r'(?=.*?[!@#\$&*~])').hasMatch(value)) {
+          if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
             return 'Password must contain at least one special character';
+          }
+          if (!RegExp(r'(?=.*?[0-9])').hasMatch(value)) {
+            return 'Password must contain at least one number';
           }
         }
       case ValidationMode.none:
@@ -74,22 +77,54 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      initialValue: widget.initialValue,
-      controller: widget.controller,
-      decoration: InputDecoration(
-        labelText: widget.labelText,
-        hintText: 'Enter your ${widget.labelText}',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.0),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          initialValue: widget.initialValue,
+          controller: widget.controller,
+          decoration: InputDecoration(
+            labelText:
+                '${widget.labelText}${widget.isRequired ? ' (Required)' : ''}',
+            hintText: 'Enter your ${widget.labelText}',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            prefixIcon: widget.icon != null ? Icon(widget.icon) : null,
+          ),
+          validator: (value) => widget.validator != null
+              ? widget.validator!(value)
+              : value!.trim().isEmpty && widget.isRequired
+                  ? '* This field is required'
+                  : widget.defaultValidator(value, widget.mode),
         ),
-        prefixIcon: widget.icon != null ? Icon(widget.icon) : null,
+        if (widget.mode == ValidationMode.password)
+          _buildPasswordRequirements(),
+      ],
+    );
+  }
+
+  Widget _buildPasswordRequirements() {
+    final value = widget.controller.text;
+    final requirements = [
+      if (value.length < 8) 'at least 8 characters',
+      if (!RegExp(r'(?=.*?[A-Z])').hasMatch(value)) 'one uppercase character',
+      if (!RegExp(r'(?=.*?[!@#\$&*~\?:;$\+\-\*\-\/])').hasMatch(value))
+        'one special character',
+      if (!RegExp(r'(?=.*?[0-9])').hasMatch(value)) 'one number',
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 4.0),
+      child: Text(
+        requirements.isEmpty
+            ? 'Your password meets all requirements'
+            : 'Your password must have ${requirements.join(', ')}',
+        style: TextStyle(
+          color: requirements.isEmpty ? Colors.green : Colors.red,
+          fontSize: 12,
+        ),
       ),
-      validator: (value) => widget.validator != null
-          ? widget.validator!(value)
-          : value!.trim().isEmpty && widget.isRequired
-              ? '* This field is required'
-              : widget.defaultValidator(value, widget.mode),
     );
   }
 }
@@ -126,6 +161,7 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
   void initState() {
     super.initState();
     widget.focusNode.addListener(_focusChanged);
+    widget.controller.addListener(_onTextChanged);
 
     isValid = widget.validator != null
         ? widget.validator!(widget.controller.text) == null
@@ -138,42 +174,83 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
     }
   }
 
+  void _onTextChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   void dispose() {
     widget.focusNode.removeListener(_focusChanged);
+    widget.controller.removeListener(_onTextChanged);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      focusNode: widget.focusNode,
-      controller: widget.controller,
-      obscureText: !_passwordVisible,
-      enableSuggestions: false,
-      autocorrect: false,
-      decoration: InputDecoration(
-        border: const OutlineInputBorder(),
-        labelText: widget.labelText,
-        prefixIcon: const Icon(Icons.lock),
-        suffixIcon: widget.focusNode.hasFocus
-            ? IconButton(
-                icon: Icon(
-                  _passwordVisible ? Icons.visibility : Icons.visibility_off,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _passwordVisible = !_passwordVisible;
-                  });
-                },
-              )
-            : null,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          focusNode: widget.focusNode,
+          controller: widget.controller,
+          obscureText: !_passwordVisible,
+          enableSuggestions: false,
+          autocorrect: false,
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            labelText:
+                '${widget.labelText}${widget.isRequired ? ' (Required)' : ''}',
+            prefixIcon: const Icon(Icons.lock),
+            suffixIcon: widget.focusNode.hasFocus
+                ? IconButton(
+                    icon: Icon(
+                      _passwordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _passwordVisible = !_passwordVisible;
+                      });
+                    },
+                  )
+                : null,
+          ),
+          validator: (value) => widget.validator != null
+              ? widget.validator!(value)
+              : value!.trim().isEmpty && widget.isRequired
+                  ? '* This field is required'
+                  : widget.defaultValidator(value, widget.mode),
+        ),
+        if (widget.mode == ValidationMode.password)
+          _buildPasswordRequirements(),
+      ],
+    );
+  }
+
+  Widget _buildPasswordRequirements() {
+    final value = widget.controller.text;
+    final requirements = [
+      if (value.length < 8) 'at least 8 characters',
+      if (!RegExp(r'(?=.*?[A-Z])').hasMatch(value)) 'one uppercase character',
+      if (!RegExp(r'(?=.*?[!@#\$&*~\?:;$\+\-\*\-\/])').hasMatch(value))
+        'one special character',
+      if (!RegExp(r'(?=.*?[0-9])').hasMatch(value)) 'one number',
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 4.0),
+      child: Text(
+        requirements.isEmpty
+            ? 'Your password meets all requirements'
+            : 'Your password must have ${requirements.join(', ')}',
+        style: TextStyle(
+          color: requirements.isEmpty ? Colors.green : Colors.red,
+          fontSize: 12,
+        ),
       ),
-      validator: (value) => widget.validator != null
-          ? widget.validator!(value)
-          : value!.trim().isEmpty && widget.isRequired
-              ? '* This field is required'
-              : widget.defaultValidator(value, widget.mode),
     );
   }
 }

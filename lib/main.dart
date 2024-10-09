@@ -31,12 +31,13 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
 
-  QuizService().createQuizzesFromJson('assets/quizzes/quizzes.json', 'Default');
+  await QuizService()
+      .createQuizzesFromJson('assets/quizzes/quizzes.json', 'Default');
 
   FirebaseAuth.instance.authStateChanges().listen(
     (User? user) async {
       if (user == null) {
-        providerContainer.read(appUserNotifierProvider.notifier).reset();
+        providerContainer.refresh(appUserNotifierProvider.notifier);
 
         if (navigatorKey.currentState == null) return;
         navigatorKey.currentState!.pushReplacement(
@@ -66,8 +67,6 @@ void main() async {
 Future<Widget> getLandingPage(AppUser appUserData) async {
   final auth = FirebaseAuth.instance;
   final user = auth.currentUser;
-
-  print('App user data: $appUserData');
 
   if (user == null) {
     return kIsWeb ? const AccountSetup(Login()) : const OnboardingPage();
@@ -135,10 +134,14 @@ class MyApp extends ConsumerWidget {
                 theme: theme,
                 darkTheme: darkTheme,
                 navigatorKey: navigatorKey,
+                routes: {
+                  '/login': (context) => const AccountSetup(Login()),
+                  '/register': (context) => const AccountSetup(Register()),
+                  '/apprentice_home': (context) => const ApprenticeHome(),
+                  '/mentor_home': (context) => const MentorHome(),
+                },
                 home: LoadingScreen(
-                  futures: [
-                    getLandingPage(data),
-                  ],
+                  futures: [getLandingPage(data)],
                   onDone: (context, snapshot) async {
                     if (!context.mounted) return;
 

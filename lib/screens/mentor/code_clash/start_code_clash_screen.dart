@@ -169,7 +169,7 @@ class _StartCodeClashScreenState extends ConsumerState<StartCodeClashScreen> {
                     title: Text(participant.displayName),
                     leading: CircleAvatar(
                       child: CachedNetworkImage(
-                        imageUrl: participant.photoURL ?? '',
+                        imageUrl: participant.photoUrl ?? '',
                         placeholder: (context, url) =>
                             const CircularProgressIndicator(),
                         errorWidget: (context, url, error) => const Icon(
@@ -208,7 +208,8 @@ class _StartCodeClashScreenState extends ConsumerState<StartCodeClashScreen> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+            color: ThemeUtils.getTextColorForBackground(
+                Theme.of(context).primaryColor),
           ),
         ),
       ),

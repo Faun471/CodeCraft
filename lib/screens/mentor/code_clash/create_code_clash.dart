@@ -227,7 +227,8 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
             child: Text(
               'Add Unit Test',
               style: TextStyle(
-                color: ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                color: ThemeUtils.getTextColorForBackground(
+                    Theme.of(context).primaryColor),
               ),
             ),
           ),
@@ -324,7 +325,8 @@ class _CreateCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
                   'Add Input',
                   style: TextStyle(
                     color:
-                        ThemeUtils.getTextColor(Theme.of(context).primaryColor),
+                        ThemeUtils.getTextColorForBackground(
+                        Theme.of(context).primaryColor),
                   ),
                 ),
               ),

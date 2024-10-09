@@ -1,3 +1,4 @@
+import 'package:codecraft/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:auto_size_text/auto_size_text.dart';
@@ -27,19 +28,9 @@ class QuizViewer extends ConsumerWidget {
       });
     }
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor.withOpacity(0.75),
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
-        automaticallyImplyLeading: false,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          "${quizState.currentQuestionIndex + 1} of ${quiz.questions.length}",
-          style: const TextStyle(color: Colors.white),
-        ),
-      ),
-      body: Center(
+    return Container(
+      color: ThemeUtils.getDarkColor(Theme.of(context).primaryColor),
+      child: Center(
         child: Stack(
           children: [
             Center(
@@ -53,35 +44,15 @@ class QuizViewer extends ConsumerWidget {
                       const SizedBox(height: 20),
                       Expanded(
                         child: _buildQuestionCard(
-                            quizState, quizNotifier, context),
+                          quizState,
+                          quizNotifier,
+                          context,
+                        ),
                       ),
                       const SizedBox(height: 20),
                       _buildNextButton(quizState, quizNotifier),
                     ],
                   ),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 50,
-              right: MediaQuery.of(context).size.width / 2 -
-                  (MediaQuery.of(context).size.width < 400 ? 125 : 150),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                child: Row(
-                  children: [
-                    const Icon(Icons.alarm, color: Colors.white),
-                    const SizedBox(width: 5),
-                    Text(
-                      "${(quizState.remainingTimer ~/ 60).toString().padLeft(2, '0')}:${(quizState.remainingTimer % 60).toString().padLeft(2, '0')}",
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ],
                 ),
               ),
             ),
@@ -109,21 +80,38 @@ class QuizViewer extends ConsumerWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(
-            quiz.title,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-              fontWeight: FontWeight.w500,
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            constraints: const BoxConstraints(maxWidth: 100),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.alarm,
+                  color: ThemeUtils.getTextColorForBackground(
+                      Theme.of(context).primaryColor),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  "${(state.remainingTimer ~/ 60).toString().padLeft(2, '0')}:${(state.remainingTimer % 60).toString().padLeft(2, '0')}",
+                  style: TextStyle(
+                    color: ThemeUtils.getTextColorForBackground(
+                        Theme.of(context).primaryColor),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 25),
           AutoSizeText(
             state.quiz.questions[state.currentQuestionIndex].questionText,
             style: const TextStyle(
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
@@ -162,7 +150,15 @@ class QuizViewer extends ConsumerWidget {
             border: Border.all(color: const Color(0xFFE0E0E0)),
           ),
           child: ListTile(
-            title: Text(answer),
+            title: AutoSizeText(
+              answer,
+              maxFontSize: 12,
+              minFontSize: 10,
+              style: TextStyle(
+                color: ThemeUtils.adjustColorBrightness(
+                    Theme.of(context).primaryColor),
+              ),
+            ),
             onTap: () => notifier.checkAnswer(answer),
           ),
         ),
@@ -170,7 +166,10 @@ class QuizViewer extends ConsumerWidget {
         effects: [
           FadeEffect(begin: 0, end: 1, duration: 300.ms),
           SlideEffect(
-              begin: const Offset(-0.1, 0), end: Offset.zero, duration: 300.ms),
+            begin: const Offset(-0.1, 0),
+            end: Offset.zero,
+            duration: 300.ms,
+          ),
         ],
       );
     }).toList();

@@ -190,8 +190,11 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
                     Column(
                       children: [
                         CircleAvatar(
-                          backgroundImage:
-                              CachedNetworkImageProvider(user.photoURL ?? ''),
+                          backgroundImage: CachedNetworkImageProvider(
+                            user.photoUrl == null || user.photoUrl!.isEmpty
+                                ? 'https://api.dicebear.com/9.x/thumbs/png?seed=${user.id!}'
+                                : user.photoUrl!,
+                          ),
                           radius: 30,
                         ),
                         if (MediaQuery.of(context).size.width < 600)
@@ -233,7 +236,7 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
                     // Quizzes and Challenges
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Text(
                           'Level: ${user.level ?? 0}',
@@ -242,20 +245,30 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
                             fontSize: 12,
                           ),
                         ),
-                        Text(
-                          'Coding Challenges: ${user.completedChallenges?.length ?? 0}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
+                        if (_sortBy == 'quizzes')
+                          Text(
+                            'Quizzes: ${user.quizResults.length}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Debugging Challenges: ${user.completedDebuggingChallenges?.length ?? 0}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
+                        if (_sortBy == 'challenges') ...[
+                          Text(
+                            'Coding Challenges: ${user.completedChallenges?.length ?? 0}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
+                          Text(
+                            'Debugging Challenges: ${user.completedDebuggingChallenges?.length ?? 0}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ],

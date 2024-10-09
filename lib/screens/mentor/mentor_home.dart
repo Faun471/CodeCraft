@@ -1,12 +1,11 @@
 import 'package:codecraft/models/app_user_notifier.dart';
-import 'package:codecraft/screens/apprentice/organisation/organisation_screen.dart';
 import 'package:codecraft/screens/body.dart';
 import 'package:codecraft/screens/generic/about_us.dart';
 import 'package:codecraft/screens/generic/faq.dart';
 import 'package:codecraft/screens/generic/pricing_screen.dart';
 import 'package:codecraft/screens/mentor/code_clash/manage_code_clashes_screen.dart';
 import 'package:codecraft/screens/mentor/debugging_challenge/manage_debugging_challenge.dart';
-import 'package:codecraft/screens/mentor/organisation/manage_organisation_mentor.dart';
+import 'package:codecraft/screens/mentor/organization/manage_organisation_mentor.dart';
 import 'package:codecraft/screens/mentor/quizzes/manage_quizzes_screen.dart';
 import 'package:codecraft/screens/settings/settings.dart';
 import 'package:codecraft/utils/utils.dart';
@@ -34,7 +33,7 @@ class MentorHome extends ConsumerWidget {
               ),
               SidebarItem(
                 icon: Icons.people,
-                label: 'Manage Organisation',
+                label: 'Manage Organization',
                 screen: const ManageRequestsScreen(),
               ),
               SidebarItem(
@@ -84,10 +83,6 @@ class MentorHome extends ConsumerWidget {
                     label: 'User Profile',
                     screen: const SettingsScreen(),
                   ),
-                  SidebarItem(
-                      icon: Icons.business,
-                      label: 'Organisation',
-                      screen: const OrganisationScreen()),
                   SidebarItem(
                     icon: Icons.palette,
                     label: 'Appearance',

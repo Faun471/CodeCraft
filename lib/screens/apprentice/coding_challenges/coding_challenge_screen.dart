@@ -461,6 +461,7 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
   @override
   void dispose() {
     controller.dispose();
+    ref.watch(codeExecutionProvider.notifier).resetOutput();
     super.dispose();
   }
 }

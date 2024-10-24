@@ -63,6 +63,7 @@ class _DebuggingChallengeScreenState
       _title = widget.challenge!.title;
       _instructions = widget.challenge!.instructions;
       _initialCode = widget.challenge!.initialCode;
+      codeLineController.text = _initialCode;
       _correctLine = widget.challenge!.correctLine;
       _expectedOutput = widget.challenge!.expectedOutput;
       _attemptsAllowed = widget.challenge!.attemptsLeft;

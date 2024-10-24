@@ -60,6 +60,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
     if (widget.challenge != null) {
       _instructions = widget.challenge!.instructions;
       _sampleCode = widget.challenge!.sampleCode ?? '';
+      controller.text = _sampleCode;
       _className = widget.challenge!.className;
       _methodName = widget.challenge!.methodName;
       _unitTests = widget.challenge!.unitTests;

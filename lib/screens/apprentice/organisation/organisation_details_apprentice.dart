@@ -50,37 +50,41 @@ class OrganizationCard extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundImage: NetworkImage(organization.imageUrl),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  organization.orgName.isEmpty
-                      ? 'Organization Name'
-                      : organization.orgName,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            if (organization.mentorId == FirebaseAuth.instance.currentUser!.uid)
-              Positioned(
-                top: 0,
-                right: 0,
-                child: IconsButton(
-                  padding: EdgeInsets.zero,
-                  text: 'Edit',
-                  iconData: Icons.edit,
-                  onPressed: () =>
-                      _showEditOrganizationDialog(context, organization, ref),
-                ),
+        SizedBox(
+          width: double.infinity,
+          child: Stack(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundImage: NetworkImage(organization.imageUrl),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    organization.orgName.isEmpty
+                        ? 'Organization Name'
+                        : organization.orgName,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
-          ],
+              if (organization.mentorId ==
+                  FirebaseAuth.instance.currentUser!.uid)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: IconsButton(
+                    padding: EdgeInsets.zero,
+                    text: 'Edit',
+                    iconData: Icons.edit,
+                    onPressed: () =>
+                        _showEditOrganizationDialog(context, organization, ref),
+                  ),
+                ),
+            ],
+          ),
         ),
         SizedBox(height: 10),
         Text(organization.orgDescription, style: TextStyle(fontSize: 16)),

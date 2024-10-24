@@ -94,7 +94,7 @@ class _ManageChallengeScreenState extends ConsumerState<ManageQuizzesScreen> {
                     ),
                     child: ListTile(
                       title: Text(
-                        "${snapshot.data![index].duration.toDateTime().isBefore(DateTime.now()) ? '(Expired)' : ''} ${snapshot.data![index].id}",
+                        "${snapshot.data![index].duration.toDateTime().isBefore(DateTime.now()) ? '(Expired)' : ''} ${snapshot.data![index].title}",
                         style: TextStyle(
                             color: snapshot.data![index].duration
                                     .toDateTime()

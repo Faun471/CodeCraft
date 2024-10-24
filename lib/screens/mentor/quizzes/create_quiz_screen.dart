@@ -643,18 +643,13 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
 
                 if (!mounted) return;
 
+                Navigator.of(context).pop();
+
                 Utils.displayDialog(
                   context: context,
                   title: 'Success',
                   content: 'Quiz submitted successfully.',
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('OK'),
-                    ),
-                  ],
+                  lottieAsset: 'assets/anim/congrats.json',
                 );
               } catch (e) {
                 if (!mounted) return;

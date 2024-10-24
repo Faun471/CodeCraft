@@ -133,14 +133,20 @@ class Auth extends _$Auth {
       return 'success';
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
-        case 'invalid-email':
-          return 'The email address is not valid.';
         case 'email-already-in-use':
           return 'The email address is already in use by another account.';
+        case 'invalid-email':
+          return 'The email address is not valid.';
+        case 'operation-not-allowed':
+          return 'Email/password accounts are not enabled. Please contact the developer.';
         case 'weak-password':
           return 'The password is too weak.';
-        case 'operation-not-allowed':
-          return 'Email/password accounts are not enabled. Enable email/password accounts in the Firebase Console, under the Auth tab.';
+        case 'too-many-requests':
+          return 'Too many requests. Try again later.';
+        case 'user-token-expired':
+          return 'The user\'s token has expired. Sign in again.';
+        case 'network-request-failed':
+          return 'A network error occurred. Please check your connection and try again.';
         default:
           return e.toString();
       }
@@ -160,12 +166,22 @@ class Auth extends _$Auth {
       switch (e.code) {
         case 'invalid-email':
           return 'The email address is not valid.';
+        case 'user-disabled':
+          return 'The user has been disabled.';
         case 'user-not-found':
           return 'No user found for that email.';
         case 'wrong-password':
           return 'Wrong password provided for that user.';
+        case 'too-many-requests':
+          return 'Too many requests. Try again later.';
+        case 'user-token-expired':
+          return 'The user\'s token has expired. Sign in again.';
+        case 'network-request-failed':
+          return 'A network error occurred. Please check your connection and try again.';
+        case 'invalid-credential':
+          return 'Error occurred while accessing credentials. Try again.';
         case 'operation-not-allowed':
-          return 'Email/password accounts are not enabled. Enable email/password accounts in the Firebase Console, under the Auth tab.';
+          return 'Email/password accounts are not enabled. Please contact the developer.';
         default:
           return e.toString();
       }

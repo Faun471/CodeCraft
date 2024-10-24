@@ -5,6 +5,7 @@ import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/account_setup/register.dart';
 import 'package:codecraft/screens/apprentice/apprentice_home.dart';
 import 'package:codecraft/screens/mentor/mentor_home.dart';
+import 'package:codecraft/services/auth/auth_helper.dart';
 import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -28,7 +29,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerifScreen> {
   @override
   void initState() {
     super.initState();
-    FirebaseAuth.instance.currentUser?.sendEmailVerification();
+    ref.watch(authProvider.notifier).sendVerificationEmail();
     _startVerificationCheck();
   }
 

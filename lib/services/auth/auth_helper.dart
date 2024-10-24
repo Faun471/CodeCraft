@@ -207,4 +207,40 @@ class Auth extends _$Auth {
 
     return Future.value();
   }
+
+  Future<void> sendVerificationEmail() async {
+    final user = state.value?.user;
+    if (user == null || user.emailVerified) {
+      return;
+    }
+
+    final dbHelper = DatabaseHelper();
+    final appUser = await dbHelper.currentUser.get();
+
+    if (appUser['lastEmailVerification'] != null) {
+      DateTime? lastEmailVerification;
+      try {
+        lastEmailVerification =
+            (appUser['lastEmailVerification'] as Timestamp).toDate();
+      } catch (e) {
+        return;
+      }
+
+      DateTime now = DateTime.now();
+      if (now.difference(lastEmailVerification).inMinutes < 2) {
+        print('Email verification already sent within the last 2 minutes.');
+        return;
+      }
+    }
+
+    try {
+      await dbHelper.currentUser.set(
+        {'lastEmailVerification': Timestamp.now()},
+        SetOptions(merge: true),
+      );
+      await user.sendEmailVerification();
+    } catch (e) {
+      return;
+    }
+  }
 }

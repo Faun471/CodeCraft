@@ -47,3 +47,4 @@ pubspec.lock
 .firebaserc
 pubspec.lock
 pubspec.lock
+/lib/screens/paypal

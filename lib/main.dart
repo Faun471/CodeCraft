@@ -11,7 +11,6 @@ import 'package:codecraft/screens/account_setup/register.dart';
 import 'package:codecraft/screens/apprentice/apprentice_home.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/screens/mentor/mentor_home.dart';
-import 'package:codecraft/services/quiz_service.dart';
 import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/widgets/cards/onboarding_card.dart';
 import 'package:context_menus/context_menus.dart';
@@ -31,8 +30,6 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
 
-  await QuizService()
-      .createQuizzesFromJson('assets/quizzes/quizzes.json', 'Default');
 
   FirebaseAuth.instance.authStateChanges().listen(
     (User? user) async {

@@ -192,7 +192,7 @@ class _LeaderboardsState extends ConsumerState<Leaderboards> {
                         CircleAvatar(
                           backgroundImage: CachedNetworkImageProvider(
                             user.photoUrl == null || user.photoUrl!.isEmpty
-                                ? 'https://api.dicebear.com/9.x/thumbs/png?seed=${user.id!}'
+                                ? 'https://api.dicebear.com/9.x/thumbs/png?seed=${user.id ?? ''}'
                                 : user.photoUrl!,
                           ),
                           radius: 30,

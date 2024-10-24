@@ -4,7 +4,6 @@ import 'package:codecraft/models/quiz.dart';
 import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/screens/mentor/quizzes/create_quiz_screen.dart';
-import 'package:codecraft/screens/mentor/quizzes/edit_quiz_screen.dart';
 import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/services/quiz_service.dart';
 import 'package:codecraft/utils/theme_utils.dart';
@@ -125,7 +124,7 @@ class _ManageChallengeScreenState extends ConsumerState<ManageQuizzesScreen> {
                                 onDone: (context, snapshot1) {
                                   Navigator.pop(context);
                                   ref.watch(screenProvider.notifier).pushScreen(
-                                        EditQuizScreen(
+                                        CreateQuizScreen(
                                             quiz: snapshot1.data[0]!),
                                       );
                                 },

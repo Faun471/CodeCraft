@@ -1,4 +1,3 @@
-import 'package:codecraft/screens/mentor/organization/join_requests_list.dart';
 import 'package:codecraft/screens/mentor/organization/organisation_details_mentor.dart';
 import 'package:codecraft/services/auth/auth_helper.dart';
 import 'package:flutter/material.dart';

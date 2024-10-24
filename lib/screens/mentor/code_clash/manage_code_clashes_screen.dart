@@ -3,7 +3,6 @@ import 'package:codecraft/models/code_clash.dart';
 import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/screens/apprentice/code_clash/code_clash_results_screen.dart';
 import 'package:codecraft/screens/mentor/code_clash/create_code_clash.dart';
-import 'package:codecraft/screens/mentor/code_clash/edit_code_clash.dart';
 import 'package:codecraft/screens/mentor/code_clash/start_code_clash_screen.dart';
 import 'package:codecraft/services/code_clash_service.dart';
 import 'package:codecraft/utils/theme_utils.dart';
@@ -145,7 +144,7 @@ class _ManageCodeClashesScreenState
 
   void _navigateToEditScreen(BuildContext context, CodeClash codeClash) {
     ref.watch(screenProvider.notifier).pushScreen(
-          EditCodeClashScreen(codeClash: codeClash),
+          CreateCodeClashScreen(codeClash: codeClash),
         );
   }
 

@@ -16,18 +16,24 @@ class CreateDebuggingChallengeScreen extends ConsumerStatefulWidget {
   const CreateDebuggingChallengeScreen({super.key, this.challenge});
 
   @override
-  _DebuggingChallengeScreenState createState() => _DebuggingChallengeScreenState();
+  _DebuggingChallengeScreenState createState() =>
+      _DebuggingChallengeScreenState();
 }
 
-class _DebuggingChallengeScreenState extends ConsumerState<CreateDebuggingChallengeScreen> {
+class _DebuggingChallengeScreenState
+    extends ConsumerState<CreateDebuggingChallengeScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _instructionsController = TextEditingController();
   final TextEditingController _correctLineController = TextEditingController();
-  final TextEditingController _expectedOutputController = TextEditingController();
-  final TextEditingController _attemptsAllowedController = TextEditingController();
-  final CodeLineEditingController codeLineController = CodeLineEditingController();
-  final BoardDateTimeTextController dateTimeController = BoardDateTimeTextController();
+  final TextEditingController _expectedOutputController =
+      TextEditingController();
+  final TextEditingController _attemptsAllowedController =
+      TextEditingController();
+  final CodeLineEditingController codeLineController =
+      CodeLineEditingController();
+  final BoardDateTimeTextController dateTimeController =
+      BoardDateTimeTextController();
 
   int _currentStep = 0;
 
@@ -38,6 +44,16 @@ class _DebuggingChallengeScreenState extends ConsumerState<CreateDebuggingChalle
   late String _expectedOutput;
   late int _attemptsAllowed;
   late String _duration;
+
+  final fields = <int, Key>{
+    0: Key('title'),
+    1: Key('instructions'),
+    2: Key('initialCode'),
+    3: Key('correctLine'),
+    4: Key('expectedOutput'),
+    5: Key('attemptsAllowed'),
+    6: Key('duration'),
+  };
 
   @override
   void initState() {
@@ -84,6 +100,10 @@ class _DebuggingChallengeScreenState extends ConsumerState<CreateDebuggingChalle
                 _currentStep -= 1;
               });
             }
+
+            if (_currentStep == 0) {
+              _cancelChallenge();
+            }
           },
           onStepTapped: (int index) {
             setState(() {
@@ -96,7 +116,29 @@ class _DebuggingChallengeScreenState extends ConsumerState<CreateDebuggingChalle
                 _currentStep += 1;
               });
             } else {
-              _submitDebuggingChallenge();
+              if (_formKey.currentState!.validate()) {
+                _submitDebuggingChallenge();
+              } else {
+                Utils.displayDialog(
+                  context: context,
+                  title: 'Please complete all steps',
+                  content: 'Ensure all fields are filled correctly.',
+                  lottieAsset: 'assets/anim/error.json',
+                  onDismiss: () {
+                    final firstInvalidStep = _formKey.currentState!
+                        .validateGranularly()
+                        .first
+                        .widget
+                        .key!;
+
+                    setState(() {
+                      _currentStep = fields.keys.firstWhere(
+                        (key) => fields[key] == firstInvalidStep,
+                      );
+                    });
+                  },
+                );
+              }
             }
           },
           steps: [
@@ -146,6 +188,7 @@ class _DebuggingChallengeScreenState extends ConsumerState<CreateDebuggingChalle
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          key: fields[0],
           controller: _titleController,
           decoration: const InputDecoration(
             labelText: 'Title',
@@ -170,6 +213,7 @@ class _DebuggingChallengeScreenState extends ConsumerState<CreateDebuggingChalle
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          key: fields[1],
           controller: _instructionsController,
           decoration: const InputDecoration(labelText: 'Instructions'),
           maxLines: 5,
@@ -198,6 +242,7 @@ class _DebuggingChallengeScreenState extends ConsumerState<CreateDebuggingChalle
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: CodeEditorWidget(
+          key: fields[2],
           controller: codeLineController,
         ),
       ),
@@ -209,6 +254,7 @@ class _DebuggingChallengeScreenState extends ConsumerState<CreateDebuggingChalle
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          key: fields[3],
           controller: _correctLineController,
           decoration: const InputDecoration(labelText: 'Correct Line Number'),
           keyboardType: TextInputType.number,
@@ -234,6 +280,7 @@ class _DebuggingChallengeScreenState extends ConsumerState<CreateDebuggingChalle
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          key: fields[4],
           controller: _expectedOutputController,
           decoration: const InputDecoration(labelText: 'Expected Output'),
           maxLines: 3,
@@ -256,6 +303,7 @@ class _DebuggingChallengeScreenState extends ConsumerState<CreateDebuggingChalle
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          key: fields[5],
           controller: _attemptsAllowedController,
           decoration: const InputDecoration(labelText: 'Attempts Allowed'),
           keyboardType: TextInputType.number,
@@ -281,8 +329,10 @@ class _DebuggingChallengeScreenState extends ConsumerState<CreateDebuggingChalle
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: BoardDateTimeInputField(
+          key: fields[6],
           controller: dateTimeController,
           pickerType: DateTimePickerType.datetime,
+          showPickerType: BoardDateTimeFieldPickerType.mini,
           initialDate: _duration.toDateTime(),
           minimumDate: DateTime.now(),
           maximumDate: DateTime.now().add(const Duration(days: 365)),
@@ -295,6 +345,30 @@ class _DebuggingChallengeScreenState extends ConsumerState<CreateDebuggingChalle
           },
         ),
       ),
+    );
+  }
+
+  Future<void> _cancelChallenge() async {
+    Utils.displayDialog(
+      context: context,
+      title: 'Are you sure you want to cancel?',
+      content: 'All changes will be lost.',
+      lottieAsset: 'assets/anim/question.json',
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('No, Continue Editing'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            ref.read(screenProvider.notifier).popScreen();
+          },
+          child: const Text('Yes, Cancel'),
+        ),
+      ],
     );
   }
 

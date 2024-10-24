@@ -84,7 +84,7 @@ class _StartCodeClashScreenState extends ConsumerState<StartCodeClashScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              codeClash.description,
+              codeClash.instructions,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),

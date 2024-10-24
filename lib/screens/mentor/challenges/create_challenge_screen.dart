@@ -44,6 +44,15 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
     ),
   ];
 
+  final fields = <int, Key>{
+    0: Key('instructions'),
+    1: Key('sampleCode'),
+    2: Key('className'),
+    3: Key('methodName'),
+    4: Key('duration'),
+    5: Key('unitTests'),
+  };
+
   @override
   void initState() {
     super.initState();
@@ -75,6 +84,10 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                         _currentStep -= 1;
                       });
                     }
+
+                    if (_currentStep == 0) {
+                      _cancelChallenge();
+                    }
                   },
                   onStepTapped: (int index) {
                     setState(() {
@@ -97,6 +110,26 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                       _sampleCode = controller.text;
 
                       _submitChallenge();
+                    } else {
+                      Utils.displayDialog(
+                        context: context,
+                        title: 'Please complete all steps',
+                        content: 'Ensure all fields are filled correctly.',
+                        lottieAsset: 'assets/anim/error.json',
+                        onDismiss: () {
+                          final firstInvalidStep = _formKey.currentState!
+                              .validateGranularly()
+                              .first
+                              .widget
+                              .key!;
+
+                          setState(() {
+                            _currentStep = fields.keys.firstWhere(
+                              (key) => fields[key] == firstInvalidStep,
+                            );
+                          });
+                        },
+                      );
                     }
                   },
                   steps: [
@@ -163,6 +196,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          key: fields[0],
           decoration: const InputDecoration(labelText: 'Instructions'),
           autovalidateMode: AutovalidateMode.onUserInteraction,
           maxLines: 5,
@@ -192,6 +226,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: CodeEditorWidget(
+          key: fields[1],
           controller: controller,
         ),
       ),
@@ -203,6 +238,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          key: fields[2],
           decoration: const InputDecoration(labelText: 'Class Name'),
           autovalidateMode: AutovalidateMode.onUserInteraction,
           initialValue: _className,
@@ -225,6 +261,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          key: fields[3],
           decoration: const InputDecoration(labelText: 'Method Name'),
           autovalidateMode: AutovalidateMode.onUserInteraction,
           initialValue: _methodName,
@@ -247,6 +284,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: BoardDateTimeInputField(
+          key: fields[4],
           controller: dateTimeController,
           pickerType: DateTimePickerType.datetime,
           initialDate: _duration.toDateTime(),
@@ -382,47 +420,70 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
     });
   }
 
-  Future<void> _submitChallenge() async {
-    final challenge = Challenge(
-      id: _className.toSnakeCase(),
-      instructions: _instructions,
-      sampleCode: _sampleCode,
-      className: _className,
-      methodName: _methodName,
-      unitTests: _unitTests,
-      duration: _duration,
+  Future<void> _cancelChallenge() async {
+    Utils.displayDialog(
+      context: context,
+      title: 'Are you sure you want to cancel?',
+      content: 'All changes will be lost.',
+      lottieAsset: 'assets/anim/question.json',
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('No, Continue Editing'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            ref.read(screenProvider.notifier).popScreen();
+          },
+          child: const Text('Yes, Cancel'),
+        ),
+      ],
     );
-
-    await ChallengeService().createChallenge(
-      challenge,
-      ref.read(appUserNotifierProvider).value!.orgId!,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    _resetChallenge();
-
-    ref.read(screenProvider.notifier).popScreen();
   }
 
-  void _resetChallenge() {
-    setState(() {
-      _className = 'DefaultClassName';
-      _methodName = 'defaultMethodName';
-      _instructions = 'Default instructions';
-      _sampleCode = 'Default sample code';
-      _unitTests = [
-        UnitTest(
-          input: [Input(value: 'default input', type: 'String')],
-          expectedOutput: ExpectedOutput(
-            value: 'default output',
-            type: 'String',
-          ),
+  Future<void> _submitChallenge() async {
+    Utils.displayDialog(
+      context: context,
+      title: 'Are you sure with the changes?',
+      content: 'Please review the changes before submitting.',
+      lottieAsset: 'assets/anim/question.json',
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancel'),
         ),
-      ];
-      _currentStep = 0;
-    });
+        TextButton(
+          onPressed: () async {
+            Navigator.of(context).pop();
+            final challenge = Challenge(
+              id: _className.toSnakeCase(),
+              instructions: _instructions,
+              sampleCode: _sampleCode,
+              className: _className,
+              methodName: _methodName,
+              unitTests: _unitTests,
+              duration: _duration,
+            );
+
+            await ChallengeService().createChallenge(
+              challenge,
+              ref.read(appUserNotifierProvider).value!.orgId!,
+            );
+
+            if (!mounted) {
+              return;
+            }
+
+            ref.read(screenProvider.notifier).popScreen();
+          },
+          child: const Text('Submit'),
+        ),
+      ],
+    );
   }
 }

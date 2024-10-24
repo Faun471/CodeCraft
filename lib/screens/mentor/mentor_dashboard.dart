@@ -234,15 +234,21 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title,
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: ThemeUtils.getTextColorForBackground(color))),
+              AutoSizeText(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: ThemeUtils.getTextColorForBackground(color),
+                ),
+                maxLines: 2,
+                maxFontSize: 24,
+                minFontSize: 14,
+              ),
               Spacer(),
               Text(
                 count,
                 style: TextStyle(
-                    fontSize: 36,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: ThemeUtils.getTextColorForBackground(color)),
               ),
@@ -329,6 +335,7 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
               title,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 12,
                 color: ThemeUtils.getTextColorForBackground(color),
               ),
             ),
@@ -347,6 +354,9 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
                       value: value,
                       child: Text(
                         value.capitalize(),
+                        style: TextStyle(
+                          fontSize: 12,
+                        ),
                       ),
                     );
                   }).toList();
@@ -362,7 +372,7 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
                         ),
                       ),
                     ),
-                    Icon(Icons.arrow_drop_down),
+                    Icon(Icons.arrow_drop_down, color: Colors.black54),
                   ],
                 ),
               ),
@@ -472,7 +482,7 @@ class _PaginatedMembersListState extends ConsumerState<PaginatedMembersList> {
                       ),
                     ];
                   },
-                  icon: Icon(Icons.more_vert),
+                  icon: Icon(Icons.more_vert, color: Colors.black54),
                 ),
               );
             },
@@ -552,7 +562,7 @@ class PaginatedLeaderboard extends StatefulWidget {
 
 class _PaginatedLeaderboardState extends State<PaginatedLeaderboard> {
   int _currentPage = 0;
-  final int _itemsPerPage = 5;
+  final int _itemsPerPage = 10;
 
   @override
   Widget build(BuildContext context) {

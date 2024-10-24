@@ -4,7 +4,6 @@ import 'package:codecraft/models/unit_test.dart';
 class CodeClash {
   final String id;
   final String title;
-  final String description;
   final String instructions;
   final String? sampleCode;
   final String className;
@@ -18,7 +17,6 @@ class CodeClash {
   CodeClash({
     required this.id,
     required this.title,
-    required this.description,
     required this.instructions,
     this.sampleCode,
     required this.className,
@@ -34,7 +32,6 @@ class CodeClash {
     return CodeClash(
       id: '',
       title: '',
-      description: '',
       instructions: '',
       className: '',
       methodName: '',
@@ -49,7 +46,6 @@ class CodeClash {
     return CodeClash(
       id: json['id'] ?? '',
       title: json['title'] ?? '',
-      description: json['description'] ?? '',
       instructions: json['instructions'] ?? '',
       sampleCode: json['sampleCode'] ?? '',
       className: json['className'] ?? '',
@@ -75,7 +71,6 @@ class CodeClash {
     return {
       'id': id,
       'title': title,
-      'description': description,
       'instructions': instructions,
       'sampleCode': sampleCode,
       'className': className,

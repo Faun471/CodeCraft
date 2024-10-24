@@ -145,7 +145,7 @@ class _CodeClashesScreenState extends ConsumerState<CodeClashes> {
                         return ListTile(
                           title: Text(snapshot.data![index].id),
                           subtitle: Text(
-                            snapshot.data![index].description,
+                            snapshot.data![index].instructions,
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -178,7 +178,7 @@ class _CodeClashesScreenState extends ConsumerState<CodeClashes> {
                         return ListTile(
                           title: Text(snapshot.data![index].id),
                           subtitle: Text(
-                            snapshot.data![index].description,
+                            snapshot.data![index].instructions,
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),

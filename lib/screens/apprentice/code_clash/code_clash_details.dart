@@ -71,11 +71,6 @@ class CodeClashDetailScreen extends ConsumerWidget {
                     fontWeight: FontWeight.bold,
                   ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              codeClash.description,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
             const SizedBox(height: 16),
             _buildInfoRow(
                 context, 'Time Limit', '${codeClash.timeLimit} minutes'),

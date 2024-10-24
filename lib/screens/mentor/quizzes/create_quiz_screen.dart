@@ -9,7 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CreateQuizScreen extends ConsumerStatefulWidget {
-  const CreateQuizScreen({super.key});
+  final Quiz? quiz;
+
+  const CreateQuizScreen({super.key, this.quiz});
 
   @override
   _CreateQuizScreenState createState() => _CreateQuizScreenState();
@@ -25,6 +27,22 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
   String _duration = '';
   final List<Question> _questions = [];
 
+  final fields = <int, Key>{
+    0: Key('quizDetails'),
+    1: Key('questions'),
+    2: Key('duration'),
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.quiz != null) {
+      _quizTitle = widget.quiz!.title;
+      _duration = widget.quiz!.duration;
+      _questions.addAll(widget.quiz!.questions);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -38,7 +56,30 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
                 _currentStep += 1;
               });
             } else {
-              _submitQuiz();
+              if (_formKey.currentState!.validate()) {
+                _submitQuiz();
+              } else {
+                Utils.displayDialog(
+                  context: context,
+                  title: 'Please complete all steps',
+                  content: 'Ensure all fields are filled correctly.',
+                  lottieAsset: 'assets/anim/error.json',
+                  onDismiss: () {
+                    final firstInvalidStep = _formKey.currentState!
+                        .validateGranularly()
+                        .first
+                        .widget
+                        .key!;
+
+                    setState(() {
+                      _currentStep = fields.entries
+                          .firstWhere(
+                              (entry) => entry.value == firstInvalidStep)
+                          .key;
+                    });
+                  },
+                );
+              }
             }
           },
           onStepCancel: () {
@@ -46,6 +87,10 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
               setState(() {
                 _currentStep -= 1;
               });
+            }
+
+            if (_currentStep == 0) {
+              _cancelChallenge();
             }
           },
           onStepTapped: (int index) {
@@ -80,6 +125,8 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: TextFormField(
+          key: fields[0],
+          initialValue: _quizTitle,
           decoration: const InputDecoration(
             labelText: 'Quiz Title',
             hintText: 'Enter a descriptive title for your quiz',
@@ -105,6 +152,7 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          key: fields[1],
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -201,6 +249,14 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
             ),
             const SizedBox(height: 16),
             BoardDateTimeInputField(
+              showPickerType: BoardDateTimeFieldPickerType.mini,
+              key: fields[2],
+              validators: BoardDateTimeInputFieldValidators(
+                onIllegalFormat: (_) => 'Invalid date format',
+                onOutOfRange: (_) => 'Date out of range',
+                onRequired: () => 'Date is required',
+                showMessage: true,
+              ),
               controller: dateTimeController,
               pickerType: DateTimePickerType.date,
               initialDate: _duration.toDateTime(),
@@ -526,6 +582,30 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
           },
         );
       },
+    );
+  }
+
+  Future<void> _cancelChallenge() async {
+    Utils.displayDialog(
+      context: context,
+      title: 'Are you sure you want to cancel?',
+      content: 'All changes will be lost.',
+      lottieAsset: 'assets/anim/question.json',
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('No, Continue Editing'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            ref.read(screenProvider.notifier).popScreen();
+          },
+          child: const Text('Yes, Cancel'),
+        ),
+      ],
     );
   }
 

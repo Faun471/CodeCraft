@@ -59,15 +59,13 @@ dependencies:
   markdown_widget: ^2.3.2+6
   flutter_highlight: ^0.7.0
   http: ^1.2.1
-  re_editor:
-    git:
-      url: https://github.com/reqable/re-editor.git
+  re_editor: ^0.4.0
   re_highlight: ^0.0.3
   highlight: ^0.7.0
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5
   context_menus: ^2.0.0+1
-  board_datetime_picker: ^2.1.1
+  board_datetime_picker: ^2.1.4
   popup_menu_plus: ^0.0.6
   video_player: ^2.9.2
 

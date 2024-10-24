@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/providers/screen_provider.dart';
+import 'package:codecraft/widgets/buttons/notification_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -132,9 +133,7 @@ class BodyState extends ConsumerState<Body> {
                 minFontSize: 24,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor.computeLuminance() > 0.5
-                      ? Colors.black
-                      : Colors.white,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
               ),
             ],
@@ -149,6 +148,10 @@ class BodyState extends ConsumerState<Body> {
                   },
                 )
               : null,
+          actions: [
+            if (appUser.accountType == 'mentor')
+              NotificationButton(userId: appUser.id!),
+          ],
         ),
         drawer: isSmallScreen ? _buildSidebar(appUser) : null,
         body: Row(

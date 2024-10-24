@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class Organization {
   final String id;
   final String orgName;
@@ -7,7 +5,10 @@ class Organization {
   final String createdAt;
   final String mentorId;
   final String code;
+  final String plan;
+  final int maxApprentices;
   final List<String> apprentices;
+  final String imageUrl;
 
   Organization(
     this.id,
@@ -16,17 +17,23 @@ class Organization {
     this.createdAt,
     this.mentorId,
     this.code,
+    this.plan,
+    this.maxApprentices,
     this.apprentices,
+    this.imageUrl,
   );
 
   Organization.fromMap(Map<String, dynamic> data)
       : id = data['id'] ?? '',
-        orgName = data['name'] ?? '',
-        orgDescription = data['description'] ?? '',
-        createdAt = (data['createdAt'] as Timestamp).toDate().toIso8601String(),
+        orgName = data['orgName'] ?? '',
+        orgDescription = data['orgDescription'] ?? '',
+        createdAt = (data['createdAt']) ?? '',
         mentorId = data['mentorId'] ?? '',
         code = data['code'] ?? '',
-        apprentices = List<String>.from(data['apprentices'] ?? []);
+        plan = data['plan'] ?? '',
+        maxApprentices = data['maxApprentices'] ?? 0,
+        apprentices = List<String>.from(data['apprentices'] ?? []),
+        imageUrl = data['imageUrl'] ?? '';
 
   Map<String, dynamic> toMap() {
     return {
@@ -36,7 +43,36 @@ class Organization {
       'createdAt': createdAt,
       'mentorId': mentorId,
       'code': code,
+      'plan': plan,
+      'maxApprentices': maxApprentices,
       'apprentices': apprentices,
+      'imageUrl': imageUrl,
     };
+  }
+
+  Organization copyWith({
+    String? id,
+    String? orgName,
+    String? orgDescription,
+    String? createdAt,
+    String? mentorId,
+    String? code,
+    String? plan,
+    int? maxApprentices,
+    List<String>? apprentices,
+    String? imageUrl,
+  }) {
+    return Organization(
+      id ?? this.id,
+      orgName ?? this.orgName,
+      orgDescription ?? this.orgDescription,
+      createdAt ?? this.createdAt,
+      mentorId ?? this.mentorId,
+      code ?? this.code,
+      plan ?? this.plan,
+      maxApprentices ?? this.maxApprentices,
+      apprentices ?? this.apprentices,
+      imageUrl ?? this.imageUrl,
+    );
   }
 }

@@ -6,8 +6,8 @@ import 'package:codecraft/screens/apprentice/coding_quizzes/coding_quizzes.dart'
 import 'package:codecraft/screens/apprentice/map_screen.dart';
 import 'package:codecraft/screens/apprentice/coding_challenges/weekly_challenges.dart';
 import 'package:codecraft/screens/body.dart';
-import 'package:codecraft/screens/generic/about_us.dart';
 import 'package:codecraft/screens/generic/faq.dart';
+import 'package:codecraft/screens/generic/leaderboards.dart';
 import 'package:codecraft/screens/generic/new_about_us.dart';
 import 'package:codecraft/screens/generic/pricing_screen.dart';
 import 'package:codecraft/screens/settings/settings.dart';
@@ -33,6 +33,11 @@ class ApprenticeHome extends ConsumerWidget {
                     screen: const MapScreen(),
                   ),
                   SidebarItem(
+                    label: 'Leaderboard',
+                    icon: Icons.leaderboard,
+                    screen: const Leaderboards(),
+                  ),
+                  SidebarItem(
                     icon: Icons.code_rounded,
                     label: 'Coding Challenges',
                     screen: const CodingChallenges(),
@@ -43,9 +48,10 @@ class ApprenticeHome extends ConsumerWidget {
                     screen: const WeeklyChallenges(),
                   ),
                   SidebarItem(
-                      icon: Icons.bug_report,
-                      label: 'Debugging Challenges',
-                      screen: const DebuggingChallenges()),
+                    icon: Icons.bug_report,
+                    label: 'Debugging Challenges',
+                    screen: const DebuggingChallenges(),
+                  ),
                   SidebarItem(
                     icon: Icons.quiz,
                     label: 'Coding Quizzes',
@@ -59,17 +65,12 @@ class ApprenticeHome extends ConsumerWidget {
                   SidebarItem(
                     icon: Icons.people,
                     label: 'About Us',
-                    screen: const AboutUs(),
-                  ),
-                  SidebarItem(
-                    icon: Icons.people,
-                    label: 'New About Us',
                     screen: const NewAboutUs(),
                   ),
                   SidebarItem(
                     icon: Icons.monetization_on,
                     label: 'Pricing',
-                    screen: const PricingScreen(),
+                    screen: const PlanViewScreen(),
                   ),
                   SidebarItem(
                     icon: Icons.question_answer,

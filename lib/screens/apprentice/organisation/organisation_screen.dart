@@ -1,4 +1,5 @@
 import 'package:codecraft/models/app_user_notifier.dart';
+import 'package:codecraft/models/organisation.dart';
 import 'package:codecraft/screens/apprentice/organisation/join_organisation.dart';
 import 'package:codecraft/screens/apprentice/organisation/organisation_details_apprentice.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +51,9 @@ class OrganizationScreen extends ConsumerWidget {
                 }
 
                 final orgData = snapshot.data!.data() as Map<String, dynamic>;
-                return OrganizationDetailsApprentice(orgData: orgData);
+                return OrganizationCard(
+                  organization: Organization.fromMap(orgData),
+                );
               },
             );
           },

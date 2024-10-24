@@ -37,18 +37,14 @@ class _QuizResultsScreenState extends ConsumerState<QuizResultsScreen> {
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: theme.colorScheme.onPrimary.computeLuminance() > 0.5
-                ? theme.colorScheme.onPrimary
-                : Colors.white,
+            color: Theme.of(context).colorScheme.onPrimary,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           'Result',
           style: TextStyle(
-            color: theme.colorScheme.onPrimary.computeLuminance() > 0.5
-                ? theme.colorScheme.onPrimary
-                : Colors.white,
+            color: theme.colorScheme.onPrimary,
           ),
         ),
       ),
@@ -231,9 +227,7 @@ class _QuizResultsScreenState extends ConsumerState<QuizResultsScreen> {
           child: Text(
             '$value',
             style: TextStyle(
-              color: theme.colorScheme.onPrimary.computeLuminance() > 0.5
-                  ? theme.colorScheme.onPrimary
-                  : Colors.white,
+              color: Theme.of(context).colorScheme.onPrimary,
             ),
           ),
         ),
@@ -283,18 +277,14 @@ class SolutionScreen extends ConsumerWidget {
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: theme.colorScheme.onPrimary.computeLuminance() > 0.5
-                ? theme.colorScheme.onPrimary
-                : Colors.white,
+            color: Theme.of(context).colorScheme.onPrimary,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           'Solution for ${quiz.title}',
           style: TextStyle(
-            color: theme.colorScheme.onPrimary.computeLuminance() > 0.5
-                ? theme.colorScheme.onPrimary
-                : Colors.white,
+            color: Theme.of(context).colorScheme.onPrimary,
           ),
         ),
       ),
@@ -423,9 +413,7 @@ class SolutionScreen extends ConsumerWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.primaryColor,
                         foregroundColor:
-                            theme.colorScheme.onPrimary.computeLuminance() > 0.5
-                                ? theme.colorScheme.onPrimary
-                                : Colors.white,
+                            Theme.of(context).colorScheme.onPrimary,
                       ),
                       child: const Text('Previous'),
                     ),
@@ -439,9 +427,7 @@ class SolutionScreen extends ConsumerWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.primaryColor,
                         foregroundColor:
-                            theme.colorScheme.onPrimary.computeLuminance() > 0.5
-                                ? theme.colorScheme.onPrimary
-                                : Colors.white,
+                            Theme.of(context).colorScheme.onPrimary,
                       ),
                       child: Text(
                         quizNotifier.hasNextQuestion() ? 'Next' : 'Finish',

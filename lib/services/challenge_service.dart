@@ -123,6 +123,16 @@ class ChallengeService {
 
     return completedChallengesData.map((e) => e.toString()).toList();
   }
+
+  // stream how many challenges have been given by the mentor to the organization
+  Stream<int> streamChallengesCount(String organizationId) {
+    return FirebaseFirestore.instance
+        .collection('organizations')
+        .doc(organizationId)
+        .collection('challenges')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
+  }
 }
 
 extension DateTimeParsing on String {

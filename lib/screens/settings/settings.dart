@@ -26,7 +26,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final isSmallScreen = size.width < 600;
+    final isSmallScreen = size.width <= 1000;
 
     return isSmallScreen ? _buildMobileLayout() : _buildDesktopLayout();
   }
@@ -47,7 +47,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 250,
+          width: MediaQuery.of(context).size.width * 0.15 < 200
+              ? 200
+              : MediaQuery.of(context).size.width * 0.15,
           child: _buildSettings(),
         ),
         const VerticalDivider(width: 1),
@@ -63,24 +65,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       shrinkWrap: true,
       children: [
         Padding(
-          padding: const EdgeInsets.all(4.0),
+          padding: EdgeInsets.only(left: 8, top: 8),
           child: Text(
             'Settings',
             style: Theme.of(context).textTheme.headlineLarge,
           ),
         ),
-        const Divider(),
+        Divider(
+          thickness: 1,
+          height: 1,
+          color: Theme.of(context).primaryColor,
+        ),
         const SizedBox(height: 10),
         ListTile(
           title: const Text('User Profile'),
           onTap: () => _onSelected('User Profile'),
           selected: widget.initialTab == 'User Profile',
         ),
-        // ListTile(
-        //   title: const Text('Organization'),
-        //   onTap: () => _onSelected('Organization'),
-        //   selected: widget.initialTab == 'Organization',
-        // ),
         ListTile(
           title: const Text('Appearance'),
           onTap: () => _onSelected('Appearance'),
@@ -120,10 +121,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     switch (widget.initialTab) {
       case 'User Profile':
         panel = const UserProfilePanel();
-      // case 'Organization':
-      //   panel = OrganizationPanel(
-      //     organization: ref.read(appUserNotifierProvider).value!.orgId!,
-      //   );
       case 'Appearance':
         panel = const AppearancePanel();
       default:

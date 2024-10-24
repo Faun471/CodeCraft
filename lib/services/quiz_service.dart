@@ -138,6 +138,16 @@ class QuizService {
     });
   }
 
+  // stream how many quizzes have been given by the mentor to the organization
+  Stream<int> streamQuizzesCount(String organizationId) {
+    return _firestore
+        .collection('organizations')
+        .doc(organizationId)
+        .collection('quizzes')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
+  }
+
   Future<QuizResult> saveQuizResultsWithAnswers(Quiz quiz) async {
     QuizResult result = QuizResult.empty();
     try {

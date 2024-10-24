@@ -94,10 +94,26 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                 await passwordReset();
               },
               minWidth: double.infinity,
-              height: 50.0, //call out niyo na lang dito si passwordReset
+              height: 50.0,
               child: const Text(
                 'Reset Password',
                 style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 25.0),
+          child: InkWell(
+            onTap: () {
+              Navigator.pushNamed(context, '/login');
+            },
+            child: Text(
+              'Back to Login',
+              style: TextStyle(
+                color: Theme.of(context).primaryColor,
+                decoration: TextDecoration.underline,
               ),
             ),
           ),

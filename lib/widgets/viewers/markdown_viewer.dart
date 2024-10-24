@@ -57,6 +57,17 @@ class MarkdownViewerState extends State<MarkdownViewer> {
       httpHeaders: {
         'Cache-Control': 'max-age=3600',
       },
+      videoPlayerOptions: VideoPlayerOptions(
+        webOptions: VideoPlayerWebOptions(
+          allowContextMenu: false,
+          controls: VideoPlayerWebOptionsControls.enabled(
+            allowDownload: false,
+            allowFullscreen: true,
+            allowPlaybackRate: false,
+            allowPictureInPicture: false,
+          ),
+        ),
+      ),
     )..initialize().then((_) {
         if (videoController.value.isInitialized) {
           setState(() {
@@ -84,58 +95,31 @@ class MarkdownViewerState extends State<MarkdownViewer> {
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.8,
-        height: MediaQuery.of(context).size.height * 0.6,
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(10)),
-                child: videoController.value.isInitialized
-                    ? AspectRatio(
-                        aspectRatio: videoController.value.aspectRatio,
-                        child: VideoPlayer(videoController),
-                      )
-                    : const Center(child: CircularProgressIndicator()),
+      child: StatefulBuilder(
+        builder: (context, setState) => Container(
+          width: MediaQuery.of(context).size.width * 0.8,
+          height: MediaQuery.of(context).size.height * 0.6,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(10)),
+                  child: videoController.value.isInitialized
+                      ? AspectRatio(
+                          aspectRatio: videoController.value.aspectRatio,
+                          child: VideoPlayer(videoController),
+                        )
+                      : const Center(child: CircularProgressIndicator()),
+                ),
               ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      videoController.value.isPlaying
-                          ? Icons.pause
-                          : Icons.play_arrow,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        videoController.value.isPlaying
-                            ? videoController.pause()
-                            : videoController.play();
-                      });
-                    },
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Close'),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

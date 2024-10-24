@@ -6,6 +6,7 @@ import 'package:codecraft/screens/apprentice/code_clash/code_clash_results_scree
 import 'package:codecraft/services/code_clash_service.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/utils/theme_utils.dart';
+import 'package:codecraft/utils/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -117,26 +118,82 @@ class _CodeClashesScreenState extends ConsumerState<CodeClashes> {
                 );
               }
 
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(snapshot.data![index].id),
-                    subtitle: Text(
-                      snapshot.data![index].description,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
+              final filteredClashes = snapshot.data!
+                  .where((clash) => clash.status != 'completed')
+                  .toList();
+
+              final completedClashes = snapshot.data!
+                  .where((clash) => clash.status == 'completed')
+                  .toList();
+
+              return Column(
+                children: [
+                  if (filteredClashes.isNotEmpty) ...[
+                    const Text(
+                      'Active Code Clashes',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    leading: const Icon(Icons.code_rounded),
-                    trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () => _onCodeClashTapped(
-                      snapshot.data![index],
-                      appUser.id ?? FirebaseAuth.instance.currentUser!.uid,
+                    const SizedBox(height: 20),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: filteredClashes.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(snapshot.data![index].id),
+                          subtitle: Text(
+                            snapshot.data![index].description,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          leading: const Icon(Icons.code_rounded),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                          onTap: () => _onCodeClashTapped(
+                            snapshot.data![index],
+                            appUser.id ??
+                                FirebaseAuth.instance.currentUser!.uid,
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
+                  ],
+                  if (completedClashes.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Finished Code Clashes',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: completedClashes.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(snapshot.data![index].id),
+                          subtitle: Text(
+                            snapshot.data![index].description,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          leading: const Icon(Icons.code_rounded),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                          onTap: () => _onCodeClashTapped(
+                            snapshot.data![index],
+                            appUser.id ??
+                                FirebaseAuth.instance.currentUser!.uid,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ],
               );
             },
           ),
@@ -181,6 +238,34 @@ class _CodeClashesScreenState extends ConsumerState<CodeClashes> {
     }
 
     if (!mounted) return;
+
+    if (codeClash.status == 'completed') {
+      Utils.displayDialog(
+        context: context,
+        title: 'Code Clash Completed!',
+        content: 'This code clash has already been completed.',
+        lottieAsset: 'assets/anim/congrats.json',
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CodeClashResultsScreen(
+                    codeClashId: codeClash.id,
+                    organizationId:
+                        ref.watch(appUserNotifierProvider).value!.orgId!,
+                  ),
+                ),
+              );
+            },
+            child: const Text('View Results'),
+          ),
+        ],
+      );
+      return;
+    }
 
     Navigator.push(
       context,

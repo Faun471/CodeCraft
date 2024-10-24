@@ -98,7 +98,7 @@ class AccountEditState extends ConsumerState<AccountEdit> {
                                       .withOpacity(0.5))),
                       icon: const Icon(Icons.camera_alt),
                       onPressed: () async {
-                        imageFile = await io.pickImage();
+                        imageFile = (await Utils.pickImage(context))!;
 
                         setState(() {
                           imageChanged = true;
@@ -168,8 +168,7 @@ class AccountEditState extends ConsumerState<AccountEdit> {
                         border: const OutlineInputBorder(),
                         labelText: "First Name",
                         prefixIcon: const Icon(Icons.person),
-                        hintText:
-                            userData.firstName ?? 'Enter your first name',
+                        hintText: userData.firstName ?? 'Enter your first name',
                         helperText: 'Leave blank to keep the same first name'),
                     controller: firstNameController,
                   ),

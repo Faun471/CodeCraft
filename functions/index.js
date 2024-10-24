@@ -191,3 +191,52 @@ function expectedOutputToString(expectedOutput, language) {
     }
     return expectedOutput.value;
 }
+
+// This is in case I accidentally delete the apprentices array in an organization
+// again I suppose... 
+exports.syncOrganizationMembers = functions.https.onRequest(async (req, res) => {
+    res.set('Access-Control-Allow-Origin', '*'); // Allow all origins
+    res.set('Access-Control-Allow-Methods', 'GET, POST'); // Allow specific methods
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+        res.status(204).send('');
+        return;
+    }
+
+    const { organizationId } = req.body;
+    
+    if (!organizationId) {
+        res.status(400).send({ error: 'Organization ID is required' });
+        return;
+    }
+
+    const db = admin.firestore();
+    const organizationRef = db.collection('organizations').doc(organizationId);
+
+    const apprenticeList = [];
+    try {
+        const snapshot = await db.collection('users').get();
+
+        for (const doc of snapshot.docs) {
+            const user = doc.data();
+            
+            // check if the user's orgId is the same as the organizationId
+            if (user.orgId === organizationId && user.accountType === 'apprentice' && user.id) {
+                apprenticeList.push(user.id);
+            }
+        }
+    } catch (error) {
+        res.status(500).send({ error: 'Failed to fetch organization members', details: error.message });
+        return;
+    }
+
+    console.log(apprenticeList);
+
+    try {
+        await organizationRef.set({ apprentices: apprenticeList }, { merge: true });
+        res.status(200).send({ message: 'Organization members updated successfully' });
+    } catch (error) {
+        res.status(500).send({ error: 'Failed to update organization members', details: error.message });
+    }
+});

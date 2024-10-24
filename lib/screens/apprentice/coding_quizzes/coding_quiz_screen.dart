@@ -43,9 +43,7 @@ class QuizScreen extends ConsumerWidget {
               leading: IconButton(
                 icon: Icon(
                   Icons.arrow_back,
-                  color: theme.colorScheme.onPrimary.computeLuminance() > 0.5
-                      ? theme.colorScheme.onPrimary
-                      : Colors.white,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
                 onPressed: () => _onWillPop(context, ref, quiz),
               ),
@@ -53,9 +51,7 @@ class QuizScreen extends ConsumerWidget {
               title: Text(
                 quiz!.title,
                 style: theme.textTheme.headlineMedium!.copyWith(
-                  color: theme.colorScheme.onPrimary.computeLuminance() > 0.5
-                      ? theme.colorScheme.onPrimary
-                      : Colors.white,
+                  color: theme.colorScheme.onPrimary,
                 ),
               ),
             ),

@@ -48,8 +48,16 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
 
   void _initializeChallenge() {
     _returnType = _getReturnType();
-    _codeController.text = widget.challenge.sampleCode ??
-        generateSampleCode('java', widget.challenge);
+
+    if (widget.challenge.sampleCode != null &&
+        widget.challenge.sampleCode!.isNotEmpty) {
+      print('sample code: ${widget.challenge.sampleCode}');
+      _codeController.text = widget.challenge.sampleCode!;
+      return;
+    }
+
+    _codeController.text =
+        generateSampleCode(_selectedLanguage, widget.challenge);
   }
 
   void _initializeVideoController(String videoUrl) {
@@ -143,7 +151,7 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
   }
 
   String _getReturnType() {
-    switch (widget.challenge.unitTests[0].expectedOutput.type) {
+    switch (widget.challenge.unitTests.first.expectedOutput.type) {
       case 'String':
         return 'String';
       case 'Integer':
@@ -190,9 +198,6 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
       if (completedChallenges.contains(widget.challenge.id)) {
         return;
       }
-
-      print('app user $appUser');
-      print('completed challenges ${appUser.completedChallenges} ');
 
       await ChallengeService().markChallengeAsCompleted(widget.challenge.id);
       ref
@@ -414,34 +419,40 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
     String methodName = challenge.methodName;
     String returnType = _returnType;
 
-    String javaArgs = challenge.unitTests[0].input[0].type.isEmpty
-        ? ''
-        : challenge.unitTests[0].input
-            .map((e) =>
-                '${e.type} arg${challenge.unitTests[0].input.indexOf(e)}')
-            .join(', ');
+    String javaArgs = '';
+    String pythonArgs = '';
 
-    String pythonArgs = challenge.unitTests[0].input[0].type.isEmpty
-        ? ''
-        : challenge.unitTests[0].input
-            .map((e) => 'arg${challenge.unitTests[0].input.indexOf(e)}')
-            .join(', ');
+    if (challenge.unitTests.isNotEmpty &&
+        challenge.unitTests.first.input.isNotEmpty) {
+      javaArgs = challenge.unitTests.first.input.first.type.isEmpty
+          ? ''
+          : challenge.unitTests.first.input
+              .map((e) =>
+                  '${e.type} arg${challenge.unitTests.first.input.indexOf(e)}')
+              .join(', ');
+
+      pythonArgs = challenge.unitTests.first.input.first.type.isEmpty
+          ? ''
+          : challenge.unitTests.first.input
+              .map((e) => 'arg${challenge.unitTests.first.input.indexOf(e)}')
+              .join(', ');
+    }
 
     if (language == 'java') {
-      return '''
-class $className {
-  public $returnType $methodName($javaArgs) {
-    // Your code here
+      return """
+  class $className {
+    public $returnType $methodName($javaArgs) {
+      // Your code here
+    }
   }
-}
-''';
+  """;
     } else if (language == 'python') {
-      return '''
-class $className:
-  def $methodName($pythonArgs):
-    # Your code here
-    pass
-''';
+      return """
+  class $className:
+    def $methodName($pythonArgs):
+      # Your code here
+      pass
+  """;
     }
     return '';
   }

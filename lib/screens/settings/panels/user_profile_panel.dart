@@ -1,11 +1,16 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codecraft/io/file_io.dart';
 import 'package:codecraft/io/io.dart';
 import 'package:codecraft/io/web_io.dart';
 import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/app_user_notifier.dart';
+import 'package:codecraft/models/organisation.dart';
+import 'package:codecraft/screens/apprentice/organisation/join_organisation.dart';
+import 'package:codecraft/screens/apprentice/organisation/organisation_details_apprentice.dart';
 import 'package:codecraft/services/auth/auth_helper.dart';
+import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/cards/custom_big_user_card.dart';
@@ -60,13 +65,12 @@ class _UserProfilePanelState extends ConsumerState<UserProfilePanel> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'User Profile',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            Text('User Profile',
+                style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 20),
             _buildUserCard(appUserState),
             const SizedBox(height: 20),
+            _buildOrganizationDetailsCard(appUserState),
           ],
         ),
       ),
@@ -171,7 +175,7 @@ class _UserProfilePanelState extends ConsumerState<UserProfilePanel> {
                             ),
                             icon: const Icon(Icons.camera_alt),
                             onPressed: () async {
-                              imageFile = await io.pickImage();
+                              imageFile = (await Utils.pickImage(context))!;
                               setState(() {
                                 imageChanged = true;
                               });
@@ -416,5 +420,50 @@ class _UserProfilePanelState extends ConsumerState<UserProfilePanel> {
     ref.watch(appUserNotifierProvider.notifier).updateData({'photoUrl': url});
 
     return url;
+  }
+
+  Widget _buildOrganizationDetailsCard(AsyncValue<AppUser> appUserState) {
+    return Card(
+      surfaceTintColor: Theme.of(context).primaryColor,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SizedBox(
+          width: double.infinity,
+          child: StreamBuilder<DocumentSnapshot>(
+            stream: DatabaseHelper()
+                .organizations
+                .doc(appUserState.requireValue.orgId!)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return SizedBox(
+                  height: 200,
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text('Error: ${snapshot.error}'),
+                );
+              }
+
+              if (!snapshot.hasData || !snapshot.data!.exists) {
+                return const Center(
+                  child: JoinOrganization(),
+                );
+              }
+
+              final orgData = snapshot.data!.data() as Map<String, dynamic>;
+              return OrganizationCard(
+                organization: Organization.fromMap(orgData),
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 }

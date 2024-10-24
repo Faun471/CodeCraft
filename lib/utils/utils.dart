@@ -1,6 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:codecraft/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lottie/lottie.dart';
 import 'package:material_dialogs/dialogs.dart';
 import 'package:material_dialogs/shared/types.dart';
@@ -177,6 +181,48 @@ class Utils {
         }
       },
     );
+  }
+
+  static Future<Uint8List?> pickImage(BuildContext context,
+      {ImageSource imageSource = ImageSource.gallery}) async {
+    final pickedImage = await ImagePicker().pickImage(source: imageSource);
+
+    if (pickedImage == null || pickedImage.path.isEmpty || !context.mounted) {
+      return null;
+    }
+
+    CroppedFile? croppedFile = await ImageCropper().cropImage(
+      sourcePath: pickedImage.path,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Cropper',
+          toolbarColor: Theme.of(context).primaryColor,
+          toolbarWidgetColor: ThemeUtils.getTextColorForBackground(
+            Theme.of(context).primaryColor,
+          ),
+          aspectRatioPresets: [
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.square,
+          ],
+        ),
+        IOSUiSettings(
+          title: 'Cropper',
+          aspectRatioPresets: [
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.square,
+          ],
+        ),
+        WebUiSettings(
+            context: context,
+            themeData: WebThemeData(
+              rotateIconColor: AdaptiveTheme.of(context).mode.isDark
+                  ? Colors.white
+                  : Colors.black,
+            )),
+      ],
+    );
+
+    return croppedFile?.readAsBytes();
   }
 }
 

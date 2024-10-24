@@ -140,6 +140,20 @@ class InvitationService extends _$InvitationService {
     });
 
     if (status == 'accepted') {
+      // Fetch the organization data
+      var orgDoc =
+          await DatabaseHelper().organizations.doc(invitation.orgId).get();
+      var orgData = orgDoc.data() as Map<String, dynamic>;
+
+      // Check if the maximum number of apprentices has been reached
+      int currentApprentices = (orgData['apprentices'] as List?)?.length ?? 0;
+      int maxApprentices = orgData['maxApprentices'] ?? 0;
+
+      if (currentApprentices >= maxApprentices) {
+        throw Exception('Maximum number of apprentices reached');
+      }
+
+      // If not exceeded, proceed with accepting the apprentice
       await DatabaseHelper().organizations.doc(invitation.orgId).set({
         'apprentices': FieldValue.arrayUnion([apprenticeId]),
       }, SetOptions(merge: true));

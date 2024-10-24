@@ -197,12 +197,26 @@ class DebuggingChallengeScreen extends ConsumerWidget {
       children: [
         ElevatedButton(
           onPressed: () => _handleProposeFix(context, ref),
-          child: Text('Propose Fix', style: GoogleFonts.firaCode()),
+          child: ref
+                  .watch(debuggingChallengeNotifierProvider(
+                    organizationId,
+                    challengeId,
+                  ))
+                  .isLoading
+              ? const CircularProgressIndicator()
+              : Text('Propose Fix', style: GoogleFonts.firaCode()),
         ),
         const SizedBox(width: 8),
         ElevatedButton(
           onPressed: () => _handleSubmit(context, ref, state),
-          child: Text('Submit Fix', style: GoogleFonts.firaCode()),
+          child: ref
+                  .watch(debuggingChallengeNotifierProvider(
+                    organizationId,
+                    challengeId,
+                  ))
+                  .isLoading
+              ? const CircularProgressIndicator()
+              : Text('Submit Fix', style: GoogleFonts.firaCode()),
         ),
       ],
     );
@@ -218,7 +232,7 @@ class DebuggingChallengeScreen extends ConsumerWidget {
     );
   }
 
-  void _handleLineSelection(BuildContext context, WidgetRef ref,
+  Future<void> _handleLineSelection(BuildContext context, WidgetRef ref,
       DebuggingChallengeState state, int lineNumber) async {
     final result = await ref
         .read(debuggingChallengeNotifierProvider(
@@ -251,7 +265,7 @@ class DebuggingChallengeScreen extends ConsumerWidget {
     }
   }
 
-  void _handleProposeFix(BuildContext context, WidgetRef ref) async {
+  Future<void> _handleProposeFix(BuildContext context, WidgetRef ref) async {
     await ref
         .read(debuggingChallengeNotifierProvider(
           organizationId,
@@ -260,7 +274,7 @@ class DebuggingChallengeScreen extends ConsumerWidget {
         .proposeFix();
   }
 
-  void _handleSubmit(BuildContext context, WidgetRef ref,
+  Future<void> _handleSubmit(BuildContext context, WidgetRef ref,
       DebuggingChallengeState state) async {
     final result = await ref
         .read(debuggingChallengeNotifierProvider(

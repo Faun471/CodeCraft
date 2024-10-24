@@ -23,6 +23,9 @@ class ThemeUtils {
         borderColor: Colors.black.withOpacity(0.2),
         focusedBorderColor: color,
       ),
+      iconTheme: IconThemeData(
+        color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+      ),
     );
   }
 
@@ -45,6 +48,9 @@ class ThemeUtils {
         color,
         borderColor: Colors.white.withOpacity(0.2),
         focusedBorderColor: color,
+      ),
+      iconTheme: IconThemeData(
+        color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
       ),
     );
   }

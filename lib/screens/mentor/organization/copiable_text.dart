@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -24,7 +25,9 @@ class _CopiableTextState extends State<CopiableText> {
       },
       child: Container(
         padding: const EdgeInsets.all(2),
-        color: Colors.grey[200],
+        color: AdaptiveTheme.of(context).brightness == Brightness.light
+            ? Colors.grey[200]
+            : Colors.grey[800],
         child: _isCopied
             ? const Row(children: [
                 Icon(Icons.check),

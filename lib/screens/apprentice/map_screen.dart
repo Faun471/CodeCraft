@@ -201,6 +201,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       description: module.description,
       imageUrl: module.image,
       onTap: () {
+        SystemSound.play(SystemSoundType.click);
         if (isUnlocked) {
           _showModuleInfoPopup(context, module, btnKey);
         } else {

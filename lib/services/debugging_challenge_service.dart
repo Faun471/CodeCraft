@@ -151,4 +151,14 @@ class DebuggingChallengeService {
       return challenges;
     });
   }
+
+  // stream how many debugging challenges have been given by the mentor to the organization
+  Stream<int> streamDebuggingChallengeCount(String organizationId) {
+    return _firestore
+        .collection('organizations')
+        .doc(organizationId)
+        .collection('debuggingChallenges')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
+  }
 }

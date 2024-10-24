@@ -292,4 +292,15 @@ class CodeClashService {
       throw Exception('Error leaving Code Clash: $e');
     }
   }
+
+  // stream how many clashes are active within the organization
+  Stream<int> streamActiveCodeClashesCount(String organizationId) {
+    return _firestore
+        .collection('organizations')
+        .doc(organizationId)
+        .collection('codeClashes')
+        .where('status', isEqualTo: 'active')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
+  }
 }

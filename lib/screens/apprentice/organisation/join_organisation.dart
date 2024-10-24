@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:codecraft/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,8 +36,8 @@ class _JoinOrganizationState extends ConsumerState<JoinOrganization> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.4,
+            Expanded(
+              flex: 3,
               child: CustomTextField(
                 labelText: 'Invitation Code',
                 controller: orgController,
@@ -45,23 +46,29 @@ class _JoinOrganizationState extends ConsumerState<JoinOrganization> {
               ),
             ),
             const SizedBox(width: 10),
-            ElevatedButton(
-              onPressed: () =>
-                  isLoading ? null : _joinOrganization(context, ref),
-              child: isLoading
-                  ? const Padding(
-                      padding: EdgeInsets.all(2.0),
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
+            Expanded(
+              flex: 2,
+              child: ElevatedButton(
+                onPressed: () =>
+                    isLoading ? null : _joinOrganization(context, ref),
+                child: isLoading
+                    ? const Padding(
+                        padding: EdgeInsets.all(2.0),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : AutoSizeText(
+                        'Join Organization',
+                        style: TextStyle(
+                          color: ThemeUtils.getTextColorForBackground(
+                            Theme.of(context).primaryColor,
+                          ),
+                        ),
+                        maxLines: 1,
+                        minFontSize: 12,
                       ),
-                    )
-                  : Text(
-                      'Join Organization',
-                      style: TextStyle(
-                        color: ThemeUtils.getTextColorForBackground(
-                            Theme.of(context).primaryColor),
-                      ),
-                    ),
+              ),
             ),
           ],
         ),

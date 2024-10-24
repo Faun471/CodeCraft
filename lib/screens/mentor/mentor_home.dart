@@ -1,7 +1,7 @@
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/screens/body.dart';
-import 'package:codecraft/screens/generic/about_us.dart';
 import 'package:codecraft/screens/generic/faq.dart';
+import 'package:codecraft/screens/generic/leaderboards.dart';
 import 'package:codecraft/screens/generic/new_about_us.dart';
 import 'package:codecraft/screens/generic/pricing_screen.dart';
 import 'package:codecraft/screens/mentor/code_clash/manage_code_clashes_screen.dart';
@@ -33,6 +33,12 @@ class MentorHome extends ConsumerWidget {
                 screen: const MentorDashboard(),
               ),
               SidebarItem(
+                icon: Icons.leaderboard,
+                label: 'Leaderboards',
+                screen: const Leaderboards(),
+              ),
+              
+              SidebarItem(
                 icon: Icons.people,
                 label: 'Manage Organization',
                 screen: const ManageRequestsScreen(),
@@ -57,7 +63,6 @@ class MentorHome extends ConsumerWidget {
                 label: 'Manage Code Clashes',
                 screen: const ManageCodeClashesScreen(),
               ),
-
               SidebarItem(
                 icon: Icons.people,
                 label: 'About Us',
@@ -66,7 +71,7 @@ class MentorHome extends ConsumerWidget {
               SidebarItem(
                 icon: Icons.monetization_on,
                 label: 'Pricing',
-                screen: const PricingScreen(),
+                screen: const PlanUpgradeScreen(),
               ),
               SidebarItem(
                 icon: Icons.question_answer,

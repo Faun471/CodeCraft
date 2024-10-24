@@ -88,10 +88,7 @@ class AppUser {
   String toString() {
     return 'AppUser{id: $id, email: $email, displayName: $displayName, firstName: $firstName, lastName: $lastName, mi: $mi, suffix: $suffix, phoneNumber: $phoneNumber, accountType: $accountType, level: $level, orgId: $orgId, experience: $experience, completedChallenges: $completedChallenges, completedDebuggingChallenges: $completedDebuggingChallenges, quizResults: $quizResults, photoUrl: $photoUrl}';
   }
-
-  // Add a method to check if the user is empty
-  // if the nullable fields are null, then the user is empty
-  // if the string fields are empty, then the user is empty
+  
   bool isEmpty() {
     return id == null &&
         email == null &&

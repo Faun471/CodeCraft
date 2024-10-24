@@ -155,8 +155,7 @@ class QuizViewer extends ConsumerWidget {
               maxFontSize: 12,
               minFontSize: 10,
               style: TextStyle(
-                color: ThemeUtils.adjustColorBrightness(
-                    Theme.of(context).primaryColor),
+                color: Colors.black87,
               ),
             ),
             onTap: () => notifier.checkAnswer(answer),

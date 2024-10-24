@@ -1,5 +1,6 @@
 import 'package:codecraft/firebase_options.dart';
 import 'package:codecraft/models/app_user.dart';
+import 'package:codecraft/models/organisation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -86,6 +87,8 @@ class DatabaseHelper {
       'orgDescription': '',
       'mentorId': mentorId,
       'createdAt': Timestamp.now(),
+      'plan': 'Free',
+      'apprentices': [],
     });
     return orgRef.id;
   }
@@ -98,17 +101,20 @@ class DatabaseHelper {
         .toList();
   }
 
-  Future<List<Map<String, dynamic>>> getOrganizationMembers(
-      String orgId) async {
+  Future<List<AppUser>> getOrganizationMembers(String orgId) async {
     QuerySnapshot querySnapshot =
         await users.where('orgId', isEqualTo: orgId).get();
     return querySnapshot.docs
-        .map((doc) => doc.data() as Map<String, dynamic>)
+        .map((doc) => AppUser.fromMap(doc.data() as Map<String, dynamic>))
         .toList();
   }
 
   Stream<QuerySnapshot> getOrganizationStreamForMentor(String mentorId) {
     return organizations.where('mentorId', isEqualTo: mentorId).snapshots();
+  }
+
+  Stream<DocumentSnapshot> getOrganizationStream(String orgId) {
+    return organizations.doc(orgId).snapshots();
   }
 
   Stream<DocumentSnapshot> getUserStream(String userId) {
@@ -181,18 +187,21 @@ class DatabaseHelper {
     }).toList();
   }
 
-  Stream<List<Map<String, dynamic>>> getOrganizationMembersStream(
-      String orgId) {
-    return users.where('orgId', isEqualTo: orgId).snapshots().map((snapshot) =>
-        snapshot.docs
-            .map((doc) => doc.data() as Map<String, dynamic>)
-            .toList());
+  Stream<List<AppUser>> getOrganizationMembersStream(String orgId) {
+    return users
+        .where('orgId', isEqualTo: orgId)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final appUser =
+                  AppUser.fromMap(doc.data() as Map<String, dynamic>);
+              return appUser;
+            }).toList());
   }
 
   Stream<List<AppUser>> getQuizLeaderboardStream(String orgId) {
     return users
         .where('orgId', isEqualTo: orgId)
-        .limit(10)
+        .limit(20)
         .snapshots()
         .map((snapshot) {
       List<AppUser> users = snapshot.docs.map((doc) {
@@ -210,7 +219,7 @@ class DatabaseHelper {
     return users
         .where('orgId', isEqualTo: orgId)
         .orderBy('completedChallenges', descending: true)
-        .limit(10)
+        .limit(20)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
@@ -222,7 +231,7 @@ class DatabaseHelper {
     return users
         .where('orgId', isEqualTo: orgId)
         .orderBy('level', descending: true)
-        .limit(10)
+        .limit(20)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
@@ -232,6 +241,29 @@ class DatabaseHelper {
 
   Future<Map<String, dynamic>> getOrganization(String orgId) async {
     DocumentSnapshot doc = await organizations.doc(orgId).get();
-    return doc.data() as Map<String, dynamic>;
+    if (doc.exists) {
+      final data = doc.data() as Map<String, dynamic>;
+      if (data['maxApprentices'] == null) {
+        await organizations.doc(orgId).update({'maxApprentices': 5});
+        data['maxApprentices'] = 5;
+      }
+
+      if (data['plan'] == null) {
+        await organizations.doc(orgId).update({'plan': 'Free'});
+        data['plan'] = 'Free';
+      }
+
+      return data;
+    }
+
+    return {};
+  }
+
+  Future<void> updateOrganizationDetails(
+      String orgId, Organization organization) async {
+    await organizations.doc(orgId).set(
+          organization.toMap(),
+          SetOptions(merge: true),
+        );
   }
 }

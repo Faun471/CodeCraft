@@ -98,7 +98,14 @@ class DebuggingChallengeNotifier extends _$DebuggingChallengeNotifier {
 
       String newOutput = await _executeCode(currentState.proposedFix ?? '');
 
-      return currentState.copyWith(currentOutput: newOutput);
+      if (newOutput == currentState.challenge.expectedOutput) {
+        return currentState.copyWith(currentOutput: newOutput);
+      } else {
+        return currentState.copyWith(
+          currentOutput: newOutput,
+          attemptsLeft: currentState.attemptsLeft - 1,
+        );
+      }
     });
   }
 

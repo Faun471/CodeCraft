@@ -96,6 +96,10 @@ class _CodeClashScreenState extends ConsumerState<CodeClashScreen> {
       _selectedLanguage,
       widget.codeClash.methodName,
     )) {
+      codeClashNotifier.stopListening();
+
+      codeClashNotifier.resetOutput();
+
       await CodeClashService().submitSolution(
           appUserState.value!.orgId!,
           widget.codeClash.id,

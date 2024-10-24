@@ -51,7 +51,6 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
 
     if (widget.challenge.sampleCode != null &&
         widget.challenge.sampleCode!.isNotEmpty) {
-      print('sample code: ${widget.challenge.sampleCode}');
       _codeController.text = widget.challenge.sampleCode!;
       return;
     }
@@ -198,6 +197,8 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
       if (completedChallenges.contains(widget.challenge.id)) {
         return;
       }
+
+      codeExecution.resetOutput();
 
       await ChallengeService().markChallengeAsCompleted(widget.challenge.id);
       ref

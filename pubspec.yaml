@@ -68,6 +68,7 @@ dependencies:
   board_datetime_picker: ^2.1.4
   popup_menu_plus: ^0.0.6
   video_player: ^2.9.2
+  paypal_sdk: ^1.0.10
 
 dev_dependencies:
   build_runner: ^2.4.10

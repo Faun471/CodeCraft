@@ -1077,6 +1077,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
+  paypal_sdk:
+    dependency: "direct main"
+    description:
+      name: paypal_sdk
+      sha256: "274c3874abbb32e30255cb0e3a387793b2ab4e1b0a391508da618cbe66df3074"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.10"
   petitparser:
     dependency: transitive
     description:

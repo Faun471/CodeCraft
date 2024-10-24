@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/providers/screen_provider.dart';
+import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/widgets/buttons/notification_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -133,7 +134,9 @@ class BodyState extends ConsumerState<Body> {
                 minFontSize: 24,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onPrimary,
+                  color: ThemeUtils.getTextColorForBackground(
+                    Theme.of(context).primaryColor,
+                  ),
                 ),
               ),
             ],

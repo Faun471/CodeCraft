@@ -246,6 +246,10 @@ class _RegisterState extends ConsumerState<Register> {
         if (value == null || value.isEmpty) {
           return '* This field is required';
         }
+
+        if (value.length != 12) {
+          return 'Invalid phone number';
+        }
         return null;
       },
       hintText: 'Phone Number',

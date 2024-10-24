@@ -13,6 +13,7 @@ class ForgotPasswordPage extends ConsumerStatefulWidget {
 
 class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   final _emailController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -73,12 +74,16 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           ),
         ),
         const SizedBox(height: 20),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25.0),
-          child: CustomTextField(
-            labelText: 'Email',
-            icon: Icons.email,
-            controller: _emailController,
+        Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 25.0),
+            child: CustomTextField(
+              labelText: 'Email',
+              icon: Icons.email,
+              controller: _emailController,
+              mode: ValidationMode.email,
+            ),
           ),
         ),
         const SizedBox(height: 20),
@@ -91,7 +96,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             ),
             child: MaterialButton(
               onPressed: () async {
-                await passwordReset();
+                if (_formKey.currentState!.validate()) {
+                  await passwordReset();
+                }
               },
               minWidth: double.infinity,
               height: 50.0,

@@ -69,6 +69,7 @@ dependencies:
   popup_menu_plus: ^0.0.6
   video_player: ^2.9.2
   paypal_sdk: ^1.0.10
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   build_runner: ^2.4.10
@@ -129,6 +130,7 @@ flutter:
     - assets/anim/soon.json
     - assets/anim/trophy.json
     - assets/challenges/challenges.json
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

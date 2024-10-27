@@ -48,3 +48,4 @@ pubspec.lock
 pubspec.lock
 pubspec.lock
 /lib/screens/paypal
+.env

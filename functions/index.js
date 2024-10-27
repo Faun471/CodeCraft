@@ -1,6 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const fetch = require("node-fetch");
+require('dotenv').config();
 
 admin.initializeApp();
 
@@ -17,8 +18,8 @@ exports.executeSimpleCode = functions.https.onRequest((req, res) => {
     const { script, language } = req.body;
 
     const payload = {
-        clientId: "3e01cb295a6d6dfef0c02c9b17e55845",
-        clientSecret: "5c687197c742b0c669fb31a43ac4fe7abe17661de152b7fd8401397a091c9e67",
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
         script: script,
         stdin: "",
         language: language === 'java' ? "java" : "python3",
@@ -54,8 +55,8 @@ exports.executeCode = functions.https.onRequest((req, res) => {
 
     const fullScript = generateFullScript(script, unitTests, className, language, methodName);
     const payload = {
-        clientId: "3e01cb295a6d6dfef0c02c9b17e55845",
-        clientSecret: "5c687197c742b0c669fb31a43ac4fe7abe17661de152b7fd8401397a091c9e67",
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
         script: fullScript,
         stdin: "",
         language: language === 'java' ? "java" : "python3",
@@ -205,7 +206,7 @@ exports.syncOrganizationMembers = functions.https.onRequest(async (req, res) => 
     }
 
     const { organizationId } = req.body;
-    
+
     if (!organizationId) {
         res.status(400).send({ error: 'Organization ID is required' });
         return;
@@ -220,7 +221,7 @@ exports.syncOrganizationMembers = functions.https.onRequest(async (req, res) => 
 
         for (const doc of snapshot.docs) {
             const user = doc.data();
-            
+
             // check if the user's orgId is the same as the organizationId
             if (user.orgId === organizationId && user.accountType === 'apprentice' && user.id) {
                 apprenticeList.push(user.id);

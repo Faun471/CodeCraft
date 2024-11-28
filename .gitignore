@@ -49,3 +49,6 @@ pubspec.lock
 pubspec.lock
 /lib/screens/paypal
 .env
+dotenv
+*.rules
+firestore.rules

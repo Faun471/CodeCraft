@@ -15,6 +15,7 @@ class AppUser {
   final List<String>? completedDebuggingChallenges;
   final Map<String, dynamic> quizResults;
   final String? photoUrl;
+  final bool isFirstLogin;
 
   AppUser({
     this.id,
@@ -33,6 +34,7 @@ class AppUser {
     this.completedDebuggingChallenges,
     this.quizResults = const {},
     this.photoUrl,
+    this.isFirstLogin = true,
   });
 
   // Factory constructor to create an AppUser from a map
@@ -59,6 +61,7 @@ class AppUser {
               .toList(),
       quizResults: data['quizResults'] as Map<String, dynamic>? ?? {},
       photoUrl: data['photoUrl'] as String?,
+      isFirstLogin: data['isFirstLogin'] ?? true,
     );
   }
 
@@ -81,14 +84,15 @@ class AppUser {
       'completedDebuggingChallenges': completedDebuggingChallenges,
       'quizResults': quizResults,
       'photoUrl': photoUrl,
+      'isFirstLogin': isFirstLogin,
     };
   }
 
   @override
   String toString() {
-    return 'AppUser{id: $id, email: $email, displayName: $displayName, firstName: $firstName, lastName: $lastName, mi: $mi, suffix: $suffix, phoneNumber: $phoneNumber, accountType: $accountType, level: $level, orgId: $orgId, experience: $experience, completedChallenges: $completedChallenges, completedDebuggingChallenges: $completedDebuggingChallenges, quizResults: $quizResults, photoUrl: $photoUrl}';
+    return 'AppUser{id: $id, email: $email, displayName: $displayName, firstName: $firstName, lastName: $lastName, mi: $mi, suffix: $suffix, phoneNumber: $phoneNumber, accountType: $accountType, level: $level, orgId: $orgId, experience: $experience, completedChallenges: $completedChallenges, completedDebuggingChallenges: $completedDebuggingChallenges, quizResults: $quizResults, photoUrl: $photoUrl, isFirstLogin: $isFirstLogin}';
   }
-  
+
   bool isEmpty() {
     return id == null &&
         email == null &&

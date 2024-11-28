@@ -17,12 +17,22 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'mentor_dashboard.dart';
 import 'challenges/manage_challenges_screen.dart';
 
-class MentorHome extends ConsumerWidget {
+class MentorHome extends ConsumerStatefulWidget {
   const MentorHome({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return ref.read(appUserNotifierProvider).when(
+  _MentorHomeState createState() => _MentorHomeState();
+}
+
+class _MentorHomeState extends ConsumerState<MentorHome> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ref.watch(appUserNotifierProvider).when(
       data: (data) {
         return Scaffold(
           body: Body(
@@ -33,50 +43,70 @@ class MentorHome extends ConsumerWidget {
                 screen: const MentorDashboard(),
               ),
               SidebarItem(
-                icon: Icons.leaderboard,
-                label: 'Leaderboards',
-                screen: const Leaderboards(),
-              ),
-              
-              SidebarItem(
+                label: 'Organization',
                 icon: Icons.people,
-                label: 'Manage Organization',
-                screen: const ManageRequestsScreen(),
+                screen: const ManageOrganizationScreen(),
+                subItems: [
+                  SidebarItem(
+                    icon: Icons.leaderboard,
+                    label: 'Leaderboards',
+                    screen: const Leaderboards(),
+                  ),
+                  SidebarItem(
+                    icon: Icons.people,
+                    label: 'Manage Organization',
+                    screen: const ManageOrganizationScreen(),
+                  ),
+                  SidebarItem(
+                    icon: Icons.monetization_on,
+                    label: 'Pricing',
+                    screen: const PlanUpgradeScreen(),
+                  ),
+                ],
               ),
               SidebarItem(
-                icon: Icons.code_off_outlined,
-                label: 'Manage Challenges',
+                label: 'Challenges',
+                icon: Icons.code,
                 screen: const ManageChallengesScreen(),
+                subItems: [
+                  SidebarItem(
+                    icon: Icons.code_off_outlined,
+                    label: 'Manage Coding Challenges',
+                    screen: const ManageChallengesScreen(),
+                  ),
+                  SidebarItem(
+                    icon: Icons.lightbulb,
+                    label: 'Manage Coding Quizzes',
+                    screen: const ManageQuizzesScreen(),
+                  ),
+                  SidebarItem(
+                    icon: Icons.bug_report,
+                    label: 'Manage Debugging Challenges',
+                    screen: const ManageDebuggingChallengesScreen(),
+                  ),
+                  SidebarItem(
+                    icon: Icons.code_outlined,
+                    label: 'Manage Code Clashes',
+                    screen: const ManageCodeClashesScreen(),
+                  ),
+                ],
               ),
               SidebarItem(
-                icon: Icons.lightbulb,
-                label: 'Manage Quizzes',
-                screen: const ManageQuizzesScreen(),
-              ),
-              SidebarItem(
-                icon: Icons.bug_report,
-                label: 'Manage Debugging Challenges',
-                screen: const ManageDebuggingChallengesScreen(),
-              ),
-              SidebarItem(
-                icon: Icons.code_outlined,
-                label: 'Manage Code Clashes',
-                screen: const ManageCodeClashesScreen(),
-              ),
-              SidebarItem(
-                icon: Icons.people,
-                label: 'About Us',
-                screen: const NewAboutUs(),
-              ),
-              SidebarItem(
-                icon: Icons.monetization_on,
-                label: 'Pricing',
-                screen: const PlanUpgradeScreen(),
-              ),
-              SidebarItem(
-                icon: Icons.question_answer,
-                label: 'FAQs',
-                screen: const FAQsPage(),
+                icon: Icons.info,
+                label: 'Information',
+                screen: NewAboutUs(),
+                subItems: [
+                  SidebarItem(
+                    icon: Icons.people,
+                    label: 'About Us',
+                    screen: const NewAboutUs(),
+                  ),
+                  SidebarItem(
+                    icon: Icons.question_answer,
+                    label: 'FAQs',
+                    screen: const FAQsPage(),
+                  ),
+                ],
               ),
               SidebarItem(
                 icon: Icons.settings,
@@ -103,8 +133,9 @@ class MentorHome extends ConsumerWidget {
                     screen: const SettingsScreen(),
                     onTap: () => Utils.displayDialog(
                       context: context,
-                      title: 'Sign Out',
-                      content: 'Are you sure you want to sign out?',
+                      title: 'Log Out',
+                      content: 'Are you sure you want to log out?',
+                      lottieAsset: 'assets/anim/question.json',
                       actions: [
                         TextButton(
                           onPressed: () {
@@ -116,7 +147,7 @@ class MentorHome extends ConsumerWidget {
                           onPressed: () {
                             FirebaseAuth.instance.signOut();
                           },
-                          child: const Text('Sign Out'),
+                          child: const Text('Log Out'),
                         ),
                       ],
                     ),

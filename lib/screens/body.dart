@@ -3,7 +3,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/providers/screen_provider.dart';
+import 'package:codecraft/screens/settings/settings.dart';
 import 'package:codecraft/utils/theme_utils.dart';
+import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/buttons/notification_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -49,16 +51,34 @@ class Body extends ConsumerStatefulWidget {
 
 class BodyState extends ConsumerState<Body> {
   bool isSmallScreen = false;
-  SidebarItem? selectedItem;
   late List<SidebarItem> _flattenedItems;
 
   @override
   void initState() {
     super.initState();
     _flattenedItems = _flattenSidebarItems(widget.sidebarItems);
-    selectedItem = _flattenedItems.first;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(screenProvider.notifier).replaceScreen(selectedItem!.screen);
+      ref
+          .watch(screenProvider.notifier)
+          .replaceScreen(_flattenedItems.first.screen);
+
+      final isFirstLogin =
+          ref.read(appUserNotifierProvider).requireValue.isFirstLogin;
+
+      if (isFirstLogin) {
+        Utils.displayDialog(
+            context: context,
+            lottieAsset: 'assets/anim/welcome.json',
+            title: 'Welcome to CodeCraft',
+            content:
+                'We are excited to have you here. We hope you enjoy your learning experience with us.',
+            isDismissible: false,
+            onDismiss: () async {
+              await ref.read(appUserNotifierProvider.notifier).updateData({
+                'isFirstLogin': false,
+              });
+            });
+      }
     });
   }
 
@@ -74,10 +94,6 @@ class BodyState extends ConsumerState<Body> {
   }
 
   void _onItemTap(SidebarItem item) {
-    setState(() {
-      selectedItem = item;
-    });
-
     if (item.onTap != null) {
       item.onTap!();
       return;
@@ -111,11 +127,8 @@ class BodyState extends ConsumerState<Body> {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (ref.read(screenProvider).screenStack.length > 1) {
-          ref.read(screenProvider.notifier).popScreen();
-          setState(() {
-            selectedItem = _findSelectedItem();
-          });
+        if (ref.watch(screenProvider).screenStack.length > 1) {
+          ref.watch(screenProvider.notifier).popScreen();
         }
       },
       child: Scaffold(
@@ -152,8 +165,12 @@ class BodyState extends ConsumerState<Body> {
                 )
               : null,
           actions: [
-            if (appUser.accountType == 'mentor')
-              NotificationButton(userId: appUser.id!),
+            if (appUser.accountType == 'mentor') ...[
+              Padding(
+                padding: EdgeInsets.only(right: 20),
+                child: NotificationButton(userId: appUser.id!),
+              ),
+            ]
           ],
         ),
         drawer: isSmallScreen ? _buildSidebar(appUser) : null,
@@ -224,26 +241,47 @@ class BodyState extends ConsumerState<Body> {
           children: _buildSidebarItems(item.subItems!),
         );
       } else {
-        return ListTile(
-          leading: Icon(item.icon),
-          title: Text(item.label),
-          onTap: () => _onItemTap(item),
-          selected: _isItemSelected(item),
+        return Stack(
+          children: [
+            ListTile(
+              leading: Icon(item.icon),
+              title: Text(item.label),
+              onTap: () => _onItemTap(item),
+              selected: _isItemSelected(item),
+            ),
+            if (_isItemSelected(item))
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                child: Container(
+                  width: 4,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(2),
+                      bottomRight: Radius.circular(2),
+                    ),
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+          ],
         );
       }
     }).toList();
   }
 
   bool _isItemSelected(SidebarItem item) {
-    return selectedItem == item || (selectedItem?.parent == item);
-  }
-
-  SidebarItem? _findSelectedItem() {
     final currentScreenType =
-        ref.read(screenProvider).screenStack.last.runtimeType;
-    return _flattenedItems.firstWhere(
-      (item) => item.screen.runtimeType == currentScreenType,
-      orElse: () => _flattenedItems.first,
-    );
+        ref.watch(screenProvider).screenStack.last.runtimeType;
+
+    if (currentScreenType == SettingsScreen) {
+      SettingsScreen currentSettingsScreen =
+          ref.watch(screenProvider).screenStack.last as SettingsScreen;
+
+      return currentSettingsScreen.initialTab == item.label;
+    }
+
+    return currentScreenType == item.screen.runtimeType;
   }
 }

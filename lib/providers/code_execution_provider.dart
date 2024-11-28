@@ -86,6 +86,8 @@ class CodeExecutionNotifier extends StateNotifier<CodeExecutionState> {
       }
     }
 
+    resetOutput();
+
     return allPassed;
   }
 

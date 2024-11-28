@@ -1,3 +1,5 @@
+import 'package:codecraft/utils/theme_utils.dart';
+import 'package:codecraft/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:codecraft/services/invitation_service.dart';
@@ -35,15 +37,18 @@ class _NotificationButtonState extends ConsumerState<NotificationButton> {
 
         return Stack(
           children: [
-            IconButton(
-              key: btnKey,
-              icon: Icon(
-                Icons.notifications,
-                color: Theme.of(context).brightness == Brightness.light
-                    ? Colors.white
-                    : Colors.black45,
+            Tooltip(
+              message: 'Notifications',
+              child: IconButton(
+                key: btnKey,
+                icon: Icon(
+                  Icons.notifications,
+                  color: ThemeUtils.getTextColorForBackground(
+                    Theme.of(context).appBarTheme.backgroundColor!,
+                  ),
+                ),
+                onPressed: () => _showNotificationMenu(context, joinRequests),
               ),
-              onPressed: () => _showNotificationMenu(context, joinRequests),
             ),
             if (requestCount > 0)
               Positioned(
@@ -146,24 +151,32 @@ class _NotificationButtonState extends ConsumerState<NotificationButton> {
     );
   }
 
-  void _handleRequestAction(
-      BuildContext context, Map<String, dynamic> request, String status) {
-    ref.read(invitationServiceProvider.notifier).updateJoinRequestStatus(
-          request['code'],
-          request['apprenticeId'],
-          status,
-        );
+  Future<void> _handleRequestAction(
+      BuildContext context, Map<String, dynamic> request, String status) async {
+    try {
+      await ref
+          .read(invitationServiceProvider.notifier)
+          .updateJoinRequestStatus(
+            request['code'],
+            request['apprenticeId'],
+            status,
+          );
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Request ${status.capitalize()}')),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      Utils.displayDialog(
+        context: context,
+        title: 'Error',
+        content: e.toString(),
+      );
+    }
+
     if (_menu.isShow) {
       _menu.dismiss();
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Request ${status.capitalize()}')),
-    );
-  }
-}
-
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }

@@ -92,63 +92,74 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
   Widget _buildVideoDialog() {
     return Dialog(
       backgroundColor: Colors.transparent,
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.8,
-        height: MediaQuery.of(context).size.height * 0.6,
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(10)),
-                child: controller.value.isInitialized
-                    ? AspectRatio(
-                        aspectRatio: controller.value.aspectRatio,
-                        child: VideoPlayer(controller),
-                      )
-                    : const Center(child: CircularProgressIndicator()),
-              ),
+      child: StatefulBuilder(
+        builder: (context, setState) {
+          return Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: MediaQuery.of(context).size.height * 0.6,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
             ),
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      controller.value.isPlaying
-                          ? Icons.pause
-                          : Icons.play_arrow,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        controller.value.isPlaying
-                            ? controller.pause()
-                            : controller.play();
-                      });
-                    },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(10)),
+                    child: controller.value.isInitialized
+                        ? AspectRatio(
+                            aspectRatio: controller.value.aspectRatio,
+                            child: VideoPlayer(controller),
+                          )
+                        : const Center(child: CircularProgressIndicator()),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Close'),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          controller.value.isPlaying
+                              ? Icons.pause
+                              : Icons.play_arrow,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            controller.value.isPlaying
+                                ? controller.pause()
+                                : controller.play();
+                          });
+                        },
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('Close'),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
+  /// Returns the type of the result as a string.
+  ///
+  /// This method determines and returns the type of the result
+  /// based on the internal logic implemented within the method.
+  ///
+  /// Returns:
+  ///   A [String] representing the type of the result.
   String _getReturnType() {
     switch (widget.challenge.unitTests.first.expectedOutput.type) {
       case 'String':
@@ -164,9 +175,17 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
     }
   }
 
-  void _runCode() {
+  /// Runs the code asynchronously.
+  ///
+  /// This method is asynchronous and returns a [Future] that completes
+  /// when the code execution process is finished. It handles the logic
+  /// for sending the user's code to the server or evaluation system.
+  /// It also updates the UI based on the output of the code execution.
+  ///
+  /// Throws an exception if the code execution fails.
+  Future<void> _runCode() async {
     final codeExecution = ref.read(codeExecutionProvider.notifier);
-    codeExecution.executeCode(
+    await codeExecution.executeCode(
       _codeController.text,
       widget.challenge.unitTests,
       widget.challenge.className,
@@ -175,6 +194,13 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
     );
   }
 
+  /// Submits the user's code for evaluation.
+  ///
+  /// This method is asynchronous and returns a [Future] that completes
+  /// when the code submission process is finished. It handles the logic
+  /// for sending the user's code to the server or evaluation system.
+  ///
+  /// Throws an [Exception] if the submission fails.
   Future<void> _submitCode() async {
     final codeExecution = ref.read(codeExecutionProvider.notifier);
 
@@ -218,12 +244,21 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
   }
 
   void _handleChallengeSuccess(BuildContext context) {
-    if (widget.challenge.outroAnimation != null) {
-      _initializeVideoController(widget.challenge.outroAnimation!);
-      return;
-    }
+    Utils.displayDialog(
+      context: context,
+      title: 'Challenge Completed!',
+      content: 'Congratulations! You have completed the challenge.',
+      lottieAsset: 'assets/anim/congrats.json',
+      onDismiss: () {
+        if (widget.challenge.outroAnimation != null) {
+          _initializeVideoController(widget.challenge.outroAnimation!);
 
-    widget.onChallengeCompleted?.call();
+          return;
+        }
+
+        widget.onChallengeCompleted?.call();
+      },
+    );
   }
 
   @override
@@ -441,18 +476,18 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
 
     if (language == 'java') {
       return """
-  class $className {
-    public $returnType $methodName($javaArgs) {
-      // Your code here
-    }
+class $className {
+  public $returnType $methodName($javaArgs) {
+    // Your code here
   }
+}
   """;
     } else if (language == 'python') {
       return """
-  class $className:
-    def $methodName($pythonArgs):
-      # Your code here
-      pass
+class $className:
+  def $methodName(self, $pythonArgs):
+    # Your code here
+    pass
   """;
     }
     return '';
@@ -461,7 +496,6 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen> {
   @override
   void dispose() {
     controller.dispose();
-    ref.watch(codeExecutionProvider.notifier).resetOutput();
     super.dispose();
   }
 }

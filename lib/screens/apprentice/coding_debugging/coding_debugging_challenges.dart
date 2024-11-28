@@ -1,6 +1,8 @@
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/debugging_challenge.dart';
+import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/screens/apprentice/coding_debugging/debugging_challenge_screen.dart';
+import 'package:codecraft/screens/settings/settings.dart';
 import 'package:codecraft/services/debugging_challenge_service.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/utils/theme_utils.dart';
@@ -94,7 +96,7 @@ class _DebuggingChallengesState extends ConsumerState<DebuggingChallenges> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                setState(() {});
+                ref.watch(screenProvider.notifier).pushScreen(SettingsScreen());
               },
               child: Text(
                 'Join an Organization',

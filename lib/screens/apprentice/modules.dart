@@ -54,7 +54,7 @@ class ModulesState extends State<Modules> {
                             'assets/pages/${snapshot.data![index].markdownName}.md',
                           )
                         ],
-                        onDone: (context, snapshot1) async {
+                        onDone: (context, snapshot1, ref) async {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(

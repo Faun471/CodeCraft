@@ -1,6 +1,8 @@
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/challenge.dart';
+import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/screens/apprentice/coding_challenges/coding_challenge_screen.dart';
+import 'package:codecraft/screens/settings/settings.dart';
 import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/utils/theme_utils.dart';
@@ -54,7 +56,9 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      setState(() {});
+                      ref
+                          .watch(screenProvider.notifier)
+                          .pushScreen(SettingsScreen());
                     },
                     child: Text(
                       'Join an Organization',
@@ -101,7 +105,7 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                setState(() {});
+                ref.watch(screenProvider.notifier).pushScreen(SettingsScreen());
               },
               child: Text(
                 'Join an Organization',
@@ -167,7 +171,8 @@ class _CodingChallengesState extends ConsumerState<CodingChallenges> {
                         Navigator.push(context, MaterialPageRoute(
                           builder: (context) {
                             return ChallengeScreen(
-                                challenge: snapshot.data![index]);
+                              challenge: snapshot.data![index],
+                            );
                           },
                         ));
                       },

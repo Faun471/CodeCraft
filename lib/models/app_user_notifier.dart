@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:codecraft/main.dart';
 import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/services/database_helper.dart';
+import 'package:codecraft/utils/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -98,11 +100,22 @@ class AppUserNotifier extends _$AppUserNotifier {
       final newExperience = currentExperience + experience;
 
       if (newExperience >= 100) {
-        final newLevel = (state.value!.level ?? 0) + 1;
+        final newLevel = (state.value!.level ?? 1) + 1;
         await updateData({
           'experience': newExperience - 100,
           'level': newLevel,
         });
+
+        if (navigatorKey.currentState == null) return;
+
+        if (navigatorKey.currentState!.mounted) {
+          Utils.displayDialog(
+            context: navigatorKey.currentState!.context,
+            title: 'Level Up!',
+            content: 'You have reached level $newLevel!',
+            lottieAsset: 'assets/anim/level_up.json',
+          );
+        }
       } else {
         await updateData({'experience': newExperience});
       }

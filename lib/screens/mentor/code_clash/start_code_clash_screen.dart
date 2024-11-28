@@ -53,6 +53,8 @@ class _StartCodeClashScreenState extends ConsumerState<StartCodeClashScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                _buildHeader(context, codeClash),
+                const SizedBox(height: 24),
                 _buildInfoCard(context, codeClash),
                 const SizedBox(height: 24),
                 _buildParticipantsList(codeClash),
@@ -245,7 +247,7 @@ class _StartCodeClashScreenState extends ConsumerState<StartCodeClashScreen> {
         context: context,
         title: 'Code Clash Started!',
         content: 'Code Clash has been started successfully',
-        lottieAsset: 'assets/anim/success.json',
+        lottieAsset: 'assets/anim/congrats.json',
       );
 
       ref.read(screenProvider.notifier).popScreen();
@@ -257,6 +259,32 @@ class _StartCodeClashScreenState extends ConsumerState<StartCodeClashScreen> {
         lottieAsset: 'assets/anim/error.json',
       );
     }
+  }
+
+  Widget _buildHeader(BuildContext context, CodeClash codeClash) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Code Clash',
+          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.close,
+            color: ThemeUtils.getTextColorForBackground(
+              Theme.of(context).scaffoldBackgroundColor,
+            ),
+          ),
+          onPressed: () {
+            ref.read(screenProvider.notifier).popScreen();
+          },
+        ),
+      ],
+    );
   }
 }
 

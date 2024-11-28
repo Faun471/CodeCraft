@@ -14,8 +14,12 @@ class DebuggingChallengeService {
           .collection('debuggingChallenges')
           .doc(challenge.id)
           .set(challenge.toJson(), SetOptions(merge: true));
-    } catch (e) {
-      throw Exception('Error creating debugging challenge: $e');
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        throw Exception('Permission denied');
+      } else {
+        throw Exception('Error creating debugging challenge: $e');
+      }
     }
   }
 

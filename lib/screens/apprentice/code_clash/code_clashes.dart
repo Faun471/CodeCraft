@@ -1,8 +1,10 @@
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/code_clash.dart';
+import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/screens/apprentice/code_clash/code_clash_details.dart';
 import 'package:codecraft/screens/apprentice/code_clash/code_clash_lobby_screen.dart';
 import 'package:codecraft/screens/apprentice/code_clash/code_clash_results_screen.dart';
+import 'package:codecraft/screens/settings/settings.dart';
 import 'package:codecraft/services/code_clash_service.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/utils/theme_utils.dart';
@@ -58,7 +60,9 @@ class _CodeClashesScreenState extends ConsumerState<CodeClashes> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      setState(() {});
+                      ref
+                          .watch(screenProvider.notifier)
+                          .pushScreen(SettingsScreen());
                     },
                     child: Text(
                       'Join an Organization',
@@ -203,16 +207,6 @@ class _CodeClashesScreenState extends ConsumerState<CodeClashes> {
   }
 
   void _onCodeClashTapped(CodeClash codeClash, String userId) async {
-    if (!codeClash.isUserInClash(userId)) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CodeClashDetailScreen(codeClash: codeClash),
-        ),
-      );
-      return;
-    }
-
     final CodeClashService codeClashService = CodeClashService();
 
     final appUser = ref.watch(appUserNotifierProvider).value;
@@ -235,11 +229,9 @@ class _CodeClashesScreenState extends ConsumerState<CodeClashes> {
         ),
       );
       return;
-    }
+    } else if (codeClash.status == 'completed') {
+      if (!mounted) return;
 
-    if (!mounted) return;
-
-    if (codeClash.status == 'completed') {
       Utils.displayDialog(
         context: context,
         title: 'Code Clash Completed!',
@@ -266,6 +258,20 @@ class _CodeClashesScreenState extends ConsumerState<CodeClashes> {
       );
       return;
     }
+
+    if (!mounted) return;
+
+    if (!codeClash.isUserInClash(userId)) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CodeClashDetailScreen(codeClash: codeClash),
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
 
     Navigator.push(
       context,

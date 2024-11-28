@@ -41,12 +41,13 @@ class AccountEditState extends ConsumerState<AccountEdit> {
   @override
   void initState() {
     super.initState();
-    displayNameController = TextEditingController();
-    phoneNumberController = TextEditingController();
-    firstNameController = TextEditingController();
-    miController = TextEditingController();
-    lastNameController = TextEditingController();
-    suffixController = TextEditingController();
+    final userData = ref.read(appUserNotifierProvider).value!;
+    displayNameController = TextEditingController(text: userData.displayName);
+    phoneNumberController = TextEditingController(text: userData.phoneNumber);
+    firstNameController = TextEditingController(text: userData.firstName);
+    miController = TextEditingController(text: userData.mi);
+    lastNameController = TextEditingController(text: userData.lastName);
+    suffixController = TextEditingController(text: userData.suffix);
   }
 
   @override
@@ -115,7 +116,6 @@ class AccountEditState extends ConsumerState<AccountEdit> {
                   border: const OutlineInputBorder(),
                   labelText: 'Display Name',
                   prefixIcon: const Icon(Icons.person),
-                  hintText: userData.displayName ?? 'Enter your name',
                   helperText: 'Leave blank to keep the same name'),
               controller: displayNameController,
             ),
@@ -218,48 +218,73 @@ class AccountEditState extends ConsumerState<AccountEdit> {
               ],
             ),
             const SizedBox(height: 10),
-            ElevatedButton(
-              style: AdaptiveTheme.of(context)
-                  .theme
-                  .elevatedButtonTheme
-                  .style!
-                  .copyWith(
-                    minimumSize: WidgetStateProperty.resolveWith<Size?>(
-                      (_) => const Size.fromHeight(60),
-                    ),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: AdaptiveTheme.of(context)
+                        .theme
+                        .elevatedButtonTheme
+                        .style!
+                        .copyWith(
+                          minimumSize: WidgetStateProperty.resolveWith<Size?>(
+                            (_) => const Size.fromHeight(60),
+                          ),
+                        ),
+                    onPressed: () {
+                      clearControllers();
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Cancel'),
                   ),
-              onPressed: () async {
-                if (imageChanged) {
-                  await updateProfilePicture(user, imageFile);
-                }
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    style: AdaptiveTheme.of(context)
+                        .theme
+                        .elevatedButtonTheme
+                        .style!
+                        .copyWith(
+                          minimumSize: WidgetStateProperty.resolveWith<Size?>(
+                            (_) => const Size.fromHeight(60),
+                          ),
+                        ),
+                    onPressed: () async {
+                      if (imageChanged) {
+                        await updateProfilePicture(user, imageFile);
+                      }
 
-                await ref.read(authProvider.notifier).updateUser(
-                      ref,
-                      displayName: displayNameController.text,
-                      phoneNumber: phoneNumberController.text,
-                      firstName: firstNameController.text,
-                      mi: miController.text,
-                      lastName: lastNameController.text,
-                      suffix: suffixController.text,
-                    );
+                      await ref.read(authProvider.notifier).updateUser(
+                            ref,
+                            displayName: displayNameController.text,
+                            phoneNumber: phoneNumberController.text,
+                            firstName: firstNameController.text,
+                            mi: miController.text,
+                            lastName: lastNameController.text,
+                            suffix: suffixController.text,
+                          );
 
-                clearControllers();
-                imageChanged = false;
+                      clearControllers();
+                      imageChanged = false;
 
-                if (!context.mounted) {
-                  return;
-                }
+                      if (!context.mounted) {
+                        return;
+                      }
 
-                Utils.displayDialog(
-                  context: context,
-                  lottieAsset: 'assets/anim/congrats.json',
-                  title: 'Success',
-                  content:
-                      'Your account has been updated successfully. 🎉\nThe changes will be reflected shortly.',
-                  onDismiss: (value) => setState(() {}),
-                );
-              },
-              child: const Text('Save'),
+                      Utils.displayDialog(
+                        context: context,
+                        lottieAsset: 'assets/anim/congrats.json',
+                        title: 'Success',
+                        content:
+                            'Your account has been updated successfully. 🎉\nThe changes will be reflected shortly.',
+                        onDismiss: (value) => setState(() {}),
+                      );
+                    },
+                    child: const Text('Save'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

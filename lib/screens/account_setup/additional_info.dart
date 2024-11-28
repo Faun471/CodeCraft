@@ -74,7 +74,7 @@ class _AdditionalInfoScreenState extends ConsumerState<AdditionalInfoScreen> {
               builder: (context) {
                 return LoadingScreen(
                   futures: [getLandingPage(appUser)],
-                  onDone: (context, snapshot) async {
+                  onDone: (context, snapshot, ref) async {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
@@ -153,12 +153,11 @@ class _AdditionalInfoScreenState extends ConsumerState<AdditionalInfoScreen> {
       autovalidateMode: AutovalidateMode.disabled,
       child: Column(
         children: [
-          Expanded(
-            child: CustomTextField(
-              labelText: 'Display Name',
-              icon: Icons.person,
-              controller: displayNameController,
-            ),
+          CustomTextField(
+            labelText: 'Display Name',
+            icon: Icons.person,
+            controller: displayNameController,
+            isRequired: false,
           ),
           const SizedBox(height: 10),
           Row(
@@ -239,7 +238,9 @@ class _AdditionalInfoScreenState extends ConsumerState<AdditionalInfoScreen> {
     if (_formKey.currentState!.validate()) {
       userData = {
         ...userData,
-        'displayName': displayNameController.text,
+        'displayName': displayNameController.text.isEmpty
+            ? '${firstNameController.text} ${lastNameController.text}'
+            : displayNameController.text,
         'firstName': firstNameController.text,
         'lastName': lastNameController.text,
         'phoneNumber': phoneNumberController.text,
@@ -271,7 +272,7 @@ class _AdditionalInfoScreenState extends ConsumerState<AdditionalInfoScreen> {
         MaterialPageRoute(
           builder: (context) => LoadingScreen(
             futures: [getLandingPage(ref.read(appUserNotifierProvider).value!)],
-            onDone: (context, snapshot) async {
+            onDone: (context, snapshot, ref) async {
               if (snapshot.data[0] == null) {
                 return;
               }

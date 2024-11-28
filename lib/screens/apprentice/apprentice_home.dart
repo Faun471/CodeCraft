@@ -22,7 +22,7 @@ class ApprenticeHome extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.read(appUserNotifierProvider).when(
+    return ref.watch(appUserNotifierProvider).when(
           data: (data) {
             return Scaffold(
               body: Body(
@@ -33,49 +33,70 @@ class ApprenticeHome extends ConsumerWidget {
                     screen: const MapScreen(),
                   ),
                   SidebarItem(
-                    label: 'Leaderboard',
-                    icon: Icons.leaderboard,
-                    screen: const Leaderboards(),
-                  ),
-                  SidebarItem(
-                    icon: Icons.code_rounded,
-                    label: 'Coding Challenges',
-                    screen: const CodingChallenges(),
-                  ),
-                  SidebarItem(
-                    icon: Icons.code_rounded,
-                    label: 'Weekly Challenges',
-                    screen: const WeeklyChallenges(),
-                  ),
-                  SidebarItem(
-                    icon: Icons.bug_report,
-                    label: 'Debugging Challenges',
-                    screen: const DebuggingChallenges(),
-                  ),
-                  SidebarItem(
-                    icon: Icons.quiz,
-                    label: 'Coding Quizzes',
-                    screen: const CodingQuizzes(),
-                  ),
-                  SidebarItem(
-                    icon: Icons.code_rounded,
-                    label: 'Code Clash',
-                    screen: const CodeClashes(),
-                  ),
-                  SidebarItem(
                     icon: Icons.people,
-                    label: 'About Us',
+                    label: 'Organization',
+                    screen: const Leaderboards(),
+                    subItems: [
+                      SidebarItem(
+                        label: 'Leaderboard',
+                        icon: Icons.leaderboard,
+                        screen: const Leaderboards(),
+                      ),
+                      SidebarItem(
+                        icon: Icons.monetization_on,
+                        label: 'Pricing',
+                        screen: const PlanViewScreen(),
+                      ),
+                    ],
+                  ),
+                  SidebarItem(
+                    icon: Icons.code,
+                    label: 'Challenges',
+                    screen: const CodingChallenges(),
+                    subItems: [
+                      SidebarItem(
+                        icon: Icons.code_rounded,
+                        label: 'Coding Challenges',
+                        screen: const CodingChallenges(),
+                      ),
+                      SidebarItem(
+                        icon: Icons.code_rounded,
+                        label: 'Weekly Challenges',
+                        screen: const WeeklyChallenges(),
+                      ),
+                      SidebarItem(
+                        icon: Icons.bug_report,
+                        label: 'Debugging Challenges',
+                        screen: const DebuggingChallenges(),
+                      ),
+                      SidebarItem(
+                        icon: Icons.quiz,
+                        label: 'Coding Quizzes',
+                        screen: const CodingQuizzes(),
+                      ),
+                      SidebarItem(
+                        icon: Icons.code_rounded,
+                        label: 'Code Clash',
+                        screen: const CodeClashes(),
+                      ),
+                    ],
+                  ),
+                  SidebarItem(
+                    icon: Icons.info,
+                    label: 'Information',
                     screen: const NewAboutUs(),
-                  ),
-                  SidebarItem(
-                    icon: Icons.monetization_on,
-                    label: 'Pricing',
-                    screen: const PlanViewScreen(),
-                  ),
-                  SidebarItem(
-                    icon: Icons.question_answer,
-                    label: 'FAQs',
-                    screen: const FAQsPage(),
+                    subItems: [
+                      SidebarItem(
+                        icon: Icons.people,
+                        label: 'About Us',
+                        screen: const NewAboutUs(),
+                      ),
+                      SidebarItem(
+                        icon: Icons.question_answer,
+                        label: 'FAQs',
+                        screen: const FAQsPage(),
+                      ),
+                    ],
                   ),
                   SidebarItem(
                     icon: Icons.settings,
@@ -102,8 +123,9 @@ class ApprenticeHome extends ConsumerWidget {
                         screen: const SettingsScreen(),
                         onTap: () => Utils.displayDialog(
                           context: context,
-                          title: 'Sign Out',
-                          content: 'Are you sure you want to sign out?',
+                          title: 'Log Out',
+                          content: 'Are you sure you want to log out?',
+                          lottieAsset: 'assets/anim/question.json',
                           actions: [
                             TextButton(
                               onPressed: () {
@@ -115,7 +137,7 @@ class ApprenticeHome extends ConsumerWidget {
                               onPressed: () {
                                 FirebaseAuth.instance.signOut();
                               },
-                              child: const Text('Sign Out'),
+                              child: const Text('Log Out'),
                             ),
                           ],
                         ),

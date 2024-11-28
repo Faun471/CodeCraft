@@ -32,123 +32,125 @@ class _ManageChallengeScreenState
   Widget build(BuildContext context) {
     final user = ref.read(appUserNotifierProvider).value;
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          const SizedBox(height: 20),
-          const Text(
-            'Manage Challenges',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+    return ContextMenuOverlay(
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            const Text(
+              'Manage Challenges',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'This is where challenges will be edited.',
-            style: TextStyle(
-              fontSize: 16,
+            const SizedBox(height: 20),
+            const Text(
+              'This is where challenges will be edited.',
+              style: TextStyle(
+                fontSize: 16,
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          StreamBuilder<List<Challenge>>(
-            stream: ChallengeService().getChallengesStream(user!.orgId!),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return LoadingAnimationWidget.flickr(
-                  leftDotColor: Theme.of(context).primaryColor,
-                  rightDotColor: Theme.of(context).colorScheme.secondary,
-                  size: MediaQuery.of(context).size.width * 0.1,
-                );
-              }
-
-              if (snapshot.hasError) {
-                return const Center(
-                  child: Text('An error occurred, please try again later!'),
-                );
-              }
-
-              if (snapshot.data!.isEmpty) {
-                return const Column(
-                  children: [
-                    Center(
-                      child:
-                          Text('No challenges available! Please create one.'),
-                    ),
-                  ],
-                );
-              }
-
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  return ContextMenuRegion(
-                    contextMenu: ContextMenu(
-                      orgId: user.orgId!,
-                      challengeId: snapshot.data![index].id,
-                      onTap: () {
-                        setState(() {});
-                      },
-                    ),
-                    child: ListTile(
-                      title: Text(
-                        "${snapshot.data![index].duration.toDateTime().isBefore(DateTime.now()) ? '(Expired)' : ''} ${snapshot.data![index].id}",
-                        style: TextStyle(
-                          color: snapshot.data![index].duration
-                                  .toDateTime()
-                                  .isBefore(DateTime.now())
-                              ? Colors.red
-                              : null,
-                        ),
-                      ),
-                      subtitle: Text(
-                        snapshot.data![index].instructions,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 3,
-                      ),
-                      tileColor: snapshot.data![index].duration
-                              .toDateTime()
-                              .isBefore(DateTime.now())
-                          ? AdaptiveTheme.of(context).mode.isDark
-                              ? const Color.fromARGB(255, 21, 21, 21)
-                              : Colors.white
-                          : null,
-                      leading: const Icon(Icons.code_rounded),
-                      trailing: const Icon(Icons.arrow_forward_ios),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return LoadingScreen(
-                                futures: [
-                                  ChallengeService().getChallenge(
-                                      user.orgId!, snapshot.data![index].id)
-                                ],
-                                onDone: (context, snapshot1) {
-                                  Navigator.pop(context);
-                                  ref.watch(screenProvider.notifier).pushScreen(
-                                        CreateChallengeScreen(
-                                          challenge: snapshot1.data[0]!,
-                                        ),
-                                      );
-                                },
-                              );
-                            },
-                          ),
-                        );
-                      },
+            const SizedBox(height: 20),
+            StreamBuilder<List<Challenge>>(
+              stream: ChallengeService().getChallengesStream(user!.orgId!),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: LoadingAnimationWidget.flickr(
+                      leftDotColor: Theme.of(context).primaryColor,
+                      rightDotColor: Theme.of(context).colorScheme.secondary,
+                      size: MediaQuery.of(context).size.width * 0.1,
                     ),
                   );
-                },
-              );
-            },
-          ),
-          const SizedBox(height: 20),
-          _createChallengeButton()
-        ],
+                }
+
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Text('An error occurred, please try again later!'),
+                  );
+                }
+
+                if (snapshot.data!.isEmpty) {
+                  return const Column(
+                    children: [
+                      Center(
+                        child:
+                            Text('No challenges available! Please create one.'),
+                      ),
+                    ],
+                  );
+                }
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    return ContextMenuRegion(
+                      contextMenu: ContextMenu(
+                        orgId: user.orgId!,
+                        challengeId: snapshot.data![index].id,
+                        onTap: () {
+                          setState(() {});
+                        },
+                      ),
+                      child: ListTile(
+                        title: Text(
+                          "${snapshot.data![index].duration.toDateTime().isBefore(DateTime.now()) ? '(Expired)' : ''} ${snapshot.data![index].id}",
+                          style: TextStyle(
+                            color: snapshot.data![index].duration
+                                    .toDateTime()
+                                    .isBefore(DateTime.now())
+                                ? Colors.red
+                                : null,
+                          ),
+                        ),
+                        subtitle: Text(
+                          snapshot.data![index].instructions,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 3,
+                        ),
+                        tileColor: snapshot.data![index].duration
+                                .toDateTime()
+                                .isBefore(DateTime.now())
+                            ? AdaptiveTheme.of(context).mode.isDark
+                                ? const Color.fromARGB(255, 21, 21, 21)
+                                : Colors.white
+                            : null,
+                        leading: const Icon(Icons.code_rounded),
+                        trailing: const Icon(Icons.arrow_forward_ios),
+                        onTap: () {
+                          ref.watch(screenProvider.notifier).pushScreen(
+                                LoadingScreen(
+                                  futures: [
+                                    ChallengeService().getChallenge(
+                                      user.orgId!,
+                                      snapshot.data![index].id,
+                                    )
+                                  ],
+                                  onDone: (context, snapshot1, ref) {
+                                    ref
+                                        .watch(screenProvider.notifier)
+                                        .replaceScreen(
+                                          CreateChallengeScreen(
+                                            challenge: snapshot1.data[0]!,
+                                          ),
+                                        );
+                                  },
+                                ),
+                              );
+                        },
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+            _createChallengeButton()
+          ],
+        ),
       ),
     );
   }

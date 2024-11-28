@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/debugging_challenge.dart';
 import 'package:codecraft/providers/screen_provider.dart';
@@ -32,122 +33,123 @@ class _ManageDebuggingChallengeScreenState
   Widget build(BuildContext context) {
     final user = ref.read(appUserNotifierProvider).value;
 
-    return SingleChildScrollView(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 20),
-            const Text(
-              'Manage Debugging Challenges',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+    return ContextMenuOverlay(
+      child: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 20),
+              const Text(
+                'Manage Debugging Challenges',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'This is where debugging challenges will be edited.',
-              style: TextStyle(
-                fontSize: 16,
+              const SizedBox(height: 20),
+              const Text(
+                'This is where debugging challenges will be edited.',
+                style: TextStyle(
+                  fontSize: 16,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            FutureBuilder<List<DebuggingChallenge>>(
-              future: DebuggingChallengeService()
-                  .getDebuggingChallenges(user!.orgId!),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return LoadingAnimationWidget.flickr(
-                    leftDotColor: Theme.of(context).primaryColor,
-                    rightDotColor: Theme.of(context).colorScheme.secondary,
-                    size: MediaQuery.of(context).size.width * 0.1,
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return const Center(
-                    child: Text('An error occurred, please try again later!'),
-                  );
-                }
-
-                if (snapshot.data!.isEmpty) {
-                  return const Column(
-                    children: [
-                      Center(
-                        child: Text(
-                            'No debugging challenges available! Please create one.'),
-                      ),
-                    ],
-                  );
-                }
-
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    return ContextMenuRegion(
-                      contextMenu: DebuggingChallengeContextMenu(
-                        orgId: user.orgId!,
-                        challengeId: snapshot.data![index].id,
-                        onTap: () {
-                          setState(() {});
-                        },
-                      ),
-                      child: ListTile(
-                        title: Text(
-                          "${snapshot.data![index].duration.toDateTime().isBefore(DateTime.now()) ? '(Expired)' : ''} ${snapshot.data![index].title}",
-                          style: TextStyle(
-                            color: snapshot.data![index].duration
-                                    .toDateTime()
-                                    .isBefore(DateTime.now())
-                                ? Colors.red
-                                : null,
-                          ),
-                        ),
-                        tileColor: snapshot.data![index].duration
-                                .toDateTime()
-                                .isBefore(DateTime.now())
-                            ? Colors.grey[100]
-                            : null,
-                        leading: const Icon(Icons.bug_report_rounded),
-                        trailing: const Icon(Icons.arrow_forward_ios),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return LoadingScreen(
-                                  futures: [
-                                    DebuggingChallengeService()
-                                        .getDebuggingChallenge(user.orgId!,
-                                            snapshot.data![index].id)
-                                  ],
-                                  onDone: (context, snapshot1) {
-                                    Navigator.pop(context);
-                                    ref
-                                        .watch(screenProvider.notifier)
-                                        .pushScreen(
-                                          CreateDebuggingChallengeScreen(
-                                            challenge: snapshot1.data[0]!,
-                                          ),
-                                        );
-                                  },
-                                );
-                              },
-                            ),
-                          );
-                        },
-                      ),
+              const SizedBox(height: 20),
+              FutureBuilder<List<DebuggingChallenge>>(
+                future: DebuggingChallengeService()
+                    .getDebuggingChallenges(user!.orgId!),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return LoadingAnimationWidget.flickr(
+                      leftDotColor: Theme.of(context).primaryColor,
+                      rightDotColor: Theme.of(context).colorScheme.secondary,
+                      size: MediaQuery.of(context).size.width * 0.1,
                     );
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-            _createDebuggingChallengeButton()
-          ],
+                  }
+
+                  if (snapshot.hasError) {
+                    return const Center(
+                      child: Text('An error occurred, please try again later!'),
+                    );
+                  }
+
+                  if (snapshot.data!.isEmpty) {
+                    return const Column(
+                      children: [
+                        Center(
+                          child: Text(
+                              'No debugging challenges available! Please create one.'),
+                        ),
+                      ],
+                    );
+                  }
+
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      return ContextMenuRegion(
+                        contextMenu: DebuggingChallengeContextMenu(
+                          orgId: user.orgId!,
+                          challengeId: snapshot.data![index].id,
+                          onTap: () {
+                            setState(() {});
+                          },
+                        ),
+                        child: ListTile(
+                          title: Text(
+                            "${snapshot.data![index].duration.toDateTime().isBefore(DateTime.now()) ? '(Expired)' : ''} ${snapshot.data![index].title}",
+                            style: TextStyle(
+                              color: snapshot.data![index].duration
+                                      .toDateTime()
+                                      .isBefore(DateTime.now())
+                                  ? Colors.red
+                                  : null,
+                            ),
+                          ),
+                          subtitle: Text(
+                            snapshot.data![index].instructions,
+                          ),
+                          tileColor: snapshot.data![index].duration
+                                  .toDateTime()
+                                  .isBefore(DateTime.now())
+                              ? AdaptiveTheme.of(context).mode.isDark
+                                  ? const Color.fromARGB(255, 21, 21, 21)
+                                  : Colors.white
+                              : null,
+                          leading: const Icon(Icons.bug_report_rounded),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                          onTap: () {
+                            ref.watch(screenProvider.notifier).pushScreen(
+                                  LoadingScreen(
+                                    futures: [
+                                      DebuggingChallengeService()
+                                          .getDebuggingChallenge(user.orgId!,
+                                              snapshot.data![index].id)
+                                    ],
+                                    onDone: (context, snapshot1, ref) {
+                                      ref
+                                          .watch(screenProvider.notifier)
+                                          .replaceScreen(
+                                            CreateDebuggingChallengeScreen(
+                                              challenge: snapshot1.data[0]!,
+                                            ),
+                                          );
+                                    },
+                                  ),
+                                );
+                          },
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+              _createDebuggingChallengeButton()
+            ],
+          ),
         ),
       ),
     );
@@ -161,7 +163,7 @@ class _ManageDebuggingChallengeScreenState
             .pushScreen(const CreateDebuggingChallengeScreen());
       },
       child: Text(
-        'Create Debugging Challenge',
+        'Create a Debugging Challenge',
         style: TextStyle(
           color: ThemeUtils.getTextColorForBackground(
               Theme.of(context).primaryColor),

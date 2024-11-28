@@ -8,16 +8,12 @@ class QuizService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> createQuiz(Quiz quiz, String organizationId) async {
-    try {
-      await _firestore
-          .collection('organizations')
-          .doc(organizationId)
-          .collection('quizzes')
-          .doc(quiz.id)
-          .set(quiz.toJson(), SetOptions(merge: true));
-    } catch (e) {
-      throw Exception('Error creating quiz: $e');
-    }
+    await _firestore
+        .collection('organizations')
+        .doc(organizationId)
+        .collection('quizzes')
+        .doc(quiz.id)
+        .set(quiz.toJson(), SetOptions(merge: true));
   }
 
   Future<Quiz> getQuizFromId(String quizId, String organizationId) async {

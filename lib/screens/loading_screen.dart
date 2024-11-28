@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-class LoadingScreen extends StatefulWidget {
-  static const route = '/loading-screen';
-
+class LoadingScreen extends ConsumerStatefulWidget {
   final List<Future> futures;
 
-  final Function(BuildContext, AsyncSnapshot)? onDone;
+  final Function(BuildContext, AsyncSnapshot, WidgetRef)? onDone;
 
   const LoadingScreen({
     super.key,
@@ -19,7 +18,7 @@ class LoadingScreen extends StatefulWidget {
   _LoadingScreenState createState() => _LoadingScreenState();
 }
 
-class _LoadingScreenState extends State<LoadingScreen> {
+class _LoadingScreenState extends ConsumerState<LoadingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +30,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
               0.5.seconds,
               () {
                 if (widget.onDone != null && context.mounted) {
-                  widget.onDone!(context, snapshot);
+                  widget.onDone!(context, snapshot, ref);
                 }
               },
             );

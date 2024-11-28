@@ -8,11 +8,12 @@ import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/organisation.dart';
 import 'package:codecraft/screens/apprentice/organisation/join_organisation.dart';
-import 'package:codecraft/screens/apprentice/organisation/organisation_details_apprentice.dart';
+import 'package:codecraft/screens/apprentice/organisation/organisation_card.dart';
 import 'package:codecraft/services/auth/auth_helper.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/utils/utils.dart';
+import 'package:codecraft/widgets/buttons/custom_text_fields.dart';
 import 'package:codecraft/widgets/cards/custom_big_user_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -47,12 +48,13 @@ class _UserProfilePanelState extends ConsumerState<UserProfilePanel> {
   @override
   void initState() {
     super.initState();
-    displayNameController = TextEditingController();
-    phoneNumberController = TextEditingController();
-    firstNameController = TextEditingController();
-    miController = TextEditingController();
-    lastNameController = TextEditingController();
-    suffixController = TextEditingController();
+    final userData = ref.read(appUserNotifierProvider).value!;
+    displayNameController = TextEditingController(text: userData.displayName);
+    phoneNumberController = TextEditingController(text: userData.phoneNumber);
+    firstNameController = TextEditingController(text: userData.firstName);
+    miController = TextEditingController(text: userData.mi);
+    lastNameController = TextEditingController(text: userData.lastName);
+    suffixController = TextEditingController(text: userData.suffix);
   }
 
   @override
@@ -108,7 +110,6 @@ class _UserProfilePanelState extends ConsumerState<UserProfilePanel> {
 
   void _showEditProfileDialog(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final userData = ref.read(appUserNotifierProvider).value!;
     String imageUrl = user?.photoURL ?? '';
 
     Utils.scrollableMaterialDialog(
@@ -186,17 +187,13 @@ class _UserProfilePanelState extends ConsumerState<UserProfilePanel> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  TextField(
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      labelText: 'Display Name',
-                      prefixIcon: const Icon(Icons.person),
-                      hintText: userData.displayName ?? 'Enter your name',
-                      helperText: 'Leave blank to keep the same name',
-                    ),
+                  CustomTextField(
+                    labelText: 'Display Name',
+                    icon: Icons.person,
                     controller: displayNameController,
+                    mode: ValidationMode.none,
+                    textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 10),
                   InternationalPhoneNumberInput(
                     onInputChanged: (PhoneNumber number) {},
                     maxLength: 12,
@@ -215,90 +212,71 @@ class _UserProfilePanelState extends ConsumerState<UserProfilePanel> {
                           .bodyMedium!
                           .color,
                     ),
-                    initialValue: PhoneNumber(
-                      dialCode: "+63",
-                      isoCode: "PH",
-                    ),
+                    initialValue: PhoneNumber(dialCode: "+63", isoCode: "PH"),
                     textFieldController: phoneNumberController,
-                    formatInput: true,
+                    keyboardAction: TextInputAction.next,
                     keyboardType: const TextInputType.numberWithOptions(
-                      signed: true,
-                      decimal: true,
-                    ),
+                        signed: true, decimal: true),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return '* This field is required';
                       }
-                      if (value.length < 12) {
+
+                      if (value.length != 12) {
                         return 'Invalid phone number';
                       }
                       return null;
                     },
-                    hintText: userData.phoneNumber ?? 'Enter your phone number',
+                    hintText: 'Phone Number',
+                    autofillHints: const [AutofillHints.telephoneNumber],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
                   Row(
                     children: [
                       Expanded(
                         flex: 3,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            labelText: "First Name",
-                            prefixIcon: const Icon(Icons.person),
-                            hintText:
-                                userData.firstName ?? 'Enter your first name',
-                            helperText:
-                                'Leave blank to keep the same first name',
-                          ),
+                        child: CustomTextField(
+                          labelText: 'First Name',
+                          icon: Icons.person,
                           controller: firstNameController,
+                          mode: ValidationMode.none,
+                          textInputAction: TextInputAction.next,
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         flex: 1,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            labelText: "MI",
-                            hintText:
-                                userData.mi ?? 'Enter your middle initial',
-                            helperText: '',
-                          ),
+                        child: CustomTextField(
+                          labelText: 'MI',
                           controller: miController,
+                          mode: ValidationMode.none,
+                          textInputAction: TextInputAction.next,
+                          isRequired: false,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
                         flex: 3,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            labelText: "Last Name",
-                            prefixIcon: const Icon(Icons.person),
-                            hintText:
-                                userData.lastName ?? 'Enter your last name',
-                            helperText:
-                                'Leave blank to keep the same last name',
-                          ),
+                        child: CustomTextField(
+                          labelText: 'Last Name',
+                          icon: Icons.person,
                           controller: lastNameController,
+                          mode: ValidationMode.none,
+                          textInputAction: TextInputAction.next,
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         flex: 1,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            labelText: "Suffix",
-                            hintText: userData.suffix ?? 'Enter your suffix',
-                            helperText: 'Leave blank to keep the same suffix',
-                          ),
+                        child: CustomTextField(
+                          labelText: 'Suffix',
                           controller: suffixController,
+                          mode: ValidationMode.none,
+                          textInputAction: TextInputAction.next,
+                          isRequired: false,
                         ),
                       ),
                     ],
@@ -311,6 +289,19 @@ class _UserProfilePanelState extends ConsumerState<UserProfilePanel> {
       ),
       actionsBuilder: (context) {
         return [
+          IconsButton(
+            onPressed: () {
+              if (_isSaving) return;
+              Navigator.of(context).pop();
+            },
+            text: 'Cancel',
+            iconData: Icons.cancel,
+            color: _isSaving ? Colors.grey : Colors.red,
+            textStyle:
+                TextStyle(color: _isSaving ? Colors.grey[600] : Colors.white),
+            iconColor: _isSaving ? Colors.grey[600] : Colors.white,
+          ),
+          const SizedBox(width: 10),
           StatefulBuilder(
             builder: (BuildContext context, StateSetter setDialogState) {
               return IconsButton(
@@ -333,7 +324,6 @@ class _UserProfilePanelState extends ConsumerState<UserProfilePanel> {
                           suffix: suffixController.text,
                         );
 
-                    clearControllers();
                     imageChanged = false;
 
                     if (!context.mounted) return;
@@ -371,19 +361,6 @@ class _UserProfilePanelState extends ConsumerState<UserProfilePanel> {
                       ),
               );
             },
-          ),
-          const SizedBox(width: 10),
-          IconsButton(
-            onPressed: () {
-              if (_isSaving) return;
-              Navigator.of(context).pop(); // Close the dialog without saving
-            },
-            text: 'Cancel',
-            iconData: Icons.cancel,
-            color: _isSaving ? Colors.grey : Colors.red,
-            textStyle:
-                TextStyle(color: _isSaving ? Colors.grey[600] : Colors.white),
-            iconColor: _isSaving ? Colors.grey[600] : Colors.white,
           ),
         ];
       },

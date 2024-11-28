@@ -29,8 +29,23 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerifScreen> {
   @override
   void initState() {
     super.initState();
-    ref.watch(authProvider.notifier).sendVerificationEmail();
-    _startVerificationCheck();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        print('Sending verification email');
+        await ref.watch(authProvider.notifier).sendVerificationEmail();
+        print('Verification email sent');
+      } catch (e) {
+        print('Error sending verification email: $e');
+        if (!mounted) return;
+        Utils.displayDialog(
+          context: context,
+          title: 'Error',
+          content: e.toString(),
+        );
+      }
+
+      _startVerificationCheck();
+    });
   }
 
   void _startVerificationCheck() {
@@ -135,16 +150,26 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerifScreen> {
               const SizedBox(height: 32),
               TextButton(
                 onPressed: () async {
-                  await FirebaseAuth.instance.currentUser
-                      ?.sendEmailVerification();
+                  try {
+                    await ref
+                        .watch(authProvider.notifier)
+                        .sendVerificationEmail();
+                    if (!context.mounted) return;
 
-                  if (!context.mounted) return;
+                    Utils.displayDialog(
+                      context: context,
+                      title: 'Email Resent',
+                      content: 'Verification email resent.',
+                    );
+                  } catch (e) {
+                    if (!context.mounted) return;
 
-                  Utils.displayDialog(
-                    context: context,
-                    title: 'Email Resent',
-                    content: 'Verification email resent.',
-                  );
+                    Utils.displayDialog(
+                      context: context,
+                      title: 'Error',
+                      content: e.toString(),
+                    );
+                  }
                 },
                 child: const Text('Resend verification email'),
               ),
@@ -155,7 +180,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerifScreen> {
 
                   if (!context.mounted) return;
                 },
-                child: const Text('Sign out'),
+                child: const Text('Log out'),
               ),
             ],
           ),

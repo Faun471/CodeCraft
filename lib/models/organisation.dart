@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 class Organization {
   final String id;
   final String orgName;
@@ -27,7 +28,9 @@ class Organization {
       : id = data['id'] ?? '',
         orgName = data['orgName'] ?? '',
         orgDescription = data['orgDescription'] ?? '',
-        createdAt = (data['createdAt']) ?? '',
+        createdAt = (data['createdAt'] is Timestamp)
+            ? (data['createdAt'] as Timestamp).toDate().toString()
+            : data['createdAt'].toString(),
         mentorId = data['mentorId'] ?? '',
         code = data['code'] ?? '',
         plan = data['plan'] ?? '',

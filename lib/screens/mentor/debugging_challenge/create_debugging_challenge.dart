@@ -1,13 +1,14 @@
-import 'package:board_datetime_picker/board_datetime_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/providers/screen_provider.dart';
-import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/codeblocks/code_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:codecraft/models/debugging_challenge.dart';
 import 'package:codecraft/services/debugging_challenge_service.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:re_editor/re_editor.dart';
 
 class CreateDebuggingChallengeScreen extends ConsumerStatefulWidget {
@@ -32,8 +33,6 @@ class _DebuggingChallengeScreenState
       TextEditingController();
   final CodeLineEditingController codeLineController =
       CodeLineEditingController();
-  final BoardDateTimeTextController dateTimeController =
-      BoardDateTimeTextController();
 
   int _currentStep = 0;
 
@@ -85,7 +84,6 @@ class _DebuggingChallengeScreenState
     _correctLineController.text = _correctLine.toString();
     _expectedOutputController.text = _expectedOutput;
     _attemptsAllowedController.text = _attemptsAllowed.toString();
-    dateTimeController.setDate(_duration.toDateTime());
   }
 
   @override
@@ -125,6 +123,14 @@ class _DebuggingChallengeScreenState
                   title: 'Please complete all steps',
                   content: 'Ensure all fields are filled correctly.',
                   lottieAsset: 'assets/anim/error.json',
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Ok'),
+                    ),
+                  ],
                   onDismiss: () {
                     final firstInvalidStep = _formKey.currentState!
                         .validateGranularly()
@@ -259,6 +265,9 @@ class _DebuggingChallengeScreenState
           controller: _correctLineController,
           decoration: const InputDecoration(labelText: 'Correct Line Number'),
           keyboardType: TextInputType.number,
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.digitsOnly
+          ],
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please enter the correct line number';
@@ -308,6 +317,9 @@ class _DebuggingChallengeScreenState
           controller: _attemptsAllowedController,
           decoration: const InputDecoration(labelText: 'Attempts Allowed'),
           keyboardType: TextInputType.number,
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.digitsOnly
+          ],
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please enter the number of attempts allowed';
@@ -329,20 +341,10 @@ class _DebuggingChallengeScreenState
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: BoardDateTimeInputField(
-          key: fields[6],
-          controller: dateTimeController,
-          pickerType: DateTimePickerType.datetime,
-          showPickerType: BoardDateTimeFieldPickerType.mini,
-          initialDate: _duration.toDateTime(),
-          minimumDate: DateTime.now(),
-          maximumDate: DateTime.now().add(const Duration(days: 365)),
-          options: const BoardDateTimeOptions(
-            languages: BoardPickerLanguages.en(),
-          ),
-          textStyle: Theme.of(context).textTheme.bodyMedium,
-          onChanged: (date) {
-            _duration = date.toIso8601String();
+        child: OmniDateTimePicker(
+          initialDate: DateTime.parse(_duration),
+          onDateTimeChanged: (DateTime dateTime) {
+            _duration = dateTime.toIso8601String();
           },
         ),
       ),
@@ -425,6 +427,19 @@ class _DebuggingChallengeScreenState
                       ref.read(screenProvider.notifier).popScreen();
                     },
                   );
+                }
+              } on FirebaseException catch (e) {
+                if (!mounted) return;
+
+                if (e.code == 'permission-denied') {
+                  Utils.displayDialog(
+                    context: context,
+                    title: 'Permission Denied',
+                    content:
+                        'You do not have permission to create a debugging challenge.\nPlease check if your plan is still active.',
+                    lottieAsset: 'assets/anim/error.json',
+                  );
+                  return;
                 }
               } catch (e) {
                 if (mounted) {

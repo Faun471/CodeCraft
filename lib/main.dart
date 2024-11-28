@@ -9,49 +9,80 @@ import 'package:codecraft/screens/account_setup/email_verification_screen.dart';
 import 'package:codecraft/screens/account_setup/login.dart';
 import 'package:codecraft/screens/account_setup/register.dart';
 import 'package:codecraft/screens/apprentice/apprentice_home.dart';
+import 'package:codecraft/screens/generic/home_screen.dart';
 import 'package:codecraft/screens/loading_screen.dart';
 import 'package:codecraft/screens/mentor/mentor_home.dart';
 import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/widgets/cards/onboarding_card.dart';
-import 'package:context_menus/context_menus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final providerContainer = ProviderContainer();
+
+String clientId = '';
+String secretKey = '';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
+  await dotenv.load(fileName: 'dotenv');
 
+  clientId = dotenv.env['PAYPAL_CLIENT_ID']!;
+  secretKey = dotenv.env['PAYPAL_CLIENT_SECRET']!;
 
   FirebaseAuth.instance.authStateChanges().listen(
     (User? user) async {
+      final currentState = navigatorKey.currentState;
+
+      if (currentState == null) return;
+
       if (user == null) {
         providerContainer.refresh(appUserNotifierProvider.notifier);
 
-        if (navigatorKey.currentState == null) return;
-        navigatorKey.currentState!.pushReplacement(
+        currentState.pushReplacement(
           MaterialPageRoute(
             builder: (context) => const AccountSetup(Login()),
           ),
         );
       } else if (!user.emailVerified) {
         String email = user.email!;
-        navigatorKey.currentState!.pushReplacement(
+
+        if (navigatorKey.currentState == null) return;
+
+        currentState.pushReplacement(
           MaterialPageRoute(
             builder: (context) => EmailVerifScreen(email: email),
+          ),
+        );
+      } else {
+        final appUser =
+            await providerContainer.refresh(appUserNotifierProvider.future);
+
+        currentState.pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => appUser.accountType == 'apprentice'
+                ? const ApprenticeHome()
+                : appUser.accountType == 'mentor'
+                    ? const MentorHome()
+                    : const AccountSetup(Register()),
           ),
         );
       }
     },
   );
+
+  if (kIsWeb) {
+    setUrlStrategy(PathUrlStrategy());
+  }
 
   runApp(
     UncontrolledProviderScope(
@@ -120,42 +151,41 @@ class MyApp extends ConsumerWidget {
 
     return ref.watch(appUserNotifierProvider).when(
       data: (data) {
-        return ContextMenuOverlay(
-          child: AdaptiveTheme(
-            light: currentTheme.lightTheme,
-            dark: currentTheme.darkTheme,
-            initial: savedThemeMode ?? AdaptiveThemeMode.light,
-            builder: (theme, darkTheme) {
-              return MaterialApp(
-                title: 'CodeCraft',
-                theme: theme,
-                darkTheme: darkTheme,
-                navigatorKey: navigatorKey,
-                routes: {
-                  '/login': (context) => const AccountSetup(Login()),
-                  '/register': (context) => const AccountSetup(Register()),
-                  '/apprentice_home': (context) => const ApprenticeHome(),
-                  '/mentor_home': (context) => const MentorHome(),
-                },
-                home: LoadingScreen(
-                  futures: [getLandingPage(data)],
-                  onDone: (context, snapshot) async {
-                    if (!context.mounted) return;
-
-                    ThemeUtils.changeTheme(
-                        context, currentTheme.preferredColor);
-
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => snapshot.data[0],
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          ),
+        return AdaptiveTheme(
+          light: currentTheme.lightTheme,
+          dark: currentTheme.darkTheme,
+          initial: savedThemeMode ?? AdaptiveThemeMode.light,
+          builder: (theme, darkTheme) {
+            return MaterialApp(
+              title: 'CodeCraft',
+              theme: theme,
+              darkTheme: darkTheme,
+              navigatorKey: navigatorKey,
+              initialRoute: '/',
+              routes: {
+                '/': (context) => const HomePage(),
+                '/app': (context) => LoadingScreen(
+                      futures: [getLandingPage(data)],
+                      onDone: (context, snapshot, ref) async {
+                        if (!context.mounted) return;
+                        ThemeUtils.changeTheme(
+                            context, currentTheme.preferredColor);
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => snapshot.data[0],
+                          ),
+                        );
+                      },
+                    ),
+                '/register': (context) => const AccountSetup(Register()),
+                '/login': (context) => const AccountSetup(Login()),
+                '/email-verification': (context) => EmailVerifScreen(
+                      email: FirebaseAuth.instance.currentUser!.email!,
+                    ),
+              },
+            );
+          },
         );
       },
       error: (error, _) {

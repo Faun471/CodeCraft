@@ -1,7 +1,5 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:codecraft/main.dart';
-import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/screens/account_setup/account_setup.dart';
 import 'package:codecraft/screens/account_setup/forgot_password.dart';
 import 'package:codecraft/screens/account_setup/register.dart';
@@ -21,7 +19,6 @@ class Login extends ConsumerStatefulWidget {
 class _LoginState extends ConsumerState<Login> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final FocusNode focusNode = FocusNode();
   bool _isLoading = false;
 
   @override
@@ -30,14 +27,21 @@ class _LoginState extends ConsumerState<Login> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
-          child: AutoSizeText(
-            'Welcome Back!',
-            style: AdaptiveTheme.of(context).theme.textTheme.displayLarge,
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Center(
+            child: AutoSizeText(
+              'Ready to Code?',
+              style: AdaptiveTheme.of(context).theme.textTheme.displayLarge,
+            ),
           ),
         ),
         const SizedBox(height: 10),
-        Padding(padding: const EdgeInsets.all(20), child: loginForm()),
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: AutofillGroup(
+            child: _buildLoginForm(),
+          ),
+        ),
         const SizedBox(height: 20),
         Padding(
           padding: const EdgeInsets.all(20),
@@ -107,7 +111,7 @@ class _LoginState extends ConsumerState<Login> {
     );
   }
 
-  Form loginForm() {
+  Form _buildLoginForm() {
     final formKey = GlobalKey<FormState>();
 
     return Form(
@@ -119,13 +123,18 @@ class _LoginState extends ConsumerState<Login> {
             labelText: 'Email',
             icon: Icons.email,
             controller: emailController,
+            autofillHint: AutofillHints.email,
           ),
-          const SizedBox(height: 10),
           PasswordTextField(
             labelText: 'Password',
             controller: passwordController,
-            focusNode: focusNode,
             icon: Icons.lock,
+            autofillHints: AutofillHints.password,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: () {
+              if (_isLoading) return;
+              _login(formKey, context);
+            },
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -151,56 +160,8 @@ class _LoginState extends ConsumerState<Login> {
           ),
           const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: _isLoading
-                ? null
-                : () async {
-                    if (formKey.currentState!.validate()) {
-                      setState(() {
-                        _isLoading = true;
-                      });
-
-                      await ref
-                          .watch(authProvider.notifier)
-                          .loginUser(
-                            emailController.text,
-                            passwordController.text,
-                          )
-                          .then(
-                        (error) async {
-                          if (error != null && mounted) {
-                            Utils.displayDialog(
-                              context: context,
-                              title: 'Error',
-                              content: error,
-                              buttonText: 'Close',
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              lottieAsset: 'assets/anim/error.json',
-                            );
-
-                            setState(() {
-                              _isLoading = false;
-                            });
-
-                            return;
-                          }
-
-                          final appUser =
-                              await ref.refresh(appUserNotifierProvider.future);
-
-                          print('App User is : $appUser');
-
-                          final landingPage = await getLandingPage(appUser);
-
-                          navigatorKey.currentState!
-                              .pushReplacement((MaterialPageRoute(
-                            builder: (context) => landingPage,
-                          )));
-                        },
-                      );
-                    }
-                  },
+            onPressed:
+                _isLoading ? null : () async => await _login(formKey, context),
             style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(60)),
             child: _isLoading
@@ -228,5 +189,52 @@ class _LoginState extends ConsumerState<Login> {
         ],
       ),
     );
+  }
+
+  Future<void> _login(
+      GlobalKey<FormState> formKey, BuildContext context) async {
+    if (formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      await ref
+          .watch(authProvider.notifier)
+          .loginUser(
+            emailController.text,
+            passwordController.text,
+          )
+          .then(
+        (error) async {
+          if (error != null && mounted) {
+            if (!context.mounted) return;
+            Utils.displayDialog(
+              context: context,
+              title: 'Error',
+              content: error,
+              buttonText: 'Close',
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              lottieAsset: 'assets/anim/error.json',
+            );
+
+            setState(() {
+              _isLoading = false;
+            });
+
+            return;
+          }
+
+          // final appUser = await ref.refresh(appUserNotifierProvider.future);
+
+          // final landingPage = await getLandingPage(appUser);
+
+          // navigatorKey.currentState!.pushReplacement((MaterialPageRoute(
+          //   builder: (context) => landingPage,
+          // )));
+        },
+      );
+    }
   }
 }

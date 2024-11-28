@@ -20,12 +20,12 @@ class _LeaderboardsState extends ConsumerState<Leaderboards> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Leaderboard',
+            'Leaderboards',
             style: Theme.of(context).textTheme.headlineLarge!.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -89,9 +89,14 @@ class _LeaderboardsState extends ConsumerState<Leaderboards> {
   Widget _buildLeaderboardList() {
     Stream<List<AppUser>> stream;
 
-    final appUser = ref.read(appUserNotifierProvider).value!;
+    final appUser = ref.read(appUserNotifierProvider).requireValue;
 
-    // Select the correct stream based on sorting
+    if (appUser.orgId == 'Default') {
+      return const Center(
+        child: Text('Please join an organization to view leaderboards.'),
+      );
+    }
+
     if (_sortBy == 'quizzes') {
       stream = DatabaseHelper().getQuizLeaderboardStream(appUser.orgId!);
     } else if (_sortBy == 'challenges') {

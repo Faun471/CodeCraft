@@ -64,6 +64,12 @@ class QuizScreen extends ConsumerWidget {
               child: QuizViewer(
                 quiz: quiz!,
                 onQuizFinished: (quiz) async {
+                  final appUser =
+                      ref.read(appUserNotifierProvider).requireValue;
+
+                  final initialQuizResults =
+                      await QuizService().getCompletedQuizzes(appUser.id!);
+
                   final result =
                       await QuizService().saveQuizResultsWithAnswers(quiz);
 
@@ -75,17 +81,68 @@ class QuizScreen extends ConsumerWidget {
                       builder: (context) => QuizResultsScreen(
                         quiz: quiz,
                         quizResult: result,
-                        showSolutions: true,
-                        canRetake: true,
+                        showSolutions: orgId != 'Default',
+                        canRetake: orgId == 'Default',
                       ),
                     ),
                   );
 
-                  final appUserNotifier =
-                      ref.watch(appUserNotifierProvider.notifier);
-                  await appUserNotifier.addExperience(
-                    quiz.experienceToEarn,
+                  QuizResult lastResult = initialQuizResults.firstWhere(
+                    (element) => element.id == result.id,
+                    orElse: () => result,
                   );
+
+                  // check if this is the first time the user is taking the quiz
+                  if (lastResult == result) {
+                    if (result.score >= quiz.passingGrade) {
+                      Utils.displayDialog(
+                        context: context,
+                        title: 'Congratulations!',
+                        content:
+                            'You have passed the quiz with a score of ${lastResult.score}/${quiz.questions.length}.',
+                        lottieAsset: 'assets/anim/congrats.json',
+                      );
+
+                      await ref
+                          .watch(appUserNotifierProvider.notifier)
+                          .addExperience(quiz.experienceToEarn);
+                    } else {
+                      Utils.displayDialog(
+                        context: context,
+                        title: 'Failed!',
+                        content:
+                            'You have failed the quiz with a score of ${lastResult.score}/${quiz.questions.length}.',
+                        lottieAsset: 'assets/anim/failed.json',
+                      );
+                    }
+
+                    return;
+                  }
+
+                  // check if the user has improved their score
+                  if (result.score > lastResult.score) {
+                    Utils.displayDialog(
+                      context: context,
+                      title: 'Congratulations!',
+                      content:
+                          'You have improved your score from ${lastResult.score}/${quiz.questions.length} to ${result.score}/${quiz.questions.length}.',
+                      lottieAsset: 'assets/anim/level_up.json',
+                    );
+
+                    if (result.score >= quiz.passingGrade) {
+                      ref
+                          .watch(appUserNotifierProvider.notifier)
+                          .addExperience(quiz.experienceToEarn);
+                    }
+                  } else {
+                    Utils.displayDialog(
+                      context: context,
+                      title: 'Nice Try!',
+                      content:
+                          'You have failed to improve your score from ${lastResult.score}/${quiz.questions.length} to ${result.score}/${quiz.questions.length}.',
+                      lottieAsset: 'assets/anim/failed.json',
+                    );
+                  }
                 },
               ),
             ),

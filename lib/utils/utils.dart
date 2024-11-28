@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:codecraft/models/app_user.dart';
+import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -9,6 +11,7 @@ import 'package:lottie/lottie.dart';
 import 'package:material_dialogs/dialogs.dart';
 import 'package:material_dialogs/shared/types.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Utils {
   static Future<void> scrollableMaterialDialog({
@@ -146,7 +149,7 @@ class Utils {
               repeat: false,
             )
           : null,
-      dialogWidth: 0.35,
+      dialogWidth: 0.45,
       color: Theme.of(context).brightness == Brightness.light
           ? Colors.white
           : const Color.fromARGB(255, 21, 21, 21),
@@ -223,6 +226,57 @@ class Utils {
     );
 
     return croppedFile?.readAsBytes();
+  }
+
+  static Future<void> sendEmail(AppUser member, Message message) async {
+    await DatabaseHelper().firestore.collection('mail').add(
+      {
+        'to': member.email,
+        'message': message.toMap(),
+      },
+    );
+  }
+}
+
+class Mail {
+  String to;
+  Message message;
+
+  Mail({required this.to, required this.message});
+
+  Map<String, dynamic> toMap() {
+    return {
+      'to': to,
+      'message': message.toMap(),
+    };
+  }
+
+  factory Mail.fromMap(Map<String, dynamic> map) {
+    return Mail(
+      to: map['to'],
+      message: Message.fromMap(map['message']),
+    );
+  }
+}
+
+class Message {
+  String subject;
+  String text;
+
+  Message({required this.subject, required this.text});
+
+  Map<String, dynamic> toMap() {
+    return {
+      'subject': subject,
+      'text': text,
+    };
+  }
+
+  factory Message.fromMap(Map<String, dynamic> map) {
+    return Message(
+      subject: map['subject'],
+      text: map['text'],
+    );
   }
 }
 

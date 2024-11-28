@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/models/code_clash.dart';
 import 'package:codecraft/models/submission.dart';
@@ -93,7 +94,7 @@ class CodeClashResultsScreen extends ConsumerWidget {
                   participantsScores[userId] = score;
                 }
               }
-        
+
               final sortedParticipants =
                   participantsScores.entries.map((entry) {
                 return CodeClashParticipant(
@@ -223,7 +224,7 @@ class CodeClashResultsScreen extends ConsumerWidget {
                                 ),
                               ),
                               Text(
-                                'Date: ${getDate(codeClash.startTime!.toDate())}',
+                                'Date: ${getDate(codeClash.startTime?.toDate())}',
                                 style: TextStyle(
                                   color: ThemeUtils.getTextColorForBackground(
                                     Theme.of(context).primaryColor,
@@ -317,8 +318,9 @@ class LeaderboardRow extends StatelessWidget {
               child: CircleAvatar(
                 backgroundColor: Colors.teal,
                 radius: 25,
-                backgroundImage:
-                    photoUrl != null ? NetworkImage(photoUrl!) : null,
+                backgroundImage: photoUrl != null
+                    ? CachedNetworkImageProvider(photoUrl ?? '')
+                    : null,
                 child: photoUrl == null
                     ? const Icon(
                         Icons.person,

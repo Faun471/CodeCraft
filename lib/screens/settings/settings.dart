@@ -88,12 +88,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           selected: widget.initialTab == 'Appearance',
         ),
         ListTile(
-          title: const Text('Sign Out'),
+          title: const Text('Log Out'),
           onTap: () {
             Utils.displayDialog(
               context: context,
-              title: 'Sign Out',
-              content: 'Are you sure you want to sign out?',
+              title: 'Log Out',
+              content: 'Are you sure you want to log out?',
+              lottieAsset: 'assets/anim/question.json',
               actions: [
                 TextButton(
                   onPressed: () {
@@ -105,7 +106,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   onPressed: () async {
                     await FirebaseAuth.instance.signOut();
                   },
-                  child: const Text('Sign Out'),
+                  child: const Text('Log Out'),
                 ),
               ],
             );

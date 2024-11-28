@@ -1,16 +1,26 @@
+import 'package:codecraft/main.dart';
 import 'package:codecraft/models/app_user_notifier.dart';
-import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/services/database_helper.dart';
+import 'package:codecraft/utils/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_dialogs/shared/types.dart';
+import 'package:paypal_payment/paypal_payment.dart';
+import 'package:paypal_sdk/core.dart';
+import 'package:paypal_sdk/subscriptions.dart';
 
-class PlanViewScreen extends StatelessWidget {
+class PlanViewScreen extends StatefulWidget {
   const PlanViewScreen({super.key});
 
+  @override
+  _PlanViewScreenState createState() => _PlanViewScreenState();
+}
+
+class _PlanViewScreenState extends State<PlanViewScreen> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<DocumentSnapshot>(
@@ -53,8 +63,9 @@ class PlanViewScreen extends StatelessWidget {
               context,
               title: "Your Organization Plan",
               apprentices: "${orgData['maxApprentices'] ?? 5}",
-              price:
-                  "₱${(orgData['maxApprentices'] ?? 5) <= 5 ? 5 : orgData['maxApprentices'] * 10} /monthly",
+              price: (orgData['maxApprentices'] ?? 5) <= 5
+                  ? "FREE"
+                  : "₱${orgData['maxApprentices'] * 10} /monthly",
             ),
             SizedBox(height: 20),
             Text(
@@ -65,6 +76,7 @@ class PlanViewScreen extends StatelessWidget {
                   ?.copyWith(color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
+            // cancel subscription
           ],
         ),
       ),
@@ -137,6 +149,45 @@ class PlanViewScreen extends StatelessWidget {
         .doc(orgId)
         .get();
   }
+
+  Future<void> _cancelSubscription() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No authenticated user');
+    }
+
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+    String orgId = userDoc.get('orgId');
+
+    final org = await FirebaseFirestore.instance
+        .collection('organizations')
+        .doc(orgId)
+        .get();
+
+    PayPalEnvironment environment = PayPalEnvironment.sandbox(
+      clientId: clientId,
+      clientSecret: secretKey,
+    );
+
+    PayPalHttpClient client = PayPalHttpClient(environment);
+
+    SubscriptionsApi subscriptionsApi = SubscriptionsApi(client);
+    subscriptionsApi.cancelSubscription(
+      org.get('plan'),
+      'CANCELLED',
+    );
+
+    await FirebaseFirestore.instance
+        .collection('organizations')
+        .doc(orgId)
+        .set({
+      'plan': 'Free',
+      'maxApprentices': 5,
+    }, SetOptions(merge: true));
+  }
 }
 
 class PlanUpgradeScreen extends ConsumerStatefulWidget {
@@ -147,7 +198,7 @@ class PlanUpgradeScreen extends ConsumerStatefulWidget {
 }
 
 class _PlanUpgradeScreenState extends ConsumerState<PlanUpgradeScreen> {
-  double _currentSliderValue = 10;
+  double _currentSliderValue = 10.0;
 
   @override
   void initState() {
@@ -169,6 +220,9 @@ class _PlanUpgradeScreenState extends ConsumerState<PlanUpgradeScreen> {
         if (!snapshot.hasData) {
           return Center(child: Text('No organization data available'));
         }
+
+        _currentSliderValue =
+            (snapshot.data!['maxApprentices'] ?? 5.0).toDouble();
 
         return _buildUpgradeView(context, snapshot.data!);
       },
@@ -200,8 +254,6 @@ class _PlanUpgradeScreenState extends ConsumerState<PlanUpgradeScreen> {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 40),
-            _buildTag(context, "Current Plan", isSelected: true),
-            SizedBox(height: 20),
             StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return Column(
@@ -219,9 +271,9 @@ class _PlanUpgradeScreenState extends ConsumerState<PlanUpgradeScreen> {
                       ),
                       child: Slider(
                         value: _currentSliderValue,
-                        min: 10,
+                        min: 0,
                         max: 100,
-                        divisions: 9,
+                        divisions: 100,
                         onChanged: (double value) {
                           setState(() {
                             _currentSliderValue = value;
@@ -244,8 +296,9 @@ class _PlanUpgradeScreenState extends ConsumerState<PlanUpgradeScreen> {
                             context,
                             title: "Your Current Plan",
                             apprentices: "${orgData['maxApprentices'] ?? 5}",
-                            price:
-                                "₱${(orgData['maxApprentices'] ?? 5) <= 5 ? 5 : orgData['maxApprentices'] * 10} /monthly",
+                            price: (orgData['maxApprentices'] ?? 5) <= 5
+                                ? "FREE"
+                                : "₱${orgData['maxApprentices'] * 10} /monthly",
                           ),
                         ),
                         Expanded(
@@ -253,8 +306,9 @@ class _PlanUpgradeScreenState extends ConsumerState<PlanUpgradeScreen> {
                             context,
                             title: "New Plan",
                             apprentices: "${_currentSliderValue.toInt()}",
-                            price:
-                                "₱${(_currentSliderValue * 10).toInt()} /monthly",
+                            price: _currentSliderValue.toInt() <= 5
+                                ? "FREE"
+                                : "₱${_currentSliderValue.toInt() * 10} /monthly",
                           ),
                         ),
                       ],
@@ -275,17 +329,8 @@ class _PlanUpgradeScreenState extends ConsumerState<PlanUpgradeScreen> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              child: Text(
-                'Proceed to Payment',
-              ),
-              onPressed: () => ref
-                  .watch(screenProvider.notifier)
-                  .pushScreen(CreditCardFormScreen(
-                    {
-                      'maxApprentices': _currentSliderValue.toInt(),
-                      'planPrice': _currentSliderValue.toInt() * 10,
-                    },
-                  )),
+              onPressed: () async => await _createPlan(),
+              child: Text('Proceed to Payment'),
             ),
           ],
         ),
@@ -293,22 +338,129 @@ class _PlanUpgradeScreenState extends ConsumerState<PlanUpgradeScreen> {
     );
   }
 
-  Widget _buildTag(BuildContext context, String text,
-      {bool isSelected = false}) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: isSelected ? Colors.grey[300] : Colors.grey[200],
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: isSelected ? Colors.black : Colors.grey[600],
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+  Future<void> _createPlan() async {
+    final computedPrice = (_currentSliderValue.toInt() * 10)
+        .toDouble(); // Ensure this is a double
+
+    try {
+      Utils.scrollableMaterialDialog(
+        context: context,
+        title: 'Payment Details',
+        customViewPosition: CustomViewPosition.BEFORE_ACTION,
+        titleAlign: TextAlign.center,
+        dialogWidth: 400,
+        customView: Column(
+          children: [
+            Text(
+              'You are about to upgrade to a new plan with ${_currentSliderValue.toInt()} apprentices.',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: Colors.grey[600]),
+              textAlign: TextAlign.center,
             ),
-      ),
-    );
+            SizedBox(height: 20),
+            Text(
+              'Total: ₱$computedPrice',
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (!mounted) return;
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return PaypalSubscriptionPayment(
+                      sandboxMode: true,
+                      clientId: clientId,
+                      secretKey: secretKey,
+                      productName: 'Apprentices Expansion',
+                      type: "DIGITAL",
+                      planName: 'Apprentices Expansion',
+                      customId: ref
+                              .watch(appUserNotifierProvider)
+                              .requireValue
+                              .orgId ??
+                          '',
+                      billingCycles: [
+                        {
+                          'frequency': {
+                            "interval_unit": "MONTH",
+                            "interval_count": 1
+                          },
+                          'tenure_type': 'REGULAR',
+                          'sequence': 1,
+                          "total_cycles": 0,
+                          'pricing_scheme': {
+                            'fixed_price': {
+                              'value': 10,
+                              'currency_code': 'PHP',
+                            },
+                          },
+                        }
+                      ],
+                      quantitySupported: true,
+                      quantity: _currentSliderValue.toInt().toString(),
+                      paymentPreferences: const {"auto_bill_outstanding": true},
+                      returnURL: kDebugMode
+                          ? 'http://localhost:5000/'
+                          : 'https://code-craft.live/',
+                      cancelURL: kDebugMode
+                          ? 'http://localhost:5000/'
+                          : 'https://code-craft.live/',
+                      onSuccess: () {
+                        Utils.displayDialog(
+                          context: context,
+                          title: 'Success',
+                          content: 'Payment successful!',
+                        );
+                      },
+                      onError: () {
+                        Utils.displayDialog(
+                          context: context,
+                          title: 'Error',
+                          content: 'Payment failed. Please try again.',
+                        );
+                      },
+                      onCancel: () {
+                        Utils.displayDialog(
+                          context: context,
+                          title: 'Cancelled',
+                          content: 'Payment cancelled.',
+                        );
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+            child: Text('Proceed to Payment.'),
+          ),
+        ],
+      );
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      Utils.displayDialog(
+        context: context,
+        title: 'Error',
+        content:
+            'Failed to create plan: ${e.apiError!.message!}.\nPlease contact support.',
+      );
+    }
   }
 
   Widget _buildPlanCard(
@@ -358,125 +510,5 @@ class _PlanUpgradeScreenState extends ConsumerState<PlanUpgradeScreen> {
         ],
       ),
     );
-  }
-}
-
-class CreditCardFormScreen extends ConsumerStatefulWidget {
-  final Map<String, dynamic> planDetails;
-
-  const CreditCardFormScreen(this.planDetails, {super.key});
-
-  @override
-  _CreditCardFormScreenState createState() => _CreditCardFormScreenState();
-}
-
-class _CreditCardFormScreenState extends ConsumerState<CreditCardFormScreen> {
-  final _formKey = GlobalKey<FormState>();
-
-  String cardNumber = '';
-  String expiryDate = '';
-  String cardHolderName = '';
-  String cvv = '';
-
-  // Validator for card number
-  String? validateCardNumber(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter card number';
-    } else if (value.length != 16) {
-      return 'Card number must be 16 digits';
-    }
-    return null;
-  }
-
-  // Validator for expiry date (MM/YY format)
-  String? validateExpiryDate(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter expiry date';
-    }
-    final RegExp regExp = RegExp(r'^(0[1-9]|1[0-2])\/?([0-9]{2})$');
-    if (!regExp.hasMatch(value)) {
-      return 'Invalid expiry date (MM/YY)';
-    }
-    return null;
-  }
-
-  // Validator for card holder name
-  String? validateCardHolderName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter card holder name';
-    }
-    return null;
-  }
-
-  // Validator for CVV
-  String? validateCVV(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter CVV';
-    } else if (value.length != 3) {
-      return 'CVV must be 3 digits';
-    }
-    return null;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          children: <Widget>[
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Card Number'),
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              maxLength: 16,
-              validator: validateCardNumber,
-              onChanged: (value) => cardNumber = value,
-            ),
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Expiry Date (MM/YY)'),
-              keyboardType: TextInputType.datetime,
-              maxLength: 5,
-              validator: validateExpiryDate,
-              onChanged: (value) => expiryDate = value,
-            ),
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Card Holder Name'),
-              validator: validateCardHolderName,
-              onChanged: (value) => cardHolderName = value,
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              decoration: InputDecoration(labelText: 'CVV'),
-              keyboardType: TextInputType.number,
-              maxLength: 3,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              validator: validateCVV,
-              onChanged: (value) => cvv = value,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  // Submit the form
-                  await _submitForm();
-                }
-              },
-              child: Text('Submit'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _submitForm() async {
-    await FirebaseFirestore.instance
-        .collection('organizations')
-        .doc(ref.watch(appUserNotifierProvider).requireValue.orgId!)
-        .update(widget.planDetails);
-
-    ref.watch(screenProvider.notifier).popScreen();
   }
 }

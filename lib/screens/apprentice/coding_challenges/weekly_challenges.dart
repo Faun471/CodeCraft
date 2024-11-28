@@ -1,6 +1,7 @@
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/screens/apprentice/coding_challenges/coding_challenge_screen.dart';
 import 'package:codecraft/services/challenge_service.dart';
+import 'package:codecraft/utils/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -164,7 +165,15 @@ class _WeeklyChallengesState extends ConsumerState<WeeklyChallenges> {
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(
                           builder: (context) {
-                            return ChallengeScreen(challenge: challenge);
+                            return ChallengeScreen(
+                              challenge: challenge,
+                              onChallengeCompleted: () => Utils.displayDialog(
+                                context: context,
+                                title: 'Congratulations!',
+                                content: 'You have completed the challenge!',
+                                lottieAsset: 'assets/anim/congrats.json',
+                              ),
+                            );
                           },
                         ));
                       },

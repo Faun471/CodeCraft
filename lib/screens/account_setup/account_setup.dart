@@ -1,5 +1,6 @@
 import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/widgets/screentypes/logo_with_background.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class AccountSetup extends StatefulWidget {
@@ -13,6 +14,17 @@ class AccountSetup extends StatefulWidget {
 
 class _AccountSetupState extends State<AccountSetup> {
   late bool isVertical;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (FirebaseAuth.instance.currentUser != null) {
+        Navigator.of(context).pushReplacementNamed('/app');
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

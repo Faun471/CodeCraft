@@ -17,8 +17,12 @@ class CodeClashService {
           .collection('codeClashes')
           .doc(codeClash.id)
           .set(codeClash.toJson(), SetOptions(merge: true));
-    } catch (e) {
-      throw Exception('Error creating Code Clash: $e');
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        throw Exception('Permission denied');
+      } else {
+        throw Exception('Error creating Code Clash: $e');
+      }
     }
   }
 
@@ -299,7 +303,6 @@ class CodeClashService {
         .collection('organizations')
         .doc(organizationId)
         .collection('codeClashes')
-        .where('status', isEqualTo: 'active')
         .snapshots()
         .map((snapshot) => snapshot.docs.length);
   }

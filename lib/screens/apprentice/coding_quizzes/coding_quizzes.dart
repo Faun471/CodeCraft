@@ -1,8 +1,10 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/quiz.dart';
+import 'package:codecraft/providers/screen_provider.dart';
 import 'package:codecraft/screens/apprentice/coding_quizzes/coding_quiz_screen.dart';
 import 'package:codecraft/screens/apprentice/coding_quizzes/completed_quiz_screen.dart';
+import 'package:codecraft/screens/settings/settings.dart';
 import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/services/quiz_service.dart';
 import 'package:codecraft/services/database_helper.dart';
@@ -47,7 +49,9 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  setState(() {});
+                  ref
+                      .watch(screenProvider.notifier)
+                      .pushScreen(SettingsScreen());
                 },
                 child: Text(
                   'Join an Organization',
@@ -93,7 +97,7 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                setState(() {});
+                ref.watch(screenProvider.notifier).pushScreen(SettingsScreen());
               },
               child: Text(
                 'Join an Organization',
@@ -153,6 +157,8 @@ class _QuizChallengesState extends ConsumerState<CodingQuizzes> {
                     final availableQuizzes = snapshot.data!
                         .where((quiz) => !completedQuizzes.any(
                             (completedQuiz) => completedQuiz.id == quiz.id))
+                        .where((quiz) =>
+                            quiz.duration.toDateTime().isAfter(DateTime.now()))
                         .toList();
 
                     final completedQuizzesList = snapshot.data!

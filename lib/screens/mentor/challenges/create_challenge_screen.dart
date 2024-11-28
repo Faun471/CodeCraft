@@ -1,15 +1,18 @@
-import 'package:board_datetime_picker/board_datetime_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/expected_output.dart';
 import 'package:codecraft/models/input.dart';
 import 'package:codecraft/models/unit_test.dart';
 import 'package:codecraft/providers/screen_provider.dart';
+import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/codeblocks/code_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:codecraft/models/challenge.dart';
 import 'package:codecraft/services/challenge_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_dialogs/shared/types.dart';
+import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:re_editor/re_editor.dart';
 
 class CreateChallengeScreen extends ConsumerStatefulWidget {
@@ -26,8 +29,6 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
   final CodeLineEditingController controller = CodeLineEditingController();
 
   String _duration = DateTime.now().add(const Duration(days: 1)).toString();
-  final BoardDateTimeTextController dateTimeController =
-      BoardDateTimeTextController();
   int _currentStep = 0;
 
   String _instructions = '';
@@ -117,6 +118,14 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                         title: 'Please complete all steps',
                         content: 'Ensure all fields are filled correctly.',
                         lottieAsset: 'assets/anim/error.json',
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Ok'),
+                          ),
+                        ],
                         onDismiss: () {
                           final firstInvalidStep = _formKey.currentState!
                               .validateGranularly()
@@ -284,22 +293,226 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: BoardDateTimeInputField(
+        child: OmniDateTimePicker(
           key: fields[4],
-          controller: dateTimeController,
-          pickerType: DateTimePickerType.datetime,
           initialDate: _duration.toDateTime(),
-          minimumDate: DateTime.now(),
-          maximumDate: DateTime.now().add(const Duration(days: 365)),
-          options: const BoardDateTimeOptions(
-            languages: BoardPickerLanguages.en(),
-          ),
-          textStyle: Theme.of(context).textTheme.bodyMedium,
-          onChanged: (date) {
-            _duration = date.toIso8601String();
+          onDateTimeChanged: (date) {
+            setState(() {
+              _duration = date.toIso8601String();
+            });
           },
         ),
       ),
+    );
+  }
+
+  void _addOrEditUnitTest({int? index}) {
+    List<Input> inputs = index != null
+        ? _unitTests[index].input
+        : [Input(value: '', type: 'String')];
+
+    String expectedOutputValue =
+        index != null ? _unitTests[index].expectedOutput.value : '';
+
+    String expectedOutputType =
+        index != null ? _unitTests[index].expectedOutput.type : 'String';
+    final List<String> availableTypes = ['String', 'int', 'double', 'boolean'];
+
+    final formKey = GlobalKey<FormState>();
+
+    Utils.scrollableMaterialDialog(
+      context: context,
+      title: index != null ? 'Edit Unit Test' : 'Add Unit Test',
+      customViewPosition: CustomViewPosition.BEFORE_ACTION,
+      customView: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Form(
+            key: formKey,
+            child: Column(
+              children: [
+                ...inputs.asMap().entries.map((entry) {
+                  int inputIndex = entry.key;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: inputs[inputIndex].type == 'boolean'
+                              ? DropdownButtonFormField<String>(
+                                  decoration: InputDecoration(
+                                      labelText:
+                                          'Input Value ${inputIndex + 1}'),
+                                  value: inputs[inputIndex].value == 'true'
+                                      ? 'true'
+                                      : 'false',
+                                  items: ['true', 'false'].map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      inputs[inputIndex].value =
+                                          newValue ?? 'true';
+                                    });
+                                  },
+                                )
+                              : TextFormField(
+                                  decoration: InputDecoration(
+                                      labelText:
+                                          'Input Value ${inputIndex + 1}'),
+                                  initialValue: inputs[inputIndex].value,
+                                  validator: (value) => value!.isEmpty
+                                      ? 'Please enter a value'
+                                      : null,
+                                  onChanged: (value) =>
+                                      inputs[inputIndex].value = value,
+                                ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                                labelText: 'Input Type ${inputIndex + 1}'),
+                            value: inputs[inputIndex].type.isEmpty
+                                ? 'String'
+                                : inputs[inputIndex].type,
+                            items: availableTypes.map((String type) {
+                              return DropdownMenuItem<String>(
+                                value: type,
+                                child: Text(type),
+                              );
+                            }).toList(),
+                            onChanged: (String? newType) {
+                              setState(() {
+                                if (newType == 'boolean') {
+                                  inputs[inputIndex].value = 'true';
+                                }
+
+                                inputs[inputIndex].type = newType ?? 'String';
+                              });
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.remove,
+                            color: ThemeUtils.getTextColorForBackground(
+                                Theme.of(context).scaffoldBackgroundColor),
+                          ),
+                          onPressed: () {
+                            setState(() => inputs.removeAt(inputIndex));
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => setState(
+                      () => inputs.add(Input(value: '', type: 'String'))),
+                  child: Text(
+                    'Add Input',
+                    style: TextStyle(
+                        color: ThemeUtils.getTextColorForBackground(
+                            Theme.of(context).primaryColor)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                expectedOutputType == 'boolean'
+                    ? DropdownButtonFormField<String>(
+                        decoration: const InputDecoration(
+                            labelText: 'Expected Output Value'),
+                        value: expectedOutputValue == 'true' ? 'true' : 'false',
+                        items: ['true', 'false'].map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            expectedOutputValue = newValue ?? 'true';
+                          });
+                        },
+                      )
+                    : TextFormField(
+                        decoration: const InputDecoration(
+                            labelText: 'Expected Output Value'),
+                        initialValue: expectedOutputValue,
+                        validator: (value) =>
+                            value!.isEmpty ? 'Please enter a value' : null,
+                        onChanged: (value) => expectedOutputValue = value,
+                      ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  decoration:
+                      const InputDecoration(labelText: 'Expected Output Type'),
+                  value: expectedOutputType.isEmpty
+                      ? 'String'
+                      : expectedOutputType,
+                  items: availableTypes.map((String type) {
+                    return DropdownMenuItem<String>(
+                      value: type,
+                      child: Text(type),
+                    );
+                  }).toList(),
+                  validator: (value) =>
+                      value == null ? 'Please select a type' : null,
+                  onChanged: (String? newType) {
+                    setState(() {
+                      expectedOutputValue =
+                          newType == 'boolean' ? 'true' : expectedOutputValue;
+                      expectedOutputType = newType ?? 'String';
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          );
+        },
+      ),
+      actions: [
+        TextButton(
+          child: const Text('Cancel'),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        TextButton(
+          child: Text(index != null ? 'Save' : 'Add'),
+          onPressed: () {
+            if (formKey.currentState!.validate()) {
+              formKey.currentState!.save();
+
+              setState(() {
+                if (index != null) {
+                  _unitTests[index] = UnitTest(
+                    input: inputs,
+                    expectedOutput: ExpectedOutput(
+                        value: expectedOutputValue, type: expectedOutputType),
+                  );
+                } else {
+                  _unitTests.add(UnitTest(
+                    input: inputs,
+                    expectedOutput: ExpectedOutput(
+                        value: expectedOutputValue, type: expectedOutputType),
+                  ));
+                }
+              });
+              Navigator.of(context).pop();
+            } else {
+              Utils.displayDialog(
+                context: context,
+                title: 'Error',
+                content: 'Please fill in all the required fields.',
+                lottieAsset: 'assets/anim/error.json',
+              );
+            }
+          },
+        ),
+      ],
     );
   }
 
@@ -312,113 +525,57 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
             itemCount: _unitTests.length,
             padding: const EdgeInsets.symmetric(vertical: 5),
             itemBuilder: (context, index) {
-              return _buildUnitTestTile(index);
+              return ListTile(
+                title: Text('Unit Test ${index + 1}'),
+                subtitle: Text(
+                    'Input: ${inputToString(_unitTests[index].input)}, Expected: ${expectedOutputToString(_unitTests[index].expectedOutput)}'),
+                trailing: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => _addOrEditUnitTest(index: index),
+                      ),
+                      const SizedBox(width: 10),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () =>
+                            setState(() => _unitTests.removeAt(index)),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             },
           ),
-          TextButton(
-            onPressed: _addUnitTest,
-            child: const Text('Add Unit Test'),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: TextButton(
+              onPressed: () => _addOrEditUnitTest(),
+              child: const Text('Add Unit Test'),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildUnitTestTile(int index) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text('Unit Test ${index + 1}'),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    setState(() {
-                      _unitTests.removeAt(index);
-                    });
-                  },
-                ),
-              ],
-            ),
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: _unitTests[index].input.length,
-              itemBuilder: (context, inputIndex) {
-                return Column(
-                  children: [
-                    TextFormField(
-                      decoration: InputDecoration(
-                          labelText: 'Input ${inputIndex + 1} Value'),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      initialValue: _unitTests[index].input[inputIndex].value,
-                      onSaved: (value) {
-                        _unitTests[index].input[inputIndex].value = value ?? '';
-                      },
-                    ),
-                    TextFormField(
-                      decoration: InputDecoration(
-                          labelText: 'Input ${inputIndex + 1} Type'),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      initialValue: _unitTests[index].input[inputIndex].type,
-                      onSaved: (value) {
-                        _unitTests[index].input[inputIndex].type = value ?? '';
-                      },
-                    ),
-                  ],
-                );
-              },
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _unitTests[index].input.add(Input(value: '', type: ''));
-                });
-              },
-              child: const Text('Add Input'),
-            ),
-            const SizedBox(height: 10),
-            TextFormField(
-              decoration:
-                  const InputDecoration(labelText: 'Expected Output Value'),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              initialValue: _unitTests[index].expectedOutput.value,
-              onSaved: (value) {
-                _unitTests[index].expectedOutput.value = value ?? '';
-              },
-            ),
-            const SizedBox(height: 10),
-            TextFormField(
-              decoration:
-                  const InputDecoration(labelText: 'Expected Output Type'),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              initialValue: _unitTests[index].expectedOutput.type,
-              onSaved: (value) {
-                _unitTests[index].expectedOutput.type = value ?? '';
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+  String inputToString(List<Input> inputs) {
+    return inputs.map((input) => input.value).join(',');
   }
 
-  void _addUnitTest() {
-    setState(() {
-      _unitTests.add(
-        UnitTest(
-          input: [Input(value: '', type: '')],
-          expectedOutput: ExpectedOutput(
-            value: '',
-            type: '',
-          ),
-        ),
-      );
-    });
+  String expectedOutputToString(ExpectedOutput output) {
+    switch (output.type) {
+      case 'String':
+        return '"${output.value}"';
+      case 'boolean':
+        return output.value == 'true' ? 'true' : 'false';
+      case 'char':
+        return "'${output.value}'";
+      default:
+        return output.value;
+    }
   }
 
   Future<void> _cancelChallenge() async {
@@ -470,14 +627,37 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
               unitTests: _unitTests,
               duration: _duration,
             );
+            try {
+              await ChallengeService().createChallenge(
+                challenge,
+                ref.read(appUserNotifierProvider).value!.orgId!,
+              );
+            } on FirebaseException catch (e) {
+              if (!mounted) return;
 
-            await ChallengeService().createChallenge(
-              challenge,
-              ref.read(appUserNotifierProvider).value!.orgId!,
-            );
-
-            if (!mounted) {
-              return;
+              if (e.code == 'permission-denied') {
+                Utils.displayDialog(
+                  context: context,
+                  title: 'Permission Denied',
+                  content:
+                      'You do not have permission to create a challenge.\nPlease check if your plan is still active.',
+                  lottieAsset: 'assets/anim/error.json',
+                );
+                return;
+              }
+            } on Exception catch (e) {
+              if (!mounted) return;
+              if (e.toString().contains(
+                  'Organization has reached the maximum number of apprentices')) {
+                Utils.displayDialog(
+                  context: context,
+                  title: 'Error',
+                  content:
+                      'Organization has reached the maximum number of apprentices.\nPlease upgrade your plan, or remove some apprentices.',
+                  lottieAsset: 'assets/anim/error.json',
+                );
+                return;
+              }
             }
 
             ref.read(screenProvider.notifier).popScreen();

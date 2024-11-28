@@ -1,17 +1,21 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/providers/screen_provider.dart';
+import 'package:codecraft/screens/mentor/challenges/create_challenge_screen.dart';
 import 'package:codecraft/screens/mentor/challenges/manage_challenges_screen.dart';
+import 'package:codecraft/screens/mentor/code_clash/create_code_clash.dart';
 import 'package:codecraft/screens/mentor/code_clash/manage_code_clashes_screen.dart';
+import 'package:codecraft/screens/mentor/debugging_challenge/create_debugging_challenge.dart';
 import 'package:codecraft/screens/mentor/debugging_challenge/manage_debugging_challenge.dart';
+import 'package:codecraft/screens/mentor/paginated_leaderboard.dart';
+import 'package:codecraft/screens/mentor/paginated_members.dart';
+import 'package:codecraft/screens/mentor/quizzes/create_quiz_screen.dart';
 import 'package:codecraft/screens/mentor/quizzes/manage_quizzes_screen.dart';
 import 'package:codecraft/services/challenge_service.dart';
 import 'package:codecraft/services/code_clash_service.dart';
 import 'package:codecraft/services/database_helper.dart';
 import 'package:codecraft/services/debugging_challenge_service.dart';
-import 'package:codecraft/services/invitation_service.dart';
 import 'package:codecraft/services/quiz_service.dart';
 import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/utils/utils.dart';
@@ -32,7 +36,7 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(24.0),
-      child: MediaQuery.of(context).size.width > 600
+      child: MediaQuery.of(context).size.width > 768
           ? _buildDesktopLayout()
           : SingleChildScrollView(child: _buildMobileLayout()),
     );
@@ -92,18 +96,51 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
           child: Row(
             children: [
               Expanded(
-                child: _buildCategorySection(
-                  'Top Apprentices',
-                  Colors.blue[50]!,
-                  _buildLeaderboardList(ref),
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            ThemeUtils.adjustColorBrightness(Colors.blue[50]!)
+                                .withOpacity(0.5),
+                        blurRadius: 7,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: _buildCategorySection(
+                    'Top Apprentices',
+                    Colors.blue[50]!,
+                    _buildLeaderboardList(ref, itemsPerPage: 8),
+                  ),
                 ),
               ),
               SizedBox(width: 16),
               Expanded(
-                child: _buildCategorySection(
-                  'Organization Members',
-                  Colors.red[50]!,
-                  _buildMembersList(ref),
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.red[50],
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: ThemeUtils.adjustColorBrightness(Colors.red[50]!)
+                            .withOpacity(0.5),
+                        blurRadius: 7,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: _buildCategorySection(
+                    'Organization Members',
+                    Colors.red[50]!,
+                    _buildMembersList(ref, itemsPerPage: 8),
+                  ),
                 ),
               ),
             ],
@@ -116,8 +153,9 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
   Widget _buildMobileLayout() {
     return Column(
       children: [
-        SizedBox(
+        Container(
           height: MediaQuery.of(context).size.height * 0.3,
+          padding: EdgeInsets.all(16),
           child: Row(
             children: [
               Expanded(
@@ -143,8 +181,9 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
           ),
         ),
         SizedBox(height: 8),
-        SizedBox(
+        Container(
           height: MediaQuery.of(context).size.height * 0.3,
+          padding: EdgeInsets.all(16),
           child: Row(
             children: [
               Expanded(
@@ -170,25 +209,55 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
           ),
         ),
         SizedBox(height: 16),
-        Container(
-          height: MediaQuery.of(context).size.height * 0.7,
-          color: Colors.blue[50],
-          child: _buildCategorySection(
-            'Top Apprentices',
-            Colors.blue[50]!,
-            _buildLeaderboardList(ref),
-            scrollable: false,
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.7,
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue[50],
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: ThemeUtils.adjustColorBrightness(Colors.blue[50]!)
+                      .withOpacity(0.5),
+                  blurRadius: 7,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: _buildCategorySection(
+              'Top Apprentices',
+              Colors.blue[50]!,
+              _buildLeaderboardList(ref),
+              scrollable: false,
+            ),
           ),
         ),
         SizedBox(height: 16),
-        Container(
-          height: MediaQuery.of(context).size.height * 0.7,
-          color: Colors.red[50],
-          child: _buildCategorySection(
-            'Organization Members',
-            Colors.red[50]!,
-            _buildMembersList(ref),
-            scrollable: false,
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.7,
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.red[50],
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: ThemeUtils.adjustColorBrightness(Colors.red[50]!)
+                      .withOpacity(0.5),
+                  blurRadius: 7,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: _buildCategorySection(
+              'Organization Members',
+              Colors.red[50]!,
+              _buildMembersList(ref),
+              scrollable: false,
+            ),
           ),
         ),
       ],
@@ -197,20 +266,25 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
 
   Widget _buildDashboardCard(
       String title, Stream<int> countStream, Color color) {
-    Widget screenToPush = Container();
+    Widget manageScreen = Container();
+    Widget createScreen = Container();
 
     switch (title) {
       case 'Coding Challenges':
-        screenToPush = ManageChallengesScreen();
+        manageScreen = ManageChallengesScreen();
+        createScreen = CreateChallengeScreen();
         break;
       case 'Debugging Challenges':
-        screenToPush = ManageDebuggingChallengesScreen();
+        manageScreen = ManageDebuggingChallengesScreen();
+        createScreen = CreateDebuggingChallengeScreen();
         break;
       case 'Coding Quizzes':
-        screenToPush = ManageQuizzesScreen();
+        manageScreen = ManageQuizzesScreen();
+        createScreen = CreateQuizScreen();
         break;
       case 'Code Clash':
-        screenToPush = ManageCodeClashesScreen();
+        manageScreen = ManageCodeClashesScreen();
+        createScreen = CreateCodeClashScreen();
         break;
     }
 
@@ -218,65 +292,87 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
       stream: countStream,
       builder: (context, snapshot) {
         final count = snapshot.data?.toString() ?? '0';
-        return Container(
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 5,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AutoSizeText(
-                title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: ThemeUtils.getTextColorForBackground(color),
+        return InkWell(
+          onTap: () =>
+              ref.watch(screenProvider.notifier).pushScreen(manageScreen),
+          child: Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color:
+                      ThemeUtils.adjustColorBrightness(color).withOpacity(0.5),
+                  blurRadius: 7,
+                  spreadRadius: 2,
                 ),
-                maxLines: 2,
-                maxFontSize: 24,
-                minFontSize: 14,
-              ),
-              Spacer(),
-              Text(
-                count,
-                style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: ThemeUtils.getTextColorForBackground(color)),
-              ),
-              Row(
-                children: [
-                  Spacer(),
-                  IconButton(
-                    onPressed: () {
-                      ref
-                          .watch(screenProvider.notifier)
-                          .pushScreen(screenToPush);
-                    },
-                    icon: Icon(
-                      Icons.fullscreen,
-                      size: 16,
+              ],
+            ),
+            child: Stack(
+              children: [
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: AutoSizeText(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: ThemeUtils.getTextColorForBackground(color),
+                    ),
+                    presetFontSizes: [20, 16],
+                    maxLines: 2,
+                    overflow: TextOverflow.fade,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Text(
+                    count,
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
                       color: ThemeUtils.getTextColorForBackground(color),
                     ),
                   ),
-                ],
-              ),
-            ],
+                ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: ThemeUtils.adjustColorBrightness(color),
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black38,
+                          blurRadius: 7,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        ref
+                            .watch(screenProvider.notifier)
+                            .pushScreen(createScreen);
+                      },
+                      icon: Icon(
+                        Icons.add,
+                        size: 16,
+                        color: ThemeUtils.getTextColorForBackground(color),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildMembersList(WidgetRef ref) {
+  Widget _buildMembersList(WidgetRef ref, {int itemsPerPage = 9}) {
     final appUser = ref.read(appUserNotifierProvider).value!;
 
     return FutureBuilder<List<AppUser>>(
@@ -291,12 +387,26 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
         final members = snapshot.data ?? [];
         members.removeWhere((user) => user.accountType == 'mentor');
 
-        return PaginatedMembersList(members: members);
+        if (members.isEmpty) {
+          return Center(
+            child: Text(
+              'No members available.',
+              style: TextStyle(color: Colors.black54),
+            ),
+          );
+        }
+
+        return PaginatedMembersList(
+          members: members,
+          backgroundColor: Colors.red[50]!,
+          itemsPerPage: itemsPerPage,
+          showCheckbox: false,
+        );
       },
     );
   }
 
-  Widget _buildLeaderboardList(WidgetRef ref) {
+  Widget _buildLeaderboardList(WidgetRef ref, {int itemsPerPage = 8}) {
     final appUser = ref.read(appUserNotifierProvider).value!;
     Stream<List<AppUser>> stream;
 
@@ -318,8 +428,20 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
         final leaderboardData = snapshot.data ?? [];
         leaderboardData.removeWhere((user) => user.accountType == 'mentor');
 
+        if (leaderboardData.isEmpty) {
+          return Center(
+            child: Text(
+              'No leaderboard data available.',
+              style: TextStyle(color: Colors.black54),
+            ),
+          );
+        }
+
         return PaginatedLeaderboard(
-            leaderboardData: leaderboardData, sortBy: _sortBy);
+          leaderboardData: leaderboardData,
+          sortBy: _sortBy,
+          itemsPerPage: itemsPerPage,
+        );
       },
     );
   }
@@ -342,6 +464,7 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
             Spacer(),
             if (title == 'Top Apprentices')
               PopupMenuButton<String>(
+                tooltip: 'Sort by',
                 onSelected: (String newValue) {
                   setState(() {
                     _sortBy = newValue;
@@ -382,313 +505,6 @@ class _MentorDashboardState extends ConsumerState<MentorDashboard> {
       ],
     );
 
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: scrollable ? SingleChildScrollView(child: content) : content,
-    );
-  }
-}
-
-class PaginatedMembersList extends ConsumerStatefulWidget {
-  final List<AppUser> members;
-
-  const PaginatedMembersList({super.key, required this.members});
-
-  @override
-  _PaginatedMembersListState createState() => _PaginatedMembersListState();
-}
-
-class _PaginatedMembersListState extends ConsumerState<PaginatedMembersList> {
-  int _currentPage = 0;
-  final int _itemsPerPage = 6;
-
-  @override
-  Widget build(BuildContext context) {
-    final paginatedMembers = _getPaginatedMembers();
-
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: paginatedMembers.length > _getRemainingItems()
-                ? _getRemainingItems()
-                : paginatedMembers.length,
-            itemBuilder: (context, index) {
-              final user = paginatedMembers[index];
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundImage: CachedNetworkImageProvider(
-                    user.photoUrl == null || user.photoUrl!.isEmpty
-                        ? 'https://api.dicebear.com/9.x/thumbs/png?seed=${user.id ?? ''}'
-                        : user.photoUrl!,
-                  ),
-                ),
-                title: Text(
-                  user.displayName ?? '${user.firstName} ${user.lastName}',
-                  style: TextStyle(
-                    color:
-                        ThemeUtils.getTextColorForBackground(Colors.blue[50]!),
-                  ),
-                ),
-                subtitle: Text(
-                  'Level ${user.level ?? 0}',
-                  style: TextStyle(
-                    color: ThemeUtils.getTextColorForBackground(
-                      Colors.blue[50]!,
-                    ),
-                  ),
-                ),
-                trailing: PopupMenuButton<String>(
-                  onSelected: (String value) {
-                    if (value == 'remove') {
-                      Utils.displayDialog(
-                        context: context,
-                        title: 'Remove from org',
-                        content:
-                            'Are you sure you want to remove ${user.displayName ?? '${user.firstName} ${user.lastName}'} from the organization?',
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              ref
-                                  .watch(invitationServiceProvider.notifier)
-                                  .leaveOrganization(user.id!);
-                              Navigator.of(context).pop();
-                              setState(() {
-                                widget.members.remove(user);
-                              });
-                            },
-                            child: Text('Remove'),
-                          ),
-                        ],
-                      );
-                    }
-                  },
-                  itemBuilder: (BuildContext context) {
-                    return [
-                      PopupMenuItem<String>(
-                        value: 'remove',
-                        child: Text('Remove from org'),
-                      ),
-                    ];
-                  },
-                  icon: Icon(Icons.more_vert, color: Colors.black54),
-                ),
-              );
-            },
-          ),
-        ),
-        _buildPaginationControls(),
-      ],
-    );
-  }
-
-  int _getRemainingItems() {
-    return widget.members.length - (_currentPage * _itemsPerPage);
-  }
-
-  List<AppUser> _getPaginatedMembers() {
-    final startIndex = _currentPage * _itemsPerPage;
-    final endIndex = (_currentPage + 1) * _itemsPerPage;
-    return widget.members.sublist(
-      startIndex,
-      endIndex > widget.members.length ? widget.members.length : endIndex,
-    );
-  }
-
-  Widget _buildPaginationControls() {
-    final totalPages = (widget.members.length / _itemsPerPage).ceil();
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        IconButton(
-          onPressed: _currentPage > 0
-              ? () {
-                  setState(() {
-                    _currentPage--;
-                  });
-                }
-              : null,
-          icon: Icon(
-            Icons.arrow_back,
-            color: ThemeUtils.getTextColorForBackground(Colors.blue[50]!),
-          ),
-        ),
-        Text(
-          'Page ${_currentPage + 1} of $totalPages',
-          style: TextStyle(
-            color: ThemeUtils.getTextColorForBackground(Colors.blue[50]!),
-          ),
-        ),
-        IconButton(
-          onPressed: _currentPage < totalPages - 1
-              ? () {
-                  setState(() {
-                    _currentPage++;
-                  });
-                }
-              : null,
-          icon: Icon(
-            Icons.arrow_forward,
-            color: ThemeUtils.getTextColorForBackground(Colors.blue[50]!),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class PaginatedLeaderboard extends StatefulWidget {
-  final List<AppUser> leaderboardData;
-  final String sortBy;
-
-  const PaginatedLeaderboard(
-      {super.key, required this.leaderboardData, required this.sortBy});
-
-  @override
-  _PaginatedLeaderboardState createState() => _PaginatedLeaderboardState();
-}
-
-class _PaginatedLeaderboardState extends State<PaginatedLeaderboard> {
-  int _currentPage = 0;
-  final int _itemsPerPage = 10;
-
-  @override
-  Widget build(BuildContext context) {
-    final paginatedLeaderboard = _getPaginatedLeaderboard();
-
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: paginatedLeaderboard.length,
-            itemBuilder: (context, index) {
-              final user = paginatedLeaderboard[index];
-              return _buildLeaderboardItem(
-                  user, _currentPage * _itemsPerPage + index + 1);
-            },
-          ),
-        ),
-        _buildPaginationControls(),
-      ],
-    );
-  }
-
-  List<AppUser> _getPaginatedLeaderboard() {
-    final startIndex = _currentPage * _itemsPerPage;
-    final endIndex = (_currentPage + 1) * _itemsPerPage;
-    return widget.leaderboardData.sublist(
-      startIndex,
-      endIndex > widget.leaderboardData.length
-          ? widget.leaderboardData.length
-          : endIndex,
-    );
-  }
-
-  Widget _buildPaginationControls() {
-    final totalPages = (widget.leaderboardData.length / _itemsPerPage).ceil();
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        IconButton(
-          onPressed: _currentPage > 0
-              ? () {
-                  setState(() {
-                    _currentPage--;
-                  });
-                }
-              : null,
-          icon: Icon(
-            Icons.arrow_back,
-            color: ThemeUtils.getTextColorForBackground(Colors.blue[50]!),
-          ),
-        ),
-        Text('Page ${_currentPage + 1} of $totalPages',
-            style: TextStyle(
-              color: ThemeUtils.getTextColorForBackground(Colors.blue[50]!),
-            )),
-        IconButton(
-          onPressed: _currentPage < totalPages - 1
-              ? () {
-                  setState(() {
-                    _currentPage++;
-                  });
-                }
-              : null,
-          icon: Icon(
-            Icons.arrow_forward,
-            color: ThemeUtils.getTextColorForBackground(Colors.blue[50]!),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLeaderboardItem(AppUser user, int rank) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Text(
-            '$rank.',
-            style: TextStyle(
-              color: ThemeUtils.getTextColorForBackground(Colors.blue[50]!),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(width: 8),
-          CircleAvatar(
-            backgroundImage: CachedNetworkImageProvider(
-              user.photoUrl == null || user.photoUrl!.isEmpty
-                  ? 'https://api.dicebear.com/9.x/thumbs/png?seed=${user.id ?? ''}'
-                  : user.photoUrl!,
-            ),
-            radius: 20,
-          ),
-          SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              user.displayName ?? '${user.firstName} ${user.lastName}',
-              style: TextStyle(
-                color: ThemeUtils.getTextColorForBackground(Colors.blue[50]!),
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Text(
-            _getScoreText(
-              user,
-            ),
-            style: TextStyle(
-              color: ThemeUtils.getTextColorForBackground(Colors.blue[50]!),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getScoreText(AppUser user) {
-    if (widget.sortBy == 'quizzes') {
-      return '${user.quizResults.length} quizzes';
-    } else if (widget.sortBy == 'challenges') {
-      return '${(user.completedChallenges ?? []).length} challenges';
-    } else {
-      return 'Level ${user.level}';
-    }
+    return scrollable ? SingleChildScrollView(child: content) : content;
   }
 }

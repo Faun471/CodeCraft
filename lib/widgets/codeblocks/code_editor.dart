@@ -89,7 +89,6 @@ class _DefaultCodeAutocompleteListView extends StatefulWidget
   @override
   Size get preferredSize => Size(
       250,
-      // 2 is border size
       min(kItemHeight * notifier.value.prompts.length, 150) + 2);
 
   @override

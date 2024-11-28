@@ -1,6 +1,7 @@
 import 'package:codecraft/models/challenge.dart';
 import 'package:codecraft/models/quiz.dart';
 import 'package:codecraft/parser/html_parser.dart';
+import 'package:codecraft/screens/apprentice/apprentice_home.dart';
 import 'package:codecraft/screens/apprentice/coding_challenges/coding_challenge_screen.dart';
 import 'package:codecraft/screens/apprentice/coding_quizzes/coding_quiz_screen.dart';
 import 'package:codecraft/screens/apprentice/coding_quizzes/completed_quiz_screen.dart';
@@ -351,73 +352,84 @@ class ChallengeButton extends StatefulWidget {
 class _ChallengeButtonState extends State<ChallengeButton> {
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(
-          Theme.of(context).primaryColor,
-        ),
-        fixedSize: WidgetStateProperty.all(const Size(200, 50)),
-      ),
-      onPressed: () async {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => LoadingScreen(
-              futures: [
-                ChallengeService().getChallenge('Default', widget.challengeId!),
-                ChallengeService().getCompletedChallenges(
-                  FirebaseAuth.instance.currentUser!.uid,
-                )
-              ],
-              onDone: (context, snapshot) {
-                if (snapshot.data[0] == null) {
-                  return;
-                }
+    return FutureBuilder(
+      future: ChallengeService().getChallenge('Default', widget.challengeId!),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
 
-                if (snapshot.error != null) {
-                  return;
-                }
+        final challenge = snapshot.data as Challenge;
 
-                if (snapshot.data.isEmpty) {
-                  return;
-                }
+        return ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.all(
+              Theme.of(context).primaryColor,
+            ),
+            fixedSize: WidgetStateProperty.all(const Size(300, 50)),
+          ),
+          onPressed: () async {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LoadingScreen(
+                  futures: [
+                    ChallengeService().getCompletedChallenges(
+                      FirebaseAuth.instance.currentUser!.uid,
+                    )
+                  ],
+                  onDone: (context, snapshot, ref) {
+                    if (snapshot.data[0] == null) {
+                      return;
+                    }
 
-                final challenge = snapshot.data[0] as Challenge;
+                    if (snapshot.error != null) {
+                      return;
+                    }
 
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChallengeScreen(
-                      challenge: challenge,
-                      onChallengeCompleted: () {
-                        // pop until we're back to the map screen
-                        Navigator.popUntil(
-                          context,
-                          ModalRoute.withName('/apprentice_home'),
-                        );
+                    if (snapshot.data.isEmpty) {
+                      return;
+                    }
 
-                        Utils.displayDialog(
-                          context: context,
-                          title: 'Challenge Completed',
-                          content: 'You have completed the challenge!',
-                        );
-                      },
-                    ),
-                  ),
-                );
-              },
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChallengeScreen(
+                          challenge: challenge,
+                          onChallengeCompleted: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ApprenticeHome(),
+                              ),
+                            );
+
+                            Utils.displayDialog(
+                              context: context,
+                              title: 'Challenge Completed',
+                              content: 'You have completed the challenge!',
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+          child: Text(
+            'Proceed to challenge - ${challenge.experienceToEarn} XP',
+            style: TextStyle(
+              color: ThemeUtils.getTextColorForBackground(
+                Theme.of(context).primaryColor,
+              ),
             ),
           ),
         );
       },
-      child: Text(
-        'Proceed to challenge',
-        style: TextStyle(
-          color: ThemeUtils.getTextColorForBackground(
-            Theme.of(context).primaryColor,
-          ),
-        ),
-      ),
     );
   }
 }
@@ -458,73 +470,80 @@ class QuizButton extends ConsumerStatefulWidget {
 class _QuizButtonState extends ConsumerState<QuizButton> {
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(
-          Theme.of(context).primaryColor,
-        ),
-        fixedSize: WidgetStateProperty.all(const Size(200, 50)),
-      ),
-      onPressed: () async {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => LoadingScreen(
-              futures: [
-                QuizService().getQuiz('Default', widget.quizId!),
-                QuizService().getCompletedQuizzes(
-                  FirebaseAuth.instance.currentUser!.uid,
-                ),
-                QuizService().getQuizResult(widget.quizId!),
-              ],
-              onDone: (context, snapshot) {
-                if (snapshot.data[0] == null || snapshot.error != null) {
-                  return;
-                }
+    return FutureBuilder(
+      future: QuizService().getQuiz('Default', widget.quizId!),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
 
-                final quiz = snapshot.data[0] as Quiz;
+        final quiz = snapshot.data as Quiz;
 
-                final QuizResult? previousResult =
-                    snapshot.data[2] as QuizResult?;
+        return ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.all(
+              Theme.of(context).primaryColor,
+            ),
+            fixedSize: WidgetStateProperty.all(const Size(300, 50)),
+          ),
+          onPressed: () async {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LoadingScreen(
+                  futures: [
+                    QuizService().getCompletedQuizzes(
+                      FirebaseAuth.instance.currentUser!.uid,
+                    ),
+                    QuizService().getQuizResult(widget.quizId!),
+                  ],
+                  onDone: (context, snapshot, ref) {
 
-                if (previousResult != null) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => QuizResultsScreen(
-                        quiz: quiz,
-                        quizResult: previousResult,
-                        showSolutions: false,
-                        canRetake: true,
-                        orgId: 'Default',
+                    final QuizResult? previousResult =
+                        snapshot.data[1] as QuizResult?;
+
+                    if (previousResult != null) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => QuizResultsScreen(
+                            quiz: quiz,
+                            quizResult: previousResult,
+                            showSolutions: false,
+                            canRetake: true,
+                            orgId: 'Default',
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => QuizScreen(
+                          quizId: widget.quizId!,
+                          orgId: 'Default',
+                        ),
                       ),
-                    ),
-                  );
-                  return;
-                }
-
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => QuizScreen(
-                      quizId: widget.quizId!,
-                      orgId: 'Default',
-                    ),
-                  ),
-                );
-              },
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+          child: Text(
+            'Proceed to Quiz - ${quiz.experienceToEarn} XP',
+            style: TextStyle(
+              color: ThemeUtils.getTextColorForBackground(
+                Theme.of(context).primaryColor,
+              ),
             ),
           ),
         );
       },
-      child: Text(
-        'Proceed to Quiz',
-        style: TextStyle(
-          color: ThemeUtils.getTextColorForBackground(
-            Theme.of(context).primaryColor,
-          ),
-        ),
-      ),
     );
   }
 }

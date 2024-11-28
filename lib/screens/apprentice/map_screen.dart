@@ -48,7 +48,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     super.initState();
     // Set the initial zoom to minimum when the widget is first created
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _transformationController.value = Matrix4.identity()..scale(2);
+      _transformationController.value = Matrix4.identity()..scale(1);
     });
   }
 
@@ -325,7 +325,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 'assets/pages/${module.markdownName}.md',
               )
             ],
-            onDone: (context, snapshot1) async {
+            onDone: (context, snapshot1, ref) async {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(

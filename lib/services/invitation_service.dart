@@ -154,6 +154,8 @@ class InvitationService extends _$InvitationService {
       }
 
       // If not exceeded, proceed with accepting the apprentice
+      print(
+          'Accepting apprentice invitation code: $code, orgId: ${invitation.orgId}, apprenticeId: $apprenticeId');
       await DatabaseHelper().organizations.doc(invitation.orgId).set({
         'apprentices': FieldValue.arrayUnion([apprenticeId]),
       }, SetOptions(merge: true));

@@ -17,7 +17,7 @@
     the `--base-href` argument provided to `flutter build`.
   -->
 
-        <base href="$FLUTTER_BASE_HREF" />
+        <base href="/" />
 
         <meta content="IE=Edge" />
         <meta name="description" content="A new Flutter project." />
@@ -61,6 +61,13 @@
         </script>
         <!-- This script adds the flutter initialization JS code -->
         <script src="flutter.js" defer=""></script>
+
+        <!-- inappwebview -->
+        <script
+            type="application/javascript"
+            src="/assets/packages/flutter_inappwebview_web/assets/web/web_support.js"
+            defer
+        ></script>
     </head>
 
     <body>
@@ -68,6 +75,13 @@
         <script src="assets/packages/libphonenumber_plugin/js/stringbuffer.js"></script>
         <script>
             window.addEventListener("load", function (ev) {
+                if ("serviceWorker" in navigator) {
+                    window.addEventListener("load", function () {
+                        navigator.serviceWorker.register("firebase-messaging-sw.js", {
+                            scope: "/firebase-cloud-messaging-push-scope",
+                        });
+                    });
+                }
                 // Download main.dart.js
                 _flutter.loader.loadEntrypoint({
                     serviceWorker: {

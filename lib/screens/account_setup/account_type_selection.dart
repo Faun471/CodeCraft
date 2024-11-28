@@ -22,6 +22,7 @@ class AccountTypeSelection extends ConsumerStatefulWidget {
 
 class _AccountTypeSelectionState extends ConsumerState<AccountTypeSelection> {
   late ImageRadioButtonController controller = ImageRadioButtonController();
+  bool _isChecked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -37,19 +38,6 @@ class _AccountTypeSelectionState extends ConsumerState<AccountTypeSelection> {
             ),
           ),
         ),
-        const SizedBox(height: 5),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Center(
-            child: Text(
-              'This action cannot be undone. Please select your account type carefully.\nYou will not be able to change this later.\nYou can always create a new account with a different account type.',
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                    color: Colors.grey,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
         const SizedBox(height: 30),
         ImageRadioButtonGroup(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -60,6 +48,7 @@ class _AccountTypeSelectionState extends ConsumerState<AccountTypeSelection> {
                   'https://images.pexels.com/photos/4144100/pexels-photo-4144100.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
               text: 'Apprentice',
               value: 'apprentice',
+              description: 'Learn and grow under the guidance of a mentor.',
               isSelected: true,
               onChanged: (_) {},
             ),
@@ -68,42 +57,54 @@ class _AccountTypeSelectionState extends ConsumerState<AccountTypeSelection> {
                   'https://images.pexels.com/photos/6925184/pexels-photo-6925184.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
               text: 'Mentor',
               value: 'mentor',
+              description: 'Guide and support apprentices in their journey.',
               isSelected: false,
               onChanged: (_) {},
             ),
           ],
         ),
         const SizedBox(height: 30),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(
+            child: Text(
+              'This action cannot be undone. Please select your account type carefully.\nYou will not be able to change this later.',
+              style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                    color: Colors.grey,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            children: [
+              Checkbox(
+                value: _isChecked,
+                onChanged: (bool? value) {
+                  setState(() {
+                    _isChecked = value!;
+                  });
+                },
+              ),
+              const Expanded(
+                child: Text(
+                  'I understand that this action cannot be undone.',
+                  style: TextStyle(fontSize: 14),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
         ElevatedButton(
-          onPressed: _handleSubmit,
+          onPressed: _isChecked ? _submit : null,
           child: const Text('Submit'),
         ),
       ],
     );
-  }
-
-  void _handleSubmit() async {
-    Utils.displayDialog(
-        context: context,
-        title: 'Are you sure?',
-        content:
-            'This action cannot be undone.\nYou will not be able to change this later.\nYou can always create a new account with a different account type.',
-        lottieAsset: 'assets/anim/question.json',
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _submit();
-            },
-            child: const Text('Submit'),
-          ),
-        ]);
   }
 
   Future<void> _submit() async {
@@ -119,6 +120,11 @@ class _AccountTypeSelectionState extends ConsumerState<AccountTypeSelection> {
 
       await DatabaseHelper()
           .createUser(uid, widget.userData, accountType, orgId);
+
+      if (!mounted) return;
+
+      _navigateToHome();
+      return;
     }
 
     if (!mounted) return;
@@ -133,7 +139,18 @@ class _AccountTypeSelectionState extends ConsumerState<AccountTypeSelection> {
                   controller.selectedValue!,
                 )
           ],
-          onDone: (context, _) async {
+          onDone: (context, snapshot, ref) async {
+            if (snapshot.data[0] != null) {
+              Utils.displayDialog(
+                context: context,
+                title: 'Error',
+                content: snapshot.data[0] as String,
+                lottieAsset: 'assets/anim/error.json',
+                onDismiss: () => Navigator.pop(context),
+              );
+              return;
+            }
+
             if (ref.watch(authProvider).value!.user == null) {
               return;
             }

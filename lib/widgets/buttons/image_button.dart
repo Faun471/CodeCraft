@@ -5,6 +5,7 @@ class ImageRadioButton extends StatelessWidget {
   final String image;
   final String value;
   final String text;
+  final String description;
   final bool isSelected;
   final ValueChanged<bool> onChanged;
 
@@ -12,6 +13,7 @@ class ImageRadioButton extends StatelessWidget {
     required this.image,
     required this.text,
     required this.value,
+    required this.description,
     this.isSelected = false,
     required this.onChanged,
     super.key,
@@ -28,34 +30,47 @@ class ImageRadioButton extends StatelessWidget {
                 isSelected ? Theme.of(context).primaryColor : Colors.grey[200]!,
             width: 2,
           ),
-          color: isSelected ? Theme.of(context).primaryColor : Colors.grey[200],
+          color: isSelected
+              ? Theme.of(context).primaryColor.withOpacity(0.1)
+              : Colors.grey[200],
         ),
-        child: Column(
+        child: Row(
           children: [
-            Expanded(
-              child: ClipRect(
-                child: ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                    isSelected ? Colors.transparent : Colors.black,
-                    BlendMode.saturation,
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: CachedNetworkImageProvider(image),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: CachedNetworkImageProvider(image),
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
-            const SizedBox(height: 5),
-            Text(
-              text,
-              style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                    color: isSelected ? Colors.white : Colors.black,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    text,
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          color: isSelected
+                              ? Theme.of(context).primaryColor
+                              : Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
+                  const SizedBox(height: 5),
+                  Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: isSelected
+                              ? Theme.of(context).primaryColor
+                              : Colors.black,
+                        ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -68,14 +83,12 @@ class ImageRadioButtonGroup extends StatefulWidget {
   final List<ImageRadioButton> buttons;
   final ImageRadioButtonController? controller;
   final double padding;
-  final bool isVertical;
   final MainAxisAlignment mainAxisAlignment;
   final CrossAxisAlignment crossAxisAlignment;
 
   const ImageRadioButtonGroup({
     required this.buttons,
     this.padding = 10,
-    this.isVertical = false,
     this.mainAxisAlignment = MainAxisAlignment.start,
     this.crossAxisAlignment = CrossAxisAlignment.start,
     this.controller,
@@ -98,15 +111,10 @@ class _ImageRadioButtonGroupState extends State<ImageRadioButtonGroup> {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: widget.isVertical ? 1 : _buildButtons().length,
-      ),
-      itemCount: _buildButtons().length,
-      itemBuilder: (BuildContext context, int index) {
-        return _buildButtons()[index];
-      },
+    return Column(
+      mainAxisAlignment: widget.mainAxisAlignment,
+      crossAxisAlignment: widget.crossAxisAlignment,
+      children: _buildButtons(),
     );
   }
 
@@ -118,6 +126,7 @@ class _ImageRadioButtonGroupState extends State<ImageRadioButtonGroup> {
           image: button.image,
           text: button.text,
           value: button.value,
+          description: button.description,
           isSelected: button.value == _selectedValue,
           onChanged: (isSelected) {
             if (isSelected) {

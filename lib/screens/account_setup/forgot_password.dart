@@ -1,50 +1,59 @@
-import 'package:codecraft/utils/utils.dart';
-import 'package:codecraft/widgets/buttons/custom_text_fields.dart';
+import 'package:codecraft/screens/account_setup/account_setup.dart';
+import 'package:codecraft/screens/account_setup/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:codecraft/widgets/buttons/custom_text_fields.dart';
+import 'package:codecraft/utils/utils.dart';
 
-class ForgotPasswordPage extends ConsumerStatefulWidget {
+class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
 
   @override
   _ForgotPasswordPageState createState() => _ForgotPasswordPageState();
 }
 
-class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
-  final _emailController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+  final TextEditingController emailController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    super.dispose();
-  }
+  Future<void> _sendPasswordResetEmail(BuildContext context) async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
 
-  Future<void> passwordReset() async {
-    try {
-      await FirebaseAuth.instance
-          .sendPasswordResetEmail(email: _emailController.text.trim());
+      try {
+        await FirebaseAuth.instance
+            .sendPasswordResetEmail(email: emailController.text.trim());
 
-      if (!mounted) {
-        return;
-      }
+        if (!context.mounted) {
+          return;
+        }
 
-      Utils.displayDialog(
+        Utils.displayDialog(
           context: context,
           title: 'Success',
-          content: 'Password Reset Link Sent to Your Email Address',
+          content: 'Password reset link has been sent to your email.',
           lottieAsset: 'assets/anim/congrats.json',
           buttonText: 'Close',
-          onPressed: () => Navigator.pop(context));
-    } on FirebaseAuthException catch (e) {
-      Utils.displayDialog(
+          onPressed: () => Navigator.pop(context),
+        );
+      } on FirebaseAuthException catch (e) {
+        Utils.displayDialog(
           context: context,
           title: 'Error',
           content: e.message!,
           lottieAsset: 'assets/anim/error.json',
           buttonText: 'Close',
-          onPressed: () => Navigator.pop(context));
+          onPressed: () => Navigator.pop(context),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -54,19 +63,18 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 25.0, top: 20.0),
-          child: Text(
-            'Forgot Password',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+        Center(
+          child: Padding(
+            padding: EdgeInsets.only(top: 20.0),
+            child: Text(
+              'Forgot Password',
+              style: AdaptiveTheme.of(context).theme.textTheme.displayLarge,
             ),
           ),
         ),
         const SizedBox(height: 40),
         const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 25.0),
+          padding: EdgeInsets.symmetric(horizontal: 40.0),
           child: Text(
             'Please Provide Your Email Address to Receive a Password Reset Link.',
             textAlign: TextAlign.center,
@@ -77,51 +85,53 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
         Form(
           key: _formKey,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25.0),
+            padding: const EdgeInsets.symmetric(horizontal: 40.0),
             child: CustomTextField(
               labelText: 'Email',
               icon: Icons.email,
-              controller: _emailController,
-              mode: ValidationMode.email,
+              controller: emailController,
+              autofillHint: AutofillHints.email,
+              textInputAction: TextInputAction.done,
             ),
           ),
         ),
-        const SizedBox(height: 20),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25.0),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: Colors.orange,
-            ),
-            child: MaterialButton(
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  await passwordReset();
-                }
-              },
-              minWidth: double.infinity,
-              height: 50.0,
-              child: const Text(
-                'Reset Password',
-                style: TextStyle(color: Colors.white),
-              ),
+          padding: const EdgeInsets.symmetric(horizontal: 40.0),
+          child: Center(
+            child: ElevatedButton(
+              onPressed: _isLoading
+                  ? null
+                  : () async => await _sendPasswordResetEmail(context),
+              style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(60)),
+              child: _isLoading
+                  ? const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    )
+                  : const Text('Send Reset Link'),
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 10),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25.0),
+          padding: const EdgeInsets.symmetric(horizontal: 40.0),
           child: InkWell(
             onTap: () {
-              Navigator.pushNamed(context, '/login');
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) {
+                return const AccountSetup(Login());
+              }));
             },
             child: Text(
               'Back to Login',
-              style: TextStyle(
-                color: Theme.of(context).primaryColor,
-                decoration: TextDecoration.underline,
-              ),
+              style: AdaptiveTheme.of(context)
+                  .theme
+                  .textTheme
+                  .labelLarge!
+                  .copyWith(
+                    decoration: TextDecoration.underline,
+                    color: AdaptiveTheme.of(context).theme.primaryColor,
+                  ),
             ),
           ),
         ),

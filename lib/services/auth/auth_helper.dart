@@ -118,13 +118,24 @@ class Auth extends _$Auth {
     String accountType,
   ) async {
     try {
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: userData['email']!,
-        password: userData['password']!,
-      );
+      User? user;
+      if (FirebaseAuth.instance.currentUser == null) {
+        UserCredential userCredential =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: userData['email']!,
+          password: userData['password']!,
+        );
 
-      String userId = userCredential.user!.uid;
+        user = userCredential.user;
+      } else {
+        user = FirebaseAuth.instance.currentUser;
+      }
+
+      if (user == null) {
+        throw 'An error occurred while registering the user. You may try to reload the page and try again.';
+      }
+
+      String userId = user.uid;
       String orgId = accountType == 'mentor'
           ? await DatabaseHelper().createOrganization(userId)
           : DatabaseHelper.defaultOrgId;
@@ -224,6 +235,10 @@ class Auth extends _$Auth {
     return Future.value();
   }
 
+  Future<void> sendPasswordResetEmail(String email) async {
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+  }
+
   Future<void> sendVerificationEmail() async {
     final user = state.value?.user;
     if (user == null || user.emailVerified) {
@@ -233,30 +248,30 @@ class Auth extends _$Auth {
     final dbHelper = DatabaseHelper();
     final appUser = await dbHelper.currentUser.get();
 
-    if (appUser['lastEmailVerification'] != null) {
-      DateTime? lastEmailVerification;
-      try {
-        lastEmailVerification =
-            (appUser['lastEmailVerification'] as Timestamp).toDate();
-      } catch (e) {
-        return;
-      }
-
-      DateTime now = DateTime.now();
-      if (now.difference(lastEmailVerification).inMinutes < 2) {
-        print('Email verification already sent within the last 2 minutes.');
-        return;
-      }
-    }
-
+    DateTime? lastEmailVerification;
     try {
+      lastEmailVerification =
+          (appUser['lastEmailVerification'] as Timestamp).toDate();
+    } catch (e) {
       await dbHelper.currentUser.set(
         {'lastEmailVerification': Timestamp.now()},
         SetOptions(merge: true),
       );
+
+      lastEmailVerification = DateTime.now();
+
       await user.sendEmailVerification();
-    } catch (e) {
+
       return;
     }
+
+    DateTime now = DateTime.now();
+    if (now.difference(lastEmailVerification).inMinutes < 2) {
+      String timeLeft =
+          (2 - now.difference(lastEmailVerification).inMinutes).toString();
+      throw 'Please wait $timeLeft minutes before sending another verification email.';
+    }
+
+    await user.sendEmailVerification();
   }
 }

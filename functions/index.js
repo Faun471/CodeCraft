@@ -18,8 +18,8 @@ exports.executeSimpleCode = functions.https.onRequest((req, res) => {
     const { script, language } = req.body;
 
     const payload = {
-        clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
+        clientId: process.env.JDOODLE_CLIENT_ID,
+        clientSecret: process.env.JDOODLE_CLIENT_SECRET,
         script: script,
         stdin: "",
         language: language === 'java' ? "java" : "python3",
@@ -55,8 +55,8 @@ exports.executeCode = functions.https.onRequest((req, res) => {
 
     const fullScript = generateFullScript(script, unitTests, className, language, methodName);
     const payload = {
-        clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
+        clientId: process.env.JDOODLE_CLIENT_ID,
+        clientSecret: process.env.JDOODLE_CLIENT_SECRET,
         script: fullScript,
         stdin: "",
         language: language === 'java' ? "java" : "python3",
@@ -128,20 +128,20 @@ function generateFullScript(userScript, unitTests, className, language, methodNa
 
         script += `${userScript}\n`;
         script += 'if __name__ == "__main__":\n';
-        script += `    instance = ${className}()\n`;
-        script += '    all_tests_passed = True\n';
+        script += ` instance = ${className}()\n`;
+        script += ' all_tests_passed = True\n';
 
         unitTests.forEach((test, index) => {
             const args = test.input.map(input => inputToString(input, language)).join(', ');
             const expectedOutput = expectedOutputToString(test.expectedOutput, language);
 
-            script += `    result${index + 1} = instance.${methodName}(${args}) == ${expectedOutput}\n`;
-            script += `    print(f"${methodName}(${args}) == ${expectedOutputToString(escapeJavaString(expectedOutput))} : {str(result${index + 1}).lower()}")\n`;
-            script += `    all_tests_passed = all_tests_passed and result${index + 1}\n`;
+            script += ` result${index + 1} = instance.${methodName}(${args}) == ${expectedOutput}\n`;
+            // script += `    print(f"${methodName}(${args}) == ${expectedOutputToString(escapeJavaString(expectedOutput))} : {str(result${index + 1}).lower()}")\n`;
+            script += ` all_tests_passed = all_tests_passed and result${index + 1}\n`;
         });
 
-        script += '    if all_tests_passed:\n';
-        script += '        print("All tests passed!")\n';
+        script += ' if all_tests_passed:\n';
+        script += '     print("All tests passed!")\n';
 
         return script;
     }
@@ -239,5 +239,90 @@ exports.syncOrganizationMembers = functions.https.onRequest(async (req, res) => 
         res.status(200).send({ message: 'Organization members updated successfully' });
     } catch (error) {
         res.status(500).send({ error: 'Failed to update organization members', details: error.message });
+    }
+});
+
+const axios = require("axios");
+
+async function getPaypalAccessToken() {
+    const clientId = process.env.PAYPAL_CLIENT_ID;
+    const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+
+    console.log("PayPal client ID:", clientId);
+    console.log("PayPal client secret:", clientSecret);
+
+    const response = await axios.post(
+        "https://api-m.sandbox.paypal.com/v1/oauth2/token",
+        "grant_type=client_credentials",
+        {
+            auth: {
+                username: clientId,
+                password: clientSecret,
+            },
+        }
+    );
+
+    console.log("PayPal access token:", response.data.access_token);
+
+    return response.data.access_token;
+}
+
+exports.paypalWebhook = functions.https.onRequest(async (req, res) => {
+    const event = req.body;
+
+    console.log("Received PayPal event:", event);
+
+    // Handle specific events
+    if (event.event_type === "BILLING.SUBSCRIPTION.CREATED") {
+        console.log("Subscription created:", event);
+    } else if (event.event_type === "BILLING.SUBSCRIPTION.ACTIVATED") {
+        const db = admin.firestore();
+        const subscription = event.resource;
+        const quantity = Number.parseInt(subscription.quantity);
+        const orgId = subscription.custom_id;
+        await db.collection('organizations').doc(orgId).set({ maxApprentices: quantity, plan: subscription.id, planStatus: 'active' }, { merge: true });
+    } else if (event.event_type === "BILLING.SUBSCRIPTION.SUSPENDED" || event.event_type === "BILLING.SUBSCRIPTION.EXPIRED") {
+        // change planStatus to inactive
+        const db = admin.firestore();
+        const subscription = event.resource;
+        const orgId = subscription.custom_id;
+        await db.collection('organizations').doc(orgId).set({ planStatus: 'inactive' }, { merge: true });
+    } else if (event.event_type === "BILLING.SUBSCRIPTION.CANCELLED") {
+        const db = admin.firestore();
+        const subscription = event.resource;
+        const orgId = subscription.custom_id;
+        await db.collection('organizations').doc(orgId).set({ planStatus: 'active', maxApprentices: 5 }, { merge: true });
+    }
+
+    res.status(200).send("Webhook received and verified");
+});
+
+exports.sendEmail = functions.https.onRequest(async (req, res) => {
+    res.set('Access-Control-Allow-Origin', '*'); // Allow all origins
+    res.set('Access-Control-Allow-Methods', 'GET, POST'); // Allow specific methods
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+        res.status(204).send('');
+        return;
+    }
+
+    const { to, subject, text } = req.body;
+
+    const sgMail = require('@sendgrid/mail');
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+    const msg = {
+        to,
+        from: '',
+        subject,
+        text,
+    };
+
+    try {
+        await sgMail.send(msg);
+        res.status(200).send({ message: 'Email sent successfully' });
+    } catch (error) {
+        res.status(500).send({ error: 'Failed to send email', details: error.message });
     }
 });

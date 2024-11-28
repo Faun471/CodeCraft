@@ -46,29 +46,31 @@ class _JoinOrganizationState extends ConsumerState<JoinOrganization> {
               ),
             ),
             const SizedBox(width: 10),
-            Expanded(
-              flex: 2,
-              child: ElevatedButton(
-                onPressed: () =>
-                    isLoading ? null : _joinOrganization(context, ref),
-                child: isLoading
-                    ? const Padding(
-                        padding: EdgeInsets.all(2.0),
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : AutoSizeText(
-                        'Join Organization',
-                        style: TextStyle(
-                          color: ThemeUtils.getTextColorForBackground(
-                            Theme.of(context).primaryColor,
+            Column(
+              children: [
+                ElevatedButton(
+                  onPressed: () =>
+                      isLoading ? null : _joinOrganization(context, ref),
+                  child: isLoading
+                      ? const Padding(
+                          padding: EdgeInsets.all(2.0),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
                           ),
+                        )
+                      : AutoSizeText(
+                          'Join Organization',
+                          style: TextStyle(
+                            color: ThemeUtils.getTextColorForBackground(
+                              Theme.of(context).primaryColor,
+                            ),
+                          ),
+                          maxLines: 1,
+                          minFontSize: 12,
                         ),
-                        maxLines: 1,
-                        minFontSize: 12,
-                      ),
-              ),
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
           ],
         ),
@@ -93,7 +95,8 @@ class _JoinOrganizationState extends ConsumerState<JoinOrganization> {
 
     final dbHelper = DatabaseHelper();
 
-    final invitation = await dbHelper.invitations.doc(orgController.text).get();
+    final invitation =
+        await dbHelper.invitations.doc(orgController.text.trim()).get();
 
     if (!invitation.exists) {
       if (context.mounted) {
@@ -114,7 +117,7 @@ class _JoinOrganizationState extends ConsumerState<JoinOrganization> {
     final invitationService = ref.read(invitationNotifierProvider.notifier);
 
     try {
-      await invitationService.joinOrgWithCode(orgController.text);
+      await invitationService.joinOrgWithCode(orgController.text.trim());
 
       if (!context.mounted) {
         return;

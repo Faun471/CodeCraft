@@ -1,7 +1,7 @@
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/organisation.dart';
 import 'package:codecraft/screens/apprentice/organisation/join_organisation.dart';
-import 'package:codecraft/screens/apprentice/organisation/organisation_details_apprentice.dart';
+import 'package:codecraft/screens/apprentice/organisation/organisation_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

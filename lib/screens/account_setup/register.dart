@@ -28,11 +28,13 @@ class _RegisterState extends ConsumerState<Register> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
-  final TextEditingController displayNameController =
-      TextEditingController(); // Added controller for display name
-  final FocusNode passwordFocusNode = FocusNode();
-  final FocusNode confirmPasswordFocusNode = FocusNode();
+  final TextEditingController displayNameController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,12 +43,15 @@ class _RegisterState extends ConsumerState<Register> {
         _buildHeader(context),
         const SizedBox(height: 10),
         Padding(
-          padding: const EdgeInsets.all(20),
-          child: _buildRegisterForm(),
+          padding:
+              const EdgeInsets.only(top: 20, bottom: 10, left: 40, right: 40),
+          child: AutofillGroup(
+            child: _buildRegisterForm(),
+          ),
         ),
         _buildOrDivider(context),
         Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(40),
           child: _buildGoogleSignInButton(context),
         ),
         const SizedBox(height: 20),
@@ -58,14 +63,15 @@ class _RegisterState extends ConsumerState<Register> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+          padding:
+              const EdgeInsets.only(left: 40, right: 40, top: 20, bottom: 10),
           child: AutoSizeText(
             'Create your account',
             style: AdaptiveTheme.of(context).theme.textTheme.displayLarge!,
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 40),
           child: _buildSignInLink(context),
         ),
       ],
@@ -101,14 +107,14 @@ class _RegisterState extends ConsumerState<Register> {
 
   Widget _buildOrDivider(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 40),
       child: Row(
         children: [
           const Expanded(child: Divider(color: Colors.grey)),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
-              'Or log in with',
+              'Or create an account with',
               style: AdaptiveTheme.of(context).theme.textTheme.bodyMedium,
             ),
           ),
@@ -152,45 +158,47 @@ class _RegisterState extends ConsumerState<Register> {
       autovalidateMode: AutovalidateMode.disabled,
       child: Column(
         children: [
-          _buildNameFields(),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: CustomTextField(
-                  labelText: 'Last Name',
-                  icon: Icons.person,
-                  controller: lastNameController,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                flex: 1,
-                child: CustomTextField(
-                  labelText: 'Suffix',
-                  controller: suffixController,
-                  isRequired: false,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          CustomTextField(
-            labelText: 'Display Name',
-            icon: Icons.person,
-            controller: displayNameController,
-          ),
-          const SizedBox(height: 10),
+          // _buildNameFields(),
+          // Row(
+          //   children: [
+          //     Expanded(
+          //       flex: 2,
+          //       child: CustomTextField(
+          //         labelText: 'Last Name',
+          //         icon: Icons.person,
+          //         controller: lastNameController,
+          //         textInputAction: TextInputAction.next,
+          //       ),
+          //     ),
+          //     const SizedBox(width: 10),
+          //     Expanded(
+          //       flex: 1,
+          //       child: CustomTextField(
+          //         labelText: 'Suffix',
+          //         controller: suffixController,
+          //         isRequired: false,
+          //         textInputAction: TextInputAction.next,
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          // CustomTextField(
+          //   labelText: 'Username',
+          //   icon: Icons.person,
+          //   controller: displayNameController,
+          //   isRequired: false,
+          //   textInputAction: TextInputAction.next,
+          // ),
           CustomTextField(
             labelText: 'Email',
             icon: Icons.email,
             mode: ValidationMode.email,
             controller: emailController,
+            autofillHint: AutofillHints.email,
+            textInputAction: TextInputAction.next,
           ),
-          const SizedBox(height: 10),
-          _buildPhoneNumberInput(),
-          const SizedBox(height: 10),
+          // _buildPhoneNumberInput(),
+          // const SizedBox(height: 10),
           _buildPasswordFields(),
           _buildCreateAccountButton(),
         ],
@@ -207,6 +215,8 @@ class _RegisterState extends ConsumerState<Register> {
             icon: Icons.person,
             labelText: 'First Name',
             controller: firstNameController,
+            autofillHint: AutofillHints.givenName,
+            textInputAction: TextInputAction.next,
           ),
         ),
         const SizedBox(width: 10),
@@ -216,6 +226,8 @@ class _RegisterState extends ConsumerState<Register> {
             labelText: 'MI',
             controller: miController,
             isRequired: false,
+            autofillHint: AutofillHints.middleName,
+            textInputAction: TextInputAction.next,
           ),
         ),
       ],
@@ -239,7 +251,7 @@ class _RegisterState extends ConsumerState<Register> {
       ),
       initialValue: PhoneNumber(dialCode: "+63", isoCode: "PH"),
       textFieldController: phoneNumberController,
-      formatInput: true,
+      keyboardAction: TextInputAction.next,
       keyboardType:
           const TextInputType.numberWithOptions(signed: true, decimal: true),
       validator: (value) {
@@ -253,6 +265,7 @@ class _RegisterState extends ConsumerState<Register> {
         return null;
       },
       hintText: 'Phone Number',
+      autofillHints: const [AutofillHints.telephoneNumber],
     );
   }
 
@@ -262,26 +275,22 @@ class _RegisterState extends ConsumerState<Register> {
         PasswordTextField(
           labelText: 'Password',
           controller: passwordController,
-          focusNode: passwordFocusNode,
           icon: Icons.lock,
           mode: ValidationMode.password,
+          textInputAction: TextInputAction.next,
         ),
-        const SizedBox(height: 10),
         PasswordTextField(
           labelText: 'Confirm Password',
           controller: confirmPasswordController,
-          focusNode: confirmPasswordFocusNode,
           icon: Icons.lock,
           validator: (value) {
-            if (value == null || value.isEmpty) {
-              return '* This field is required';
-            }
             if (value != passwordController.text) {
               return 'Passwords do not match';
             }
             return null;
           },
-          mode: ValidationMode.password,
+          textInputAction: TextInputAction.done,
+          onFieldSubmitted: () => _createAccount(),
         ),
       ],
     );

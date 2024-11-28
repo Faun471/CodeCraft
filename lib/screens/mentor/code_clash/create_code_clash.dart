@@ -1,4 +1,4 @@
-import 'package:board_datetime_picker/board_datetime_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codecraft/models/app_user_notifier.dart';
 import 'package:codecraft/models/code_clash.dart';
 import 'package:codecraft/models/expected_output.dart';
@@ -10,6 +10,7 @@ import 'package:codecraft/utils/theme_utils.dart';
 import 'package:codecraft/utils/utils.dart';
 import 'package:codecraft/widgets/codeblocks/code_editor.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_dialogs/shared/types.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
@@ -27,10 +28,6 @@ class CreateCodeClashScreen extends ConsumerStatefulWidget {
 class _EditCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
   final _formKey = GlobalKey<FormState>();
   final CodeLineEditingController codeController = CodeLineEditingController();
-  final BoardDateTimeTextController startTimeController =
-      BoardDateTimeTextController();
-  final BoardDateTimeTextController endTimeController =
-      BoardDateTimeTextController();
 
   int _currentStep = 0;
   String _title = '';
@@ -87,6 +84,14 @@ class _EditCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
                 title: 'Please complete all steps',
                 content: 'Ensure all fields are filled correctly.',
                 lottieAsset: 'assets/anim/error.json',
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Ok'),
+                  ),
+                ],
                 onDismiss: () {
                   final firstInvalidStep = _formKey.currentState!
                       .validateGranularly()
@@ -154,34 +159,38 @@ class _EditCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
   }
 
   Widget _buildBasicInfoStep() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          TextFormField(
-            key: fields[0]!.first,
-            initialValue: _title,
-            decoration: const InputDecoration(labelText: 'Title'),
-            validator: (value) =>
-                value!.isEmpty ? 'Please enter a title' : null,
-            onSaved: (value) => _title = value!,
-          ),
-        ],
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            TextFormField(
+              key: fields[0]!.first,
+              initialValue: _title,
+              decoration: const InputDecoration(labelText: 'Title'),
+              validator: (value) =>
+                  value!.isEmpty ? 'Please enter a title' : null,
+              onSaved: (value) => _title = value!,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildInstructionsStep() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextFormField(
-        key: fields[1]!.first,
-        initialValue: _instructions,
-        decoration: const InputDecoration(labelText: 'Instructions'),
-        maxLines: 5,
-        validator: (value) =>
-            value!.isEmpty ? 'Please enter instructions' : null,
-        onSaved: (value) => _instructions = value!,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: TextFormField(
+          key: fields[1]!.first,
+          initialValue: _instructions,
+          decoration: const InputDecoration(labelText: 'Instructions'),
+          maxLines: 5,
+          validator: (value) =>
+              value!.isEmpty ? 'Please enter instructions' : null,
+          onSaved: (value) => _instructions = value!,
+        ),
       ),
     );
   }
@@ -200,92 +209,308 @@ class _EditCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
   }
 
   Widget _buildClassMethodStep() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          TextFormField(
-            key: fields[3]!.first,
-            initialValue: _className,
-            decoration: const InputDecoration(labelText: 'Class Name'),
-            validator: (value) =>
-                value!.isEmpty ? 'Please enter a class name' : null,
-            onSaved: (value) => _className = value!,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            key: fields[3]!.last,
-            initialValue: _methodName,
-            decoration: const InputDecoration(labelText: 'Method Name'),
-            validator: (value) =>
-                value!.isEmpty ? 'Please enter a method name' : null,
-            onSaved: (value) => _methodName = value!,
-          ),
-        ],
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            TextFormField(
+              key: fields[3]!.first,
+              initialValue: _className,
+              decoration: const InputDecoration(labelText: 'Class Name'),
+              validator: (value) =>
+                  value!.isEmpty ? 'Please enter a class name' : null,
+              onSaved: (value) => _className = value!,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              key: fields[3]!.last,
+              initialValue: _methodName,
+              decoration: const InputDecoration(labelText: 'Method Name'),
+              validator: (value) =>
+                  value!.isEmpty ? 'Please enter a method name' : null,
+              onSaved: (value) => _methodName = value!,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildTimeSettingsStep() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          TextFormField(
-            key: fields[4]!.first,
-            initialValue: _timeLimit.toString(),
-            decoration:
-                const InputDecoration(labelText: 'Time Limit (minutes)'),
-            keyboardType: TextInputType.number,
-            validator: (value) => int.tryParse(value!) == null
-                ? 'Please enter a valid number'
-                : null,
-            onSaved: (value) => _timeLimit = int.parse(value!),
-          ),
-        ],
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            TextFormField(
+              key: fields[4]!.first,
+              initialValue: _timeLimit.toString(),
+              decoration:
+                  const InputDecoration(labelText: 'Time Limit (minutes)'),
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+              validator: (value) => int.tryParse(value!) == null
+                  ? 'Please enter a valid number'
+                  : null,
+              onSaved: (value) => _timeLimit = int.parse(value!),
+            ),
+          ],
+        ),
       ),
     );
   }
 
+  void _addOrEditUnitTest({int? index}) {
+    List<Input> inputs = index != null
+        ? _unitTests[index].input
+        : [Input(value: '', type: 'String')];
+
+    String expectedOutputValue =
+        index != null ? _unitTests[index].expectedOutput.value : '';
+
+    String expectedOutputType =
+        index != null ? _unitTests[index].expectedOutput.type : 'String';
+    final List<String> availableTypes = ['String', 'int', 'double', 'boolean'];
+
+    final formKey = GlobalKey<FormState>();
+
+    Utils.scrollableMaterialDialog(
+      context: context,
+      title: index != null ? 'Edit Unit Test' : 'Add Unit Test',
+      customViewPosition: CustomViewPosition.BEFORE_ACTION,
+      customView: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Form(
+            key: formKey,
+            child: Column(
+              children: [
+                ...inputs.asMap().entries.map((entry) {
+                  int inputIndex = entry.key;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: inputs[inputIndex].type == 'boolean'
+                              ? DropdownButtonFormField<String>(
+                                  decoration: InputDecoration(
+                                      labelText:
+                                          'Input Value ${inputIndex + 1}'),
+                                  value: inputs[inputIndex].value == 'true'
+                                      ? 'true'
+                                      : 'false',
+                                  items: ['true', 'false'].map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      inputs[inputIndex].value =
+                                          newValue ?? 'true';
+                                    });
+                                  },
+                                )
+                              : TextFormField(
+                                  decoration: InputDecoration(
+                                      labelText:
+                                          'Input Value ${inputIndex + 1}'),
+                                  initialValue: inputs[inputIndex].value,
+                                  validator: (value) => value!.isEmpty
+                                      ? 'Please enter a value'
+                                      : null,
+                                  onChanged: (value) =>
+                                      inputs[inputIndex].value = value,
+                                ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                                labelText: 'Input Type ${inputIndex + 1}'),
+                            value: inputs[inputIndex].type.isEmpty
+                                ? 'String'
+                                : inputs[inputIndex].type,
+                            items: availableTypes.map((String type) {
+                              return DropdownMenuItem<String>(
+                                value: type,
+                                child: Text(type),
+                              );
+                            }).toList(),
+                            onChanged: (String? newType) {
+                              setState(() {
+                                if (newType == 'boolean') {
+                                  inputs[inputIndex].value = 'true';
+                                }
+
+                                inputs[inputIndex].type = newType ?? 'String';
+                              });
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.remove,
+                            color: ThemeUtils.getTextColorForBackground(
+                                Theme.of(context).scaffoldBackgroundColor),
+                          ),
+                          onPressed: () {
+                            setState(() => inputs.removeAt(inputIndex));
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => setState(
+                      () => inputs.add(Input(value: '', type: 'String'))),
+                  child: Text(
+                    'Add Input',
+                    style: TextStyle(
+                        color: ThemeUtils.getTextColorForBackground(
+                            Theme.of(context).primaryColor)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                expectedOutputType == 'boolean'
+                    ? DropdownButtonFormField<String>(
+                        decoration: const InputDecoration(
+                            labelText: 'Expected Output Value'),
+                        value: expectedOutputValue == 'true' ? 'true' : 'false',
+                        items: ['true', 'false'].map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            expectedOutputValue = newValue ?? 'true';
+                          });
+                        },
+                      )
+                    : TextFormField(
+                        decoration: const InputDecoration(
+                            labelText: 'Expected Output Value'),
+                        initialValue: expectedOutputValue,
+                        validator: (value) =>
+                            value!.isEmpty ? 'Please enter a value' : null,
+                        onChanged: (value) => expectedOutputValue = value,
+                      ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  decoration:
+                      const InputDecoration(labelText: 'Expected Output Type'),
+                  value: expectedOutputType.isEmpty
+                      ? 'String'
+                      : expectedOutputType,
+                  items: availableTypes.map((String type) {
+                    return DropdownMenuItem<String>(
+                      value: type,
+                      child: Text(type),
+                    );
+                  }).toList(),
+                  validator: (value) =>
+                      value == null ? 'Please select a type' : null,
+                  onChanged: (String? newType) {
+                    setState(() {
+                      expectedOutputValue =
+                          newType == 'boolean' ? 'true' : expectedOutputValue;
+                      expectedOutputType = newType ?? 'String';
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          );
+        },
+      ),
+      actions: [
+        TextButton(
+          child: const Text('Cancel'),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        TextButton(
+          child: Text(index != null ? 'Save' : 'Add'),
+          onPressed: () {
+            if (formKey.currentState!.validate()) {
+              formKey.currentState!.save();
+
+              setState(() {
+                if (index != null) {
+                  _unitTests[index] = UnitTest(
+                    input: inputs,
+                    expectedOutput: ExpectedOutput(
+                        value: expectedOutputValue, type: expectedOutputType),
+                  );
+                } else {
+                  _unitTests.add(UnitTest(
+                    input: inputs,
+                    expectedOutput: ExpectedOutput(
+                        value: expectedOutputValue, type: expectedOutputType),
+                  ));
+                }
+              });
+              Navigator.of(context).pop();
+            } else {
+              Utils.displayDialog(
+                context: context,
+                title: 'Error',
+                content: 'Please fill in all the required fields.',
+                lottieAsset: 'assets/anim/error.json',
+              );
+            }
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _buildUnitTestsStep() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return Card(
       child: Column(
         children: [
-          ..._unitTests.asMap().entries.map((entry) {
-            int index = entry.key;
-            UnitTest test = entry.value;
-            return ListTile(
-              title: Text('Test ${index + 1}'),
-              subtitle: Text(
-                  'Input: ${inputToString(test.input)}, Expected: ${expectedOutputToString(test.expectedOutput)}'),
-              trailing: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () => _editUnitTest(index),
-                    ),
-                    const SizedBox(width: 10),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () =>
-                          setState(() => _unitTests.removeAt(index)),
-                    ),
-                  ],
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: _unitTests.length,
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text('Unit Test ${index + 1}'),
+                subtitle: Text(
+                    'Input: ${inputToString(_unitTests[index].input)}, Expected: ${expectedOutputToString(_unitTests[index].expectedOutput)}'),
+                trailing: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => _addOrEditUnitTest(index: index),
+                      ),
+                      const SizedBox(width: 10),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () =>
+                            setState(() => _unitTests.removeAt(index)),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          }),
-          ElevatedButton(
-            onPressed: _addUnitTest,
-            child: Text(
-              'Add Unit Test',
-              style: TextStyle(
-                color: ThemeUtils.getTextColorForBackground(
-                    Theme.of(context).primaryColor),
-              ),
+              );
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: TextButton(
+              onPressed: () => _addOrEditUnitTest(),
+              child: const Text('Add Unit Test'),
             ),
           ),
         ],
@@ -308,256 +533,6 @@ class _EditCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
       default:
         return output.value;
     }
-  }
-
-  void _addUnitTest() {
-    List<Input> inputs = [Input(value: '', type: '')];
-    String expectedOutputValue = '';
-    String expectedOutputType = 'String'; // Default type for expected output
-    final List<String> availableTypes = [
-      'String',
-      'int',
-      'double',
-      'bool'
-    ]; // Add more types as needed
-
-    Utils.scrollableMaterialDialog(
-      context: context,
-      title: 'Add Unit Test',
-      customViewPosition: CustomViewPosition.BEFORE_ACTION,
-      customView: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Column(
-            children: [
-              ...inputs.asMap().entries.map((entry) {
-                int index = entry.key;
-                return Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          labelText: 'Input Value ${index + 1}',
-                        ),
-                        onChanged: (value) => inputs[index].value = value,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          labelText: 'Input Type ${index + 1}',
-                        ),
-                        value: inputs[index].type.isNotEmpty
-                            ? inputs[index].type
-                            : 'String', // Default to String
-                        items: availableTypes.map((String type) {
-                          return DropdownMenuItem<String>(
-                            value: type,
-                            child: Text(type),
-                          );
-                        }).toList(),
-                        onChanged: (String? newType) {
-                          setState(() {
-                            inputs[index].type = newType ?? 'String';
-                          });
-                        },
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.remove),
-                      onPressed: () {
-                        setState(() => inputs.removeAt(index));
-                      },
-                    ),
-                  ],
-                );
-              }),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => setState(
-                  () => inputs.add(Input(value: '', type: 'String')),
-                ),
-                child: Text(
-                  'Add Input',
-                  style: TextStyle(
-                    color: ThemeUtils.getTextColorForBackground(
-                        Theme.of(context).primaryColor),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                decoration:
-                    const InputDecoration(labelText: 'Expected Output Value'),
-                onChanged: (value) => expectedOutputValue = value,
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                decoration:
-                    const InputDecoration(labelText: 'Expected Output Type'),
-                value: expectedOutputType,
-                items: availableTypes.map((String type) {
-                  return DropdownMenuItem<String>(
-                    value: type,
-                    child: Text(type),
-                  );
-                }).toList(),
-                onChanged: (String? newType) {
-                  setState(() {
-                    expectedOutputType = newType ?? 'String';
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-            ],
-          );
-        },
-      ),
-      actions: [
-        TextButton(
-          child: const Text('Cancel'),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        TextButton(
-          child: const Text('Add'),
-          onPressed: () {
-            if (expectedOutputValue.isNotEmpty &&
-                expectedOutputType.isNotEmpty) {
-              setState(() {
-                _unitTests.add(UnitTest(
-                  input: inputs,
-                  expectedOutput: ExpectedOutput(
-                      value: expectedOutputValue, type: expectedOutputType),
-                ));
-              });
-              Navigator.of(context).pop();
-            } else {
-              Utils.displayDialog(
-                context: context,
-                title: 'Error',
-                content: 'Please fill in all the required fields.',
-                lottieAsset: 'assets/anim/error.json',
-              );
-            }
-          },
-        ),
-      ],
-    );
-  }
-
-  void _editUnitTest(int index) {
-    UnitTest test = _unitTests[index];
-    List<Input> inputs = test.input;
-    String expectedOutputValue = test.expectedOutput.value;
-    String expectedOutputType = test.expectedOutput.type;
-    String inputValues = inputs.map((input) => input.value).join(',');
-    String inputTypes = inputs.map((input) => input.type).join(',');
-
-    final List<String> availableTypes = [
-      'String',
-      'int',
-      'double',
-      'bool'
-    ]; // Add more types as needed
-
-    Utils.scrollableMaterialDialog(
-      context: context,
-      title: 'Edit Unit Test',
-      customViewPosition: CustomViewPosition.BEFORE_ACTION,
-      customView: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      decoration:
-                          const InputDecoration(labelText: 'Input Values'),
-                      initialValue: inputValues,
-                      onChanged: (value) {
-                        inputs = value.split(',').map((e) {
-                          return Input(value: e, type: '');
-                        }).toList();
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextFormField(
-                      decoration:
-                          const InputDecoration(labelText: 'Input Types'),
-                      initialValue: inputTypes,
-                      onChanged: (value) {
-                        inputTypes = value;
-                        inputs = value.split(',').map((e) {
-                          return Input(value: '', type: e);
-                        }).toList();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                decoration:
-                    const InputDecoration(labelText: 'Expected Output Value'),
-                initialValue: expectedOutputValue,
-                onChanged: (value) => expectedOutputValue = value,
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                decoration:
-                    const InputDecoration(labelText: 'Expected Output Type'),
-                value: expectedOutputType,
-                items: availableTypes.map((String type) {
-                  return DropdownMenuItem<String>(
-                    value: type,
-                    child: Text(type),
-                  );
-                }).toList(),
-                onChanged: (String? newType) {
-                  setState(() {
-                    expectedOutputType = newType ?? 'String';
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-            ],
-          );
-        },
-      ),
-      actions: [
-        TextButton(
-          child: const Text('Cancel'),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        TextButton(
-          child: const Text('Save'),
-          onPressed: () {
-            if (expectedOutputValue.isNotEmpty &&
-                expectedOutputType.isNotEmpty) {
-              setState(() {
-                _unitTests[index] = UnitTest(
-                  input: inputs,
-                  expectedOutput: ExpectedOutput(
-                      value: expectedOutputValue, type: expectedOutputType),
-                );
-              });
-              Navigator.of(context).pop();
-            } else {
-              // Show an error message if either value or type is empty
-              Utils.displayDialog(
-                context: context,
-                title: 'Error',
-                content: 'Please fill in all the required fields.',
-                lottieAsset: 'assets/anim/error.json',
-              );
-            }
-          },
-        ),
-      ],
-    );
   }
 
   Future<void> _cancelChallenge() async {
@@ -623,6 +598,19 @@ class _EditCodeClashScreenState extends ConsumerState<CreateCodeClashScreen> {
                 updatedCodeClash,
                 ref.read(appUserNotifierProvider).requireValue.orgId!,
               );
+            } on FirebaseException catch (e) {
+              if (!mounted) return;
+
+              if (e.code == 'permission-denied') {
+                Utils.displayDialog(
+                  context: context,
+                  title: 'Permission Denied',
+                  content:
+                      'You do not have permission to create a code clash.\nPlease check if your plan is still active.',
+                  lottieAsset: 'assets/anim/error.json',
+                );
+                return;
+              }
             } catch (e) {
               if (!mounted) return;
               Utils.displayDialog(

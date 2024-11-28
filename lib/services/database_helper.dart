@@ -1,10 +1,18 @@
 import 'package:codecraft/firebase_options.dart';
 import 'package:codecraft/models/app_user.dart';
 import 'package:codecraft/models/organisation.dart';
+import 'package:codecraft/models/quiz.dart';
+import 'package:codecraft/services/quiz_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// A helper class for managing database operations.
+///
+/// This class provides methods to perform CRUD (Create, Read, Update, Delete)
+/// operations on the database. It abstracts the underlying database
+/// implementation and provides a simple interface for interacting with the
+/// database.
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -37,6 +45,10 @@ class DatabaseHelper {
     return users.doc(FirebaseAuth.instance.currentUser!.uid);
   }
 
+  /// Retrieves user data from the database for the given user ID.
+  ///
+  /// Takes a [userId] as a parameter and returns a [Future] that resolves
+  /// to a [Map<String, dynamic>] containing the user data.
   Future<Map<String, dynamic>> getUserData(String userId) async {
     DocumentSnapshot doc = await users.doc(userId).get();
 
@@ -59,6 +71,15 @@ class DatabaseHelper {
     return {};
   }
 
+  /// Retrieves the current user's data from the database.
+  ///
+  /// Returns a [Future] that resolves to a [Map<String, dynamic>] containing
+  /// the current user's data.
+  ///
+  /// Throws an [Exception] if the current user is not authenticated.
+  ///
+  /// If the current user is not authenticated, the method will throw an
+  /// exception with the message "User not authenticated".
   Future<void> createUser(String userId, Map<String, String> userData,
       String accountType, String orgId) async {
     await users.doc(userId).set({
@@ -81,6 +102,16 @@ class DatabaseHelper {
     }, SetOptions(merge: true));
   }
 
+  /// Creates a new organization for the given mentor ID.
+  ///
+  /// Takes a [mentorId] as a parameter and returns a [Future] that resolves
+  /// to a [String] containing the ID of the newly created organization.
+  ///
+  /// The method creates a new organization with the name "Mentor Organization"
+  /// and a default plan of "Free". It also creates a pre-made quiz for the
+  /// organization.
+  ///
+  /// The method returns the ID of the newly created organization.
   Future<String> createOrganization(String mentorId) async {
     DocumentReference orgRef = await organizations.add({
       'orgName': 'Mentor Organization',
@@ -88,8 +119,36 @@ class DatabaseHelper {
       'mentorId': mentorId,
       'createdAt': Timestamp.now(),
       'plan': 'Free',
+      'maxApprentices': 5,
       'apprentices': [],
+      'planStatus': 'active',
     });
+
+    // create pre-made quiz
+    QuizService quizService = QuizService();
+    await quizService.createQuiz(
+      Quiz(
+        id: 'quiz-1',
+        title: 'Welcome Quiz',
+        duration: Timestamp.now().toDate().toIso8601String(),
+        questions: [
+          Question(
+            questionText: 'This is a sample question',
+            answerOptions: [
+              'Option 1',
+              'Option 2',
+              'Option 3',
+              'Option 4',
+            ],
+            correctAnswer: 'Option 1',
+            initialTimer: 30,
+            penaltySeconds: 5,
+          ),
+        ],
+      ),
+      orgRef.id,
+    );
+
     return orgRef.id;
   }
 

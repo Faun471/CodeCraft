@@ -1,5 +1,8 @@
+import 'package:codecraft/utils/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:video_player/video_player.dart';
 
 final GlobalKey _heroSectionKey = GlobalKey();
@@ -12,6 +15,10 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!kIsWeb) {
+      Navigator.of(context).pushReplacementNamed('/app');
+    }
+
     return Scaffold(
       body: SelectableRegion(
         focusNode: FocusNode(),
@@ -113,8 +120,30 @@ class HeaderSection extends StatelessWidget {
               Row(
                 children: [
                   TextButton(
-                    onPressed: () {
-                      // Replace with github link to binary
+                    onPressed: () async {
+                      Utils.displayDialog(
+                        context: context,
+                        lottieAsset: 'assets/anim/question.json',
+                        title:
+                            'You will download the application using an external link.',
+                        content: 'Do you wish to continue?',
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              Navigator.of(context).pop();
+                              await launchUrlString(
+                                  'https://github.com/Faun471/CodeCraft/releases/download/v1.0.0/code-craft.apk');
+                            },
+                            child: const Text('Download'),
+                          ),
+                        ],
+                      );
                     },
                     style: TextButton.styleFrom(
                       shape: RoundedRectangleBorder(

@@ -22,7 +22,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:codecraft/web_plugins.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final providerContainer = ProviderContainer();
@@ -81,7 +81,7 @@ void main() async {
   );
 
   if (kIsWeb) {
-    setUrlStrategy(PathUrlStrategy());
+    configureApp();
   }
 
   runApp(
